@@ -56,23 +56,4 @@ class JdbcTemplate implements Recoverable {
       return sneakyThrow(e);
     }
   }
-
-  static <T> Function1<ResultSet, Option<T>> option(Function1<ResultSet, T> rowMapper) {
-    return resultSet -> {
-      if (resultSet.next()) {
-        return Option.some(rowMapper.apply(resultSet));
-      }
-      return Option.none();
-    };
-  }
-
-  static <T> Function1<ResultSet, Iterable<T>> iterable(Function1<ResultSet, T> rowMapper) {
-    return resultSet -> {
-      List<T> result = new ArrayList<>();
-      while (resultSet.next()) {
-        result.add(rowMapper.apply(resultSet));
-      }
-      return ImmutableList.from(result);
-    };
-  }
 }

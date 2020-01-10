@@ -4,43 +4,54 @@
  */
 package com.github.tonivade.puredbc;
 
-import com.github.tonivade.purefun.Tuple;
-import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.data.Sequence;
 
+import static com.github.tonivade.purefun.data.ImmutableArray.empty;
 import static java.util.Objects.requireNonNull;
 
-public final class Bindable {
+public class Bindable {
 
   private final String query;
-  private Tuple values;
+  private final Sequence<?> values;
 
-  private Bindable(String query) {
-    this(query, null);
+  protected Bindable(String query) {
+    this(query, empty());
   }
 
-  private Bindable(String query, Tuple values) {
+  protected Bindable(String query, Sequence<?> values) {
     this.query = requireNonNull(query);
-    this.values = values;
+    this.values = requireNonNull(values);
   }
 
-  public String getQuery() {
+  String getQuery() {
     return query;
   }
 
-  public Sequence<Object> getParams() {
-    return values != null ? values.toSequence() : ImmutableList.empty();
+  Sequence<?> getParams() {
+    return values;
   }
 
   public static Bindable of(String query) {
     return new Bindable(query);
   }
 
-  public <A> Bindable with(A value) {
-    return new Bindable(query, Tuple.of(value));
+  public static <A> Bindable1<A> of1(String query) {
+    return new Bindable1<>(query);
   }
 
-  public <A, B> Bindable with(A value1, B value2) {
-    return new Bindable(query, Tuple.of(value1, value2));
+  public static <A, B> Bindable2<A, B> of2(String query) {
+    return new Bindable2<>(query);
+  }
+
+  public static <A, B, C> Bindable3<A, B, C> of3(String query) {
+    return new Bindable3<>(query);
+  }
+
+  public static <A, B, C, D> Bindable4<A, B, C, D> of4(String query) {
+    return new Bindable4<>(query);
+  }
+
+  public static <A, B, C, D, E> Bindable5<A, B, C, D, E> of5(String query) {
+    return new Bindable5<>(query);
   }
 }
