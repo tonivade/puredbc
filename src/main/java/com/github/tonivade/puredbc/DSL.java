@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.github.tonivade.purefun.free.Free.liftF;
 import static java.util.Objects.requireNonNull;
 
 @Sealed
@@ -35,15 +36,15 @@ public interface DSL<T> {
   DSLModule getModule();
 
   static Free<DSL.µ, Unit> update(Bindable query) {
-    return Free.liftF(new Update(query).kind1());
+    return liftF(new Update(query).kind1());
   }
 
   static <T> Free<DSL.µ, Option<T>> queryOne(Bindable query, Function1<ResultSet, T> rowMapper) {
-    return Free.liftF(new Query<>(query, DSLModule.option(rowMapper)).kind1());
+    return liftF(new Query<>(query, DSLModule.option(rowMapper)).kind1());
   }
 
   static <T> Free<DSL.µ, Iterable<T>> query(Bindable query, Function1<ResultSet, T> rowMapper) {
-    return Free.liftF(new Query<>(query, DSLModule.iterable(rowMapper)).kind1());
+    return liftF(new Query<>(query, DSLModule.iterable(rowMapper)).kind1());
   }
 
   static <T> Function1<DataSource, T> unsafeRun(Free<DSL.µ, T> free) {
@@ -63,7 +64,7 @@ public interface DSL<T> {
     private final Bindable query;
     private final Function1<ResultSet, T> extractor;
 
-    public Query(Bindable query, Function1<ResultSet, T> extractor) {
+    private Query(Bindable query, Function1<ResultSet, T> extractor) {
       this.query = requireNonNull(query);
       this.extractor = requireNonNull(extractor);
     }
@@ -97,7 +98,7 @@ public interface DSL<T> {
 
     private final Bindable query;
 
-    public Update(Bindable query) {
+    private Update(Bindable query) {
       this.query = requireNonNull(query);
     }
 
