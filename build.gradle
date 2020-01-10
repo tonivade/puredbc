@@ -25,12 +25,9 @@ dependencies {
   annotationProcessor 'com.github.tonivade:purefun-processor:1.6'
   compile 'com.github.tonivade:purefun-free:1.6'
   compile 'com.github.tonivade:purefun-effect:1.6'
-  compile 'com.github.tonivade:purefun-generic:1.6'
   compile 'com.github.tonivade:purefun-instances:1.6'
   runtime 'com.h2database:h2:1.4.197'
   testCompile 'com.zaxxer:HikariCP:2.7.8'
   testCompile 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
   testCompile 'org.junit.platform:junit-platform-runner:1.5.2'
-  testCompile 'org.mockito:mockito-core:3.0.0'
-  testCompile 'org.mockito:mockito-junit-jupiter:3.0.0'
 }

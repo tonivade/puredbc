@@ -11,9 +11,11 @@ import com.github.tonivade.purefun.Sealed;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.data.Sequence;
+import com.github.tonivade.purefun.effect.UIO;
 import com.github.tonivade.purefun.free.Free;
 import com.github.tonivade.purefun.instances.IdInstances;
 import com.github.tonivade.purefun.instances.TryInstances;
+import com.github.tonivade.purefun.instances.UIOInstances;
 import com.github.tonivade.purefun.type.Id;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
@@ -50,6 +52,10 @@ public interface DSL<T> {
 
   static <T> Function1<DataSource, Try<T>> safeRun(Free<DSL.µ, T> free) {
     return DSLModule.safeRun(free).compose(JdbcTemplate::new);
+  }
+
+  static <T> Function1<DataSource, UIO<T>> runIO(Free<DSL.µ, T> free) {
+    return DSLModule.runIO(free).compose(JdbcTemplate::new);
   }
 
   final class Query<T> implements DSL<T> {
@@ -177,6 +183,27 @@ interface DSLModule {
         }
       });
       return foldMap.fix1(Try::narrowK);
+    };
+  }
+
+  static <A> Function1<JdbcTemplate, UIO<A>> runIO(Free<DSL.µ, A> free) {
+    return jdbc -> {
+      Higher1<UIO.µ, A> foldMap = free.foldMap(UIOInstances.monad(), new Transformer<DSL.µ, UIO.µ>() {
+        @Override
+        public <T> Higher1<UIO.µ, T> apply(Higher1<DSL.µ, T> from) {
+          DSL<T> dsl = DSL.narrowK(from);
+          if (dsl instanceof DSL.Update) {
+            DSL.Update update = (DSL.Update) dsl;
+            return (Higher1<UIO.µ, T>) UIO.task(() -> jdbc.update(update.getQuery(), update.getParams())).kind1();
+          }
+          if (dsl instanceof DSL.Query) {
+            DSL.Query<T> query = (DSL.Query<T>) dsl;
+            return (Higher1<UIO.µ, T>) UIO.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor())).kind1();
+          }
+          throw new IllegalStateException();
+        }
+      });
+      return foldMap.fix1(UIO::narrowK);
     };
   }
 }
