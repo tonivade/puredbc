@@ -4,15 +4,25 @@
  */
 package com.github.tonivade.puredbc;
 
-import com.github.tonivade.purefun.data.ImmutableArray;
+import static com.github.tonivade.purefun.data.Sequence.arrayOf;
+import static java.util.Objects.requireNonNull;
 
-public class Bindable5<A, B, C, D, E> extends Bindable {
+public final class Bindable5<A, B, C, D, E> {
+
+  private final String query;
 
   protected Bindable5(String query) {
-    super(query);
+    this.query = requireNonNull(query);
   }
 
   public Bindable bind(A value1, B value2, C value3, D value4, E value5) {
-    return new Bindable(getQuery(), ImmutableArray.of(value1, value2, value3, value4, value5));
+    return new Bindable(query, arrayOf(value1, value2, value3, value4, value5));
+  }
+
+  @Override
+  public String toString() {
+    return "Bindable5{" +
+        "query='" + query + '\'' +
+        '}';
   }
 }
