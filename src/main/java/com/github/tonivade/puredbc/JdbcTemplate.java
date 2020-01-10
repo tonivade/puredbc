@@ -7,17 +7,13 @@ package com.github.tonivade.puredbc;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Recoverable;
 import com.github.tonivade.purefun.Unit;
-import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.data.Sequence;
-import com.github.tonivade.purefun.type.Option;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.github.tonivade.purefun.Unit.unit;
 import static java.util.Objects.requireNonNull;
