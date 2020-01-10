@@ -7,25 +7,19 @@ package com.github.tonivade.puredbc;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Higher1;
 import com.github.tonivade.purefun.HigherKind;
-import com.github.tonivade.purefun.Recoverable;
 import com.github.tonivade.purefun.Unit;
-import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.free.Free;
 import com.github.tonivade.purefun.instances.IdInstances;
 import com.github.tonivade.purefun.type.Id;
+import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.typeclasses.Transformer;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
-import static com.github.tonivade.purefun.Unit.unit;
-import static com.github.tonivade.purefun.data.ImmutableList.empty;
+import static com.github.tonivade.puredbc.JdbcTemplate.iterable;
+import static com.github.tonivade.puredbc.JdbcTemplate.option;
 import static java.util.Objects.requireNonNull;
 
 @HigherKind
@@ -53,56 +47,42 @@ public interface DSL<T> {
     };
   }
 
-  static Free<DSL.µ, Unit> update(String query) {
-    return update(query, empty());
+  static Free<DSL.µ, Unit> update(Bindable query) {
+    return Free.liftF(new Update(query).kind1());
   }
 
-  static Free<DSL.µ, Unit> update(String query, Sequence<?> params) {
-    return Free.liftF(new Update(query, params).kind1());
+  static Free<DSL.µ, Iterable<Integer>> queryForInt(Bindable query) {
+    return query(query, rs -> rs.getInt(1));
   }
 
-  static Free<DSL.µ, Iterable<Integer>> queryForInt(String query) {
-    return queryForInt(query, empty());
+  static Free<DSL.µ, Iterable<Long>> queryForLong(Bindable query) {
+    return query(query, rs -> rs.getLong(1));
   }
 
-  static Free<DSL.µ, Iterable<Integer>> queryForInt(String query, Sequence<?> params) {
-    return query(query, params, rs -> rs.getInt(1));
+  static <T> Free<DSL.µ, Option<T>> queryOne(Bindable query, Function1<ResultSet, T> rowMapper) {
+    return Free.liftF(new Query<>(query, option(rowMapper)).kind1());
   }
 
-  static Free<DSL.µ, Iterable<Long>> queryForLong(String query) {
-    return queryForLong(query, empty());
+  static <T> Free<DSL.µ, Iterable<T>> query(Bindable query, Function1<ResultSet, T> rowMapper) {
+    return Free.liftF(new Query<>(query, iterable(rowMapper)).kind1());
   }
 
-  static Free<DSL.µ, Iterable<Long>> queryForLong(String query, Sequence<?> params) {
-    return query(query, params, rs -> rs.getLong(1));
-  }
+  final class Query<T> implements DSL<T> {
 
-  static <T> Free<DSL.µ, Iterable<T>> query(String query, Function1<ResultSet, T> extractor) {
-    return Free.liftF(new Query<>(query, empty(), extractor).kind1());
-  }
-
-  static <T> Free<DSL.µ, Iterable<T>> query(String query, Sequence<?> params, Function1<ResultSet, T> extractor) {
-    return Free.liftF(new Query<>(query, params, extractor).kind1());
-  }
-
-  final class Query<T> implements DSL<Iterable<T>> {
-
-    private final String query;
-    private final Sequence<?> params;
+    private final Bindable query;
     private final Function1<ResultSet, T> extractor;
 
-    public Query(String query, Sequence<?> params, Function1<ResultSet, T> extractor) {
+    public Query(Bindable query, Function1<ResultSet, T> extractor) {
       this.query = requireNonNull(query);
-      this.params = requireNonNull(params);
       this.extractor = requireNonNull(extractor);
     }
 
     public String getQuery() {
-      return query;
+      return query.getQuery();
     }
 
-    public Sequence<?> getParams() {
-      return params;
+    public Sequence<Object> getParams() {
+      return query.getParams();
     }
 
     public Function1<ResultSet, T> getExtractor() {
@@ -112,77 +92,32 @@ public interface DSL<T> {
     @Override
     public String toString() {
       return "Query{" +
-          "query='" + query + '\'' +
-          ", params=" + params +
+          "query=" + query +
           '}';
     }
   }
 
   final class Update implements DSL<Unit> {
 
-    private final String query;
-    private final Sequence<?> params;
+    private final Bindable query;
 
-    public Update(String query, Sequence<?> params) {
+    public Update(Bindable query) {
       this.query = requireNonNull(query);
-      this.params = requireNonNull(params);
     }
 
     public String getQuery() {
-      return query;
+      return query.getQuery();
     }
 
-    public Sequence<?> getParams() {
-      return params;
+    public Sequence<Object> getParams() {
+      return query.getParams();
     }
 
     @Override
     public String toString() {
       return "Update{" +
-          "query='" + query + '\'' +
-          ", params=" + params +
+          "query=" + query +
           '}';
-    }
-  }
-}
-
-class JdbcTemplate implements Recoverable {
-
-  public final DataSource dataSource;
-
-  public JdbcTemplate(DataSource dataSource) {
-    this.dataSource = requireNonNull(dataSource);
-  }
-
-  Unit update(String query, Sequence<?> params) {
-    try (Connection conn = dataSource.getConnection()) {
-      PreparedStatement preparedStatement = conn.prepareStatement(query);
-      int i = 1;
-      for (Object param : params) {
-        preparedStatement.setObject(i++, param);
-      }
-      preparedStatement.executeUpdate();
-    } catch (SQLException e) {
-      return sneakyThrow(e);
-    }
-    return unit();
-  }
-
-  <T> Iterable<T> query(String query, Sequence<?> params, Function1<ResultSet, T> extractor) {
-    try (Connection conn = dataSource.getConnection()) {
-      PreparedStatement preparedStatement = conn.prepareStatement(query);
-      int i = 1;
-      for (Object param : params) {
-        preparedStatement.setObject(i++, param);
-      }
-      List<T> result = new ArrayList<>();
-      ResultSet resultSet = preparedStatement.executeQuery();
-      while (resultSet.next()) {
-        result.add(extractor.apply(resultSet));
-      }
-      return ImmutableList.from(result);
-    } catch (SQLException e) {
-      return sneakyThrow(e);
     }
   }
 }
