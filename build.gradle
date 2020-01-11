@@ -1,15 +1,31 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'jacoco'
+apply plugin: 'com.bmuschko.nexus'
 
-jar {
-  baseName = 'puredbc'
-  version = '0.1.0-SNAPSHOT'
-}
+group = 'com.github.tonivade'
+archivesBaseName = 'puredbc'
+version = '0.1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-repositories { 
+buildscript {
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
+
+  dependencies {
+    classpath 'com.bmuschko:gradle-nexus-plugin:2.3.1'
+  }
+}
+
+jacoco {
+  toolVersion = '0.8.5'
+}
+
+repositories {
   mavenLocal() 
   mavenCentral()
   maven {

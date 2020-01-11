@@ -55,7 +55,8 @@ public class PureDBCTest {
     assertAll(
         () -> assertEquals(expected, program.unsafeRun(dataSource())),
         () -> assertEquals(Try.success(expected), program.safeRun(dataSource())),
-        () -> assertEquals(expected, program.runIO(dataSource()).unsafeRunSync()),
+        () -> assertEquals(expected, program.unsafeRunIO(dataSource()).unsafeRunSync()),
+        () -> assertEquals(Try.success(expected), program.safeRunIO(dataSource()).safeRunSync()),
         () -> assertEquals(Try.success(expected), program.asyncRun(dataSource()).await())
     );
   }
@@ -73,7 +74,8 @@ public class PureDBCTest {
     assertAll(
         () -> assertEquals(expected, program.unsafeRun(dataSource())),
         () -> assertEquals(Try.success(expected), program.safeRun(dataSource())),
-        () -> assertEquals(expected, program.runIO(dataSource()).unsafeRunSync()),
+        () -> assertEquals(expected, program.unsafeRunIO(dataSource()).unsafeRunSync()),
+        () -> assertEquals(Try.success(expected), program.safeRunIO(dataSource()).safeRunSync()),
         () -> assertEquals(Try.success(expected), program.asyncRun(dataSource()).await())
     );
   }
@@ -89,7 +91,8 @@ public class PureDBCTest {
     assertAll(
         () -> assertThrows(SQLException.class, () -> program.unsafeRun(dataSource())),
         () -> assertTrue(program.safeRun(dataSource()).isFailure()),
-        () -> assertThrows(SQLException.class, () -> program.runIO(dataSource()).unsafeRunSync()),
+        () -> assertThrows(SQLException.class, () -> program.unsafeRunIO(dataSource()).unsafeRunSync()),
+        () -> assertTrue(program.safeRunIO(dataSource()).safeRunSync().isFailure()),
         () -> assertTrue(program.asyncRun(dataSource()).await().isFailure())
     );
   }

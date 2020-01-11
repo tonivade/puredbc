@@ -10,10 +10,12 @@ import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.concurrent.Future;
 import com.github.tonivade.purefun.data.ImmutableList;
+import com.github.tonivade.purefun.effect.Task;
 import com.github.tonivade.purefun.effect.UIO;
 import com.github.tonivade.purefun.free.Free;
 import com.github.tonivade.purefun.instances.FutureInstances;
 import com.github.tonivade.purefun.instances.IdInstances;
+import com.github.tonivade.purefun.instances.TaskInstances;
 import com.github.tonivade.purefun.instances.TryInstances;
 import com.github.tonivade.purefun.instances.UIOInstances;
 import com.github.tonivade.purefun.type.Id;
@@ -62,8 +64,12 @@ public final class PureDBC<T>  {
     return safeRun(value).compose(JdbcTemplate::new).apply(dataSource);
   }
 
-  public UIO<T> runIO(DataSource dataSource) {
-    return runIO(value).compose(JdbcTemplate::new).apply(dataSource);
+  public UIO<T> unsafeRunIO(DataSource dataSource) {
+    return unsafeRunIO(value).compose(JdbcTemplate::new).apply(dataSource);
+  }
+
+  public Task<T> safeRunIO(DataSource dataSource) {
+    return safeRunIO(value).compose(JdbcTemplate::new).apply(dataSource);
   }
 
   public Future<T> asyncRun(DataSource dataSource) {
@@ -117,11 +123,19 @@ public final class PureDBC<T>  {
     };
   }
 
-  private static <A> Function1<JdbcTemplate, UIO<A>> runIO(Free<DSL.µ, A> free) {
+  private static <A> Function1<JdbcTemplate, UIO<A>> unsafeRunIO(Free<DSL.µ, A> free) {
     return jdbc -> {
       DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
       Higher1<UIO.µ, A> foldMap = free.foldMap(UIOInstances.monad(), new DSLTransformer<>(visitor));
       return foldMap.fix1(UIO::narrowK);
+    };
+  }
+
+  private static <A> Function1<JdbcTemplate, Task<A>> safeRunIO(Free<DSL.µ, A> free) {
+    return jdbc -> {
+      DSLTaskVisitor visitor = new DSLTaskVisitor(jdbc);
+      Higher1<Task.µ, A> foldMap = free.foldMap(TaskInstances.monad(), new DSLTransformer<>(visitor));
+      return foldMap.fix1(Task::narrowK);
     };
   }
 
@@ -192,6 +206,27 @@ public final class PureDBC<T>  {
     @Override
     public Higher1<UIO.µ, Unit> visit(DSL.Update update) {
       UIO<Unit> value = UIO.task(() -> jdbc.update(update.getQuery(), update.getParams()));
+      return value.kind1();
+    }
+  }
+
+  private static class DSLTaskVisitor implements DSL.Visitor<Task.µ> {
+
+    private final JdbcTemplate jdbc;
+
+    public DSLTaskVisitor(JdbcTemplate jdbc) {
+      this.jdbc = requireNonNull(jdbc);
+    }
+
+    @Override
+    public <T> Higher1<Task.µ, T> visit(DSL.Query<T> query) {
+      Task<T> value = Task.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+      return value.kind1();
+    }
+
+    @Override
+    public Higher1<Task.µ, Unit> visit(DSL.Update update) {
+      Task<Unit> value = Task.task(() -> jdbc.update(update.getQuery(), update.getParams()));
       return value.kind1();
     }
   }
