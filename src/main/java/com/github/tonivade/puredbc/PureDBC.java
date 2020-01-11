@@ -6,6 +6,7 @@ package com.github.tonivade.puredbc;
 
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Higher1;
+import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.concurrent.Future;
 import com.github.tonivade.purefun.data.ImmutableList;
@@ -102,85 +103,131 @@ public final class PureDBC<T>  {
 
   private static <A> Function1<JdbcTemplate, A> unsafeRun(Free<DSL.µ, A> free) {
     return jdbc -> {
-      Higher1<Id.µ, A> foldMap = free.foldMap(IdInstances.monad(), new Transformer<DSL.µ, Id.µ>() {
-        @Override
-        public <T> Higher1<Id.µ, T> apply(Higher1<DSL.µ, T> from) {
-          DSL<T> dsl = DSL.narrowK(from);
-          if (dsl instanceof DSL.Update) {
-            DSL.Update update = (DSL.Update) dsl;
-            return (Higher1<Id.µ, T>) Id.of(jdbc.update(update.getQuery(), update.getParams())).kind1();
-          }
-          if (dsl instanceof DSL.Query) {
-            DSL.Query<T> query = (DSL.Query<T>) dsl;
-            return (Higher1<Id.µ, T>) Id.of(jdbc.query(query.getQuery(), query.getParams(), query.getExtractor())).kind1();
-          }
-          throw new IllegalStateException();
-        }
-      });
+      DSLIdVisitor visitor = new DSLIdVisitor(jdbc);
+      Higher1<Id.µ, A> foldMap = free.foldMap(IdInstances.monad(), new DSLTransformer<>(visitor));
       return foldMap.fix1(Id::narrowK).get();
     };
   }
 
   private static <A> Function1<JdbcTemplate, Try<A>> safeRun(Free<DSL.µ, A> free) {
     return jdbc -> {
-      Higher1<Try.µ, A> foldMap = free.foldMap(TryInstances.monad(), new Transformer<DSL.µ, Try.µ>() {
-        @Override
-        public <T> Higher1<Try.µ, T> apply(Higher1<DSL.µ, T> from) {
-          DSL<T> dsl = DSL.narrowK(from);
-          if (dsl instanceof DSL.Update) {
-            DSL.Update update = (DSL.Update) dsl;
-            return (Higher1<Try.µ, T>) Try.of(() -> jdbc.update(update.getQuery(), update.getParams())).kind1();
-          }
-          if (dsl instanceof DSL.Query) {
-            DSL.Query<T> query = (DSL.Query<T>) dsl;
-            return (Higher1<Try.µ, T>) Try.of(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor())).kind1();
-          }
-          throw new IllegalStateException();
-        }
-      });
+      DSLTryVisitor visitor = new DSLTryVisitor(jdbc);
+      Higher1<Try.µ, A> foldMap = free.foldMap(TryInstances.monad(), new DSLTransformer<>(visitor));
       return foldMap.fix1(Try::narrowK);
     };
   }
 
   private static <A> Function1<JdbcTemplate, UIO<A>> runIO(Free<DSL.µ, A> free) {
     return jdbc -> {
-      Higher1<UIO.µ, A> foldMap = free.foldMap(UIOInstances.monad(), new Transformer<DSL.µ, UIO.µ>() {
-        @Override
-        public <T> Higher1<UIO.µ, T> apply(Higher1<DSL.µ, T> from) {
-          DSL<T> dsl = DSL.narrowK(from);
-          if (dsl instanceof DSL.Update) {
-            DSL.Update update = (DSL.Update) dsl;
-            return (Higher1<UIO.µ, T>) UIO.task(() -> jdbc.update(update.getQuery(), update.getParams())).kind1();
-          }
-          if (dsl instanceof DSL.Query) {
-            DSL.Query<T> query = (DSL.Query<T>) dsl;
-            return (Higher1<UIO.µ, T>) UIO.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor())).kind1();
-          }
-          throw new IllegalStateException();
-        }
-      });
+      DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
+      Higher1<UIO.µ, A> foldMap = free.foldMap(UIOInstances.monad(), new DSLTransformer<>(visitor));
       return foldMap.fix1(UIO::narrowK);
     };
   }
 
   private static <A> Function1<JdbcTemplate, Future<A>> asyncRun(Free<DSL.µ, A> free) {
     return jdbc -> {
-      Higher1<Future.µ, A> foldMap = free.foldMap(FutureInstances.monad(), new Transformer<DSL.µ, Future.µ>() {
-        @Override
-        public <T> Higher1<Future.µ, T> apply(Higher1<DSL.µ, T> from) {
-          DSL<T> dsl = DSL.narrowK(from);
-          if (dsl instanceof DSL.Update) {
-            DSL.Update update = (DSL.Update) dsl;
-            return (Higher1<Future.µ, T>) Future.async(() -> jdbc.update(update.getQuery(), update.getParams())).kind1();
-          }
-          if (dsl instanceof DSL.Query) {
-            DSL.Query<T> query = (DSL.Query<T>) dsl;
-            return (Higher1<Future.µ, T>) Future.async(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor())).kind1();
-          }
-          throw new IllegalStateException();
-        }
-      });
+      DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
+      Higher1<Future.µ, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
       return foldMap.fix1(Future::narrowK);
     };
+  }
+
+  private static class DSLIdVisitor implements DSL.Visitor<Id.µ> {
+
+    private final JdbcTemplate jdbc;
+
+    public DSLIdVisitor(JdbcTemplate jdbc) {
+      this.jdbc = requireNonNull(jdbc);
+    }
+
+    @Override
+    public <T> Higher1<Id.µ, T> visit(DSL.Query<T> query) {
+      Id<T> value = Id.of(jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+      return value.kind1();
+    }
+
+    @Override
+    public Higher1<Id.µ, Unit> visit(DSL.Update update) {
+      Id<Unit> value = Id.of(jdbc.update(update.getQuery(), update.getParams()));
+      return value.kind1();
+    }
+  }
+
+  private static class DSLTryVisitor implements DSL.Visitor<Try.µ> {
+
+    private final JdbcTemplate jdbc;
+
+    public DSLTryVisitor(JdbcTemplate jdbc) {
+      this.jdbc = requireNonNull(jdbc);
+    }
+
+    @Override
+    public <T> Higher1<Try.µ, T> visit(DSL.Query<T> query) {
+      Try<T> value = Try.of(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+      return value.kind1();
+    }
+
+    @Override
+    public Higher1<Try.µ, Unit> visit(DSL.Update update) {
+      Try<Unit> value = Try.of(() -> jdbc.update(update.getQuery(), update.getParams()));
+      return value.kind1();
+    }
+  }
+
+  private static class DSLUIOVisitor implements DSL.Visitor<UIO.µ> {
+
+    private final JdbcTemplate jdbc;
+
+    public DSLUIOVisitor(JdbcTemplate jdbc) {
+      this.jdbc = requireNonNull(jdbc);
+    }
+
+    @Override
+    public <T> Higher1<UIO.µ, T> visit(DSL.Query<T> query) {
+      UIO<T> value = UIO.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+      return value.kind1();
+    }
+
+    @Override
+    public Higher1<UIO.µ, Unit> visit(DSL.Update update) {
+      UIO<Unit> value = UIO.task(() -> jdbc.update(update.getQuery(), update.getParams()));
+      return value.kind1();
+    }
+  }
+
+  private static class DSLFutureVisitor implements DSL.Visitor<Future.µ> {
+
+    private final JdbcTemplate jdbc;
+
+    public DSLFutureVisitor(JdbcTemplate jdbc) {
+      this.jdbc = requireNonNull(jdbc);
+    }
+
+    @Override
+    public <T> Higher1<Future.µ, T> visit(DSL.Query<T> query) {
+      Future<T> value = Future.async(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+      return value.kind1();
+    }
+
+    @Override
+    public Higher1<Future.µ, Unit> visit(DSL.Update update) {
+      Future<Unit> value = Future.async(() -> jdbc.update(update.getQuery(), update.getParams()));
+      return value.kind1();
+    }
+  }
+
+  private static class DSLTransformer<F extends Kind> implements Transformer<DSL.µ, F> {
+
+    private final DSL.Visitor<F> visitor;
+
+    public DSLTransformer(DSL.Visitor<F> visitor) {
+      this.visitor = requireNonNull(visitor);
+    }
+
+    @Override
+    public <T> Higher1<F, T> apply(Higher1<DSL.µ, T> from) {
+      return DSL.narrowK(from).accept(visitor);
+    }
   }
 }

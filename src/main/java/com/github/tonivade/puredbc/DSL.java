@@ -5,7 +5,9 @@
 package com.github.tonivade.puredbc;
 
 import com.github.tonivade.purefun.Function1;
+import com.github.tonivade.purefun.Higher1;
 import com.github.tonivade.purefun.HigherKind;
+import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.Sealed;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.data.Sequence;
@@ -18,7 +20,14 @@ import static java.util.Objects.requireNonNull;
 @HigherKind
 public interface DSL<T> {
 
+  <F extends Kind> Higher1<F, T> accept(Visitor<F> visitor);
+
   DSLModule getModule();
+
+  interface Visitor<F extends Kind> {
+    Higher1<F, Unit> visit(DSL.Update update);
+    <T> Higher1<F, T> visit(DSL.Query<T> query);
+  }
 
   final class Query<T> implements DSL<T> {
 
@@ -28,6 +37,11 @@ public interface DSL<T> {
     protected Query(SQL query, Function1<ResultSet, T> extractor) {
       this.query = requireNonNull(query);
       this.extractor = requireNonNull(extractor);
+    }
+
+    @Override
+    public <F extends Kind> Higher1<F, T> accept(Visitor<F> visitor) {
+      return visitor.visit(this);
     }
 
     public String getQuery() {
@@ -61,6 +75,11 @@ public interface DSL<T> {
 
     protected Update(SQL query) {
       this.query = requireNonNull(query);
+    }
+
+    @Override
+    public <F extends Kind> Higher1<F, Unit> accept(Visitor<F> visitor) {
+      return visitor.visit(this);
     }
 
     public String getQuery() {
