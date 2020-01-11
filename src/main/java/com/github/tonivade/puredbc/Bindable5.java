@@ -15,8 +15,8 @@ public final class Bindable5<A, B, C, D, E> {
     this.query = requireNonNull(query);
   }
 
-  public Bindable bind(A value1, B value2, C value3, D value4, E value5) {
-    return new Bindable(query, arrayOf(value1, value2, value3, value4, value5));
+  public SQL bind(A value1, B value2, C value3, D value4, E value5) {
+    return new SQL(query, arrayOf(value1, value2, value3, value4, value5));
   }
 
   @Override

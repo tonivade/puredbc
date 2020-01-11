@@ -17,11 +17,11 @@ import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static com.github.tonivade.puredbc.Bindable.deleteFrom;
-import static com.github.tonivade.puredbc.Bindable.insertInto;
-import static com.github.tonivade.puredbc.Bindable.select;
-import static com.github.tonivade.puredbc.Bindable.sql;
-import static com.github.tonivade.puredbc.Bindable.update;
+import static com.github.tonivade.puredbc.SQL.delete;
+import static com.github.tonivade.puredbc.SQL.insert;
+import static com.github.tonivade.puredbc.SQL.select;
+import static com.github.tonivade.puredbc.SQL.sql;
+import static com.github.tonivade.puredbc.SQL.update;
 import static com.github.tonivade.puredbc.PureDBC.query;
 import static com.github.tonivade.puredbc.PureDBC.queryOne;
 import static com.github.tonivade.puredbc.PureDBC.update;
@@ -31,15 +31,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class DSLTest {
+public class PureDBCTest {
 
-  private final Bindable createTable = sql("create table if not exists test (id int primary key, name varchar(100))");
-  private final Bindable dropTable = sql("drop table if exists test");
-  private final Bindable deleteAll = deleteFrom("test");
-  private final Bindable1<Integer> deleteOne = deleteFrom("test").where("id = ?");
-  private final Bindable2<Integer, String> insertRow = insertInto("test").values("id", "name");
+  private final SQL createTable = sql("create table if not exists test (id int primary key, name varchar(100))");
+  private final SQL dropTable = sql("drop table if exists test");
+  private final SQL deleteAll = delete("test");
+  private final Bindable1<Integer> deleteOne = delete("test").where("id = ?");
+  private final Bindable2<Integer, String> insertRow = insert("test").values("id", "name");
   private final Bindable2<String, Integer> updateRow = update("test").<String>set("name").where("id = ?");
-  private final Bindable findAll = select("id", "name").from("test");
+  private final SQL findAll = select("id", "name").from("test");
   private final Bindable1<Integer> findOne = select("id", "name").from("test").where("id = ?");
 
   @Test

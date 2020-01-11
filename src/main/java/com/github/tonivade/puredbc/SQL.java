@@ -10,16 +10,16 @@ import static com.github.tonivade.purefun.data.ImmutableArray.empty;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
 import static java.util.Objects.requireNonNull;
 
-public final class Bindable {
+public final class SQL {
 
   private final String query;
   private final Sequence<?> values;
 
-  protected Bindable(String query) {
+  protected SQL(String query) {
     this(query, empty());
   }
 
-  protected Bindable(String query, Sequence<?> values) {
+  protected SQL(String query, Sequence<?> values) {
     this.query = requireNonNull(query);
     this.values = requireNonNull(values);
   }
@@ -40,7 +40,7 @@ public final class Bindable {
         '}';
   }
 
-  public Bindable from(String table) {
+  public SQL from(String table) {
     return sql(query + " from " + table);
   }
 
@@ -84,23 +84,23 @@ public final class Bindable {
     return new Bindable5<>(query + " (" + f1 + "," + f2 + "," + f3 + "," + f4 + "," + f5 + ") values (?,?,?,?,?)");
   }
 
-  public static Bindable sql(String query) {
-    return new Bindable(query);
+  public static SQL sql(String query) {
+    return new SQL(query);
   }
 
-  public static Bindable select(String... fields) {
+  public static SQL select(String... fields) {
     return sql(arrayOf(fields).join(",", "select ", " "));
   }
 
-  public static Bindable insertInto(String table) {
+  public static SQL insert(String table) {
     return sql("insert into " + table);
   }
 
-  public static Bindable update(String table) {
+  public static SQL update(String table) {
     return sql("update " + table);
   }
 
-  public static Bindable deleteFrom(String table) {
+  public static SQL delete(String table) {
     return sql("delete from " + table);
   }
 }

@@ -15,8 +15,8 @@ public final class Bindable1<A> {
     this.query = requireNonNull(query);
   }
 
-  public Bindable bind(A value) {
-    return new Bindable(query, arrayOf(value));
+  public SQL bind(A value) {
+    return new SQL(query, arrayOf(value));
   }
 
   public <B> Bindable2<A, B> and(String condition) {

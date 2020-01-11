@@ -69,15 +69,15 @@ public final class PureDBC<T>  {
     return asyncRun(value).compose(JdbcTemplate::new).apply(dataSource);
   }
 
-  public static PureDBC<Unit> update(Bindable query) {
+  public static PureDBC<Unit> update(SQL query) {
     return new PureDBC<>(new DSL.Update(query));
   }
 
-  public static <T> PureDBC<Option<T>> queryOne(Bindable query, Function1<ResultSet, T> rowMapper) {
+  public static <T> PureDBC<Option<T>> queryOne(SQL query, Function1<ResultSet, T> rowMapper) {
     return new PureDBC<>(new DSL.Query<>(query, option(rowMapper)));
   }
 
-  public static <T> PureDBC<Iterable<T>> query(Bindable query, Function1<ResultSet, T> rowMapper) {
+  public static <T> PureDBC<Iterable<T>> query(SQL query, Function1<ResultSet, T> rowMapper) {
     return new PureDBC<>(new DSL.Query<>(query, iterable(rowMapper)));
   }
 

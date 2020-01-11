@@ -22,10 +22,10 @@ public interface DSL<T> {
 
   final class Query<T> implements DSL<T> {
 
-    private final Bindable query;
+    private final SQL query;
     private final Function1<ResultSet, T> extractor;
 
-    protected Query(Bindable query, Function1<ResultSet, T> extractor) {
+    protected Query(SQL query, Function1<ResultSet, T> extractor) {
       this.query = requireNonNull(query);
       this.extractor = requireNonNull(extractor);
     }
@@ -57,9 +57,9 @@ public interface DSL<T> {
 
   final class Update implements DSL<Unit> {
 
-    private final Bindable query;
+    private final SQL query;
 
-    protected Update(Bindable query) {
+    protected Update(SQL query) {
       this.query = requireNonNull(query);
     }
 

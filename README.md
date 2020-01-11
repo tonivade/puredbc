@@ -19,13 +19,13 @@ Develop a comprehensible and easy to use API:
 
 ```java
   // Query DSL
-  Bindable createTable = sql("create table if not exists test (id int primary key, name varchar(100))");
-  Bindable dropTable = sql("drop table if exists test");
-  Bindable deleteAll = deleteFrom("test");
-  Bindable1<Integer> deleteOne = deleteFrom("test").where("id = ?");
-  Bindable2<Integer, String> insertRow = insertInto("test").values("id", "name");
+  SQL createTable = sql("create table if not exists test (id int primary key, name varchar(100))");
+  SQL dropTable = sql("drop table if exists test");
+  SQL deleteAll = deleteFrom("test");
+  Bindable1<Integer> deleteOne = delete("test").where("id = ?");
+  Bindable2<Integer, String> insertRow = insert("test").values("id", "name");
   Bindable2<String, Integer> updateRow = update("test").<String>set("name").where("id = ?");
-  Bindable findAll = select("id", "name").from("test");
+  SQL findAll = select("id", "name").from("test");
   Bindable1<Integer> findOne = select("id", "name").from("test").where("id = ?");
   
   // PureDBC DSL
