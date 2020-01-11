@@ -11,7 +11,8 @@ This project is experimental, so don't try to use in production.
 Develop a comprehensible and easy to use API:
 
 - High level
-- Type safety
+- Flexible
+- Type safe
 - Composable
 - Meaningful errors
 
@@ -22,11 +23,11 @@ Develop a comprehensible and easy to use API:
   SQL createTable = sql("create table if not exists test (id int primary key, name varchar(100))");
   SQL dropTable = sql("drop table if exists test");
   SQL deleteAll = deleteFrom("test");
-  Bindable1<Integer> deleteOne = delete("test").where("id = ?");
-  Bindable2<Integer, String> insertRow = insert("test").values("id", "name");
-  Bindable2<String, Integer> updateRow = update("test").<String>set("name").where("id = ?");
+  SQL1<Integer> deleteOne = delete("test").where("id = ?");
+  SQL2<Integer, String> insertRow = insert("test").values("id", "name");
+  SQL2<String, Integer> updateRow = update("test").<String>set("name").where("id = ?");
   SQL findAll = select("id", "name").from("test");
-  Bindable1<Integer> findOne = select("id", "name").from("test").where("id = ?");
+  SQL1<Integer> findOne = select("id", "name").from("test").where("id = ?");
   
   // PureDBC DSL
   PureDBC<Iterable<Tuple2<Integer, String>>> program =
