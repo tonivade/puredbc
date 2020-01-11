@@ -7,29 +7,21 @@ package com.github.tonivade.puredbc;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
 import static java.util.Objects.requireNonNull;
 
-public final class Bindable3<A, B, C> {
+public final class SQL5<A, B, C, D, E> {
 
   private final String query;
 
-  protected Bindable3(String query) {
+  protected SQL5(String query) {
     this.query = requireNonNull(query);
   }
 
-  public SQL bind(A value1, B value2, C value3) {
-    return new SQL(query, arrayOf(value1, value2, value3));
-  }
-
-  public <D> Bindable4<A, B, C, D> and(String condition) {
-    return new Bindable4<>(query + " and " + condition);
-  }
-
-  public <D> Bindable4<A, B, C, D> where(String condition) {
-    return new Bindable4<>(query + " where " + condition);
+  public SQL bind(A value1, B value2, C value3, D value4, E value5) {
+    return new SQL(query, arrayOf(value1, value2, value3, value4, value5));
   }
 
   @Override
   public String toString() {
-    return "Bindable3{" +
+    return "Bindable5{" +
         "query='" + query + '\'' +
         '}';
   }

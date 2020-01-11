@@ -44,44 +44,44 @@ public final class SQL {
     return sql(query + " from " + table);
   }
 
-  public <T> Bindable1<T> where(String condition) {
-    return new Bindable1<>(query + " where " + condition);
+  public <T> SQL1<T> where(String condition) {
+    return new SQL1<>(query + " where " + condition);
   }
 
-  public <A> Bindable1<A> set(String f1) {
-    return new Bindable1<>(query + " set " + f1 + "=?");
+  public <A> SQL1<A> set(String f1) {
+    return new SQL1<>(query + " set " + f1 + "=?");
   }
 
-  public <A, B> Bindable2<A, B> set(String f1, String f2) {
-    return new Bindable2<>(query + " set " + f1 + "=?," + f2 + "=?");
+  public <A, B> SQL2<A, B> set(String f1, String f2) {
+    return new SQL2<>(query + " set " + f1 + "=?," + f2 + "=?");
   }
 
-  public <A, B, C> Bindable3<A, B, C> set(String f1, String f2, String f3) {
-    return new Bindable3<>(query + " set " + f1 + " = ?," + f2 + " = ?," + f3 + " = ?");
+  public <A, B, C> SQL3<A, B, C> set(String f1, String f2, String f3) {
+    return new SQL3<>(query + " set " + f1 + " = ?," + f2 + " = ?," + f3 + " = ?");
   }
 
-  public <A, B, C, D> Bindable4<A, B, C, D> set(String f1, String f2, String f3, String f4) {
-    return new Bindable4<>(query + " set " + f1 + "=?," + f2 + "=?," + f3 + "=?," + f4 + "=?");
+  public <A, B, C, D> SQL4<A, B, C, D> set(String f1, String f2, String f3, String f4) {
+    return new SQL4<>(query + " set " + f1 + "=?," + f2 + "=?," + f3 + "=?," + f4 + "=?");
   }
 
-  public <A> Bindable1<A> values(String f1) {
-    return new Bindable1<>(query + " (" + f1 + ") values (?)");
+  public <A> SQL1<A> values(String f1) {
+    return new SQL1<>(query + " (" + f1 + ") values (?)");
   }
 
-  public <A, B> Bindable2<A, B> values(String f1, String f2) {
-    return new Bindable2<>(query + " (" + f1 + "," + f2 + ") values (?,?)");
+  public <A, B> SQL2<A, B> values(String f1, String f2) {
+    return new SQL2<>(query + " (" + f1 + "," + f2 + ") values (?,?)");
   }
 
-  public <A, B, C> Bindable3<A, B, C> values(String f1, String f2, String f3) {
-    return new Bindable3<>(query + " (" + f1 + "," + f2 + "," + f3 + ") values (?,?,?)");
+  public <A, B, C> SQL3<A, B, C> values(String f1, String f2, String f3) {
+    return new SQL3<>(query + " (" + f1 + "," + f2 + "," + f3 + ") values (?,?,?)");
   }
 
-  public <A, B, C, D> Bindable4<A, B, C, D> values(String f1, String f2, String f3, String f4) {
-    return new Bindable4<>(query + " (" + f1 + "," + f2 + "," + f3+ "," + f4 + ") values (?,?,?,?)");
+  public <A, B, C, D> SQL4<A, B, C, D> values(String f1, String f2, String f3, String f4) {
+    return new SQL4<>(query + " (" + f1 + "," + f2 + "," + f3+ "," + f4 + ") values (?,?,?,?)");
   }
 
-  public <A, B, C, D, E> Bindable5<A, B, C, D, E> values(String f1, String f2, String f3, String f4, String f5) {
-    return new Bindable5<>(query + " (" + f1 + "," + f2 + "," + f3 + "," + f4 + "," + f5 + ") values (?,?,?,?,?)");
+  public <A, B, C, D, E> SQL5<A, B, C, D, E> values(String f1, String f2, String f3, String f4, String f5) {
+    return new SQL5<>(query + " (" + f1 + "," + f2 + "," + f3 + "," + f4 + "," + f5 + ") values (?,?,?,?,?)");
   }
 
   public static SQL sql(String query) {

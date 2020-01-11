@@ -36,11 +36,11 @@ public class PureDBCTest {
   private final SQL createTable = sql("create table if not exists test (id int primary key, name varchar(100))");
   private final SQL dropTable = sql("drop table if exists test");
   private final SQL deleteAll = delete("test");
-  private final Bindable1<Integer> deleteOne = delete("test").where("id = ?");
-  private final Bindable2<Integer, String> insertRow = insert("test").values("id", "name");
-  private final Bindable2<String, Integer> updateRow = update("test").<String>set("name").where("id = ?");
+  private final SQL1<Integer> deleteOne = delete("test").where("id = ?");
+  private final SQL2<Integer, String> insertRow = insert("test").values("id", "name");
+  private final SQL2<String, Integer> updateRow = update("test").<String>set("name").where("id = ?");
   private final SQL findAll = select("id", "name").from("test");
-  private final Bindable1<Integer> findOne = select("id", "name").from("test").where("id = ?");
+  private final SQL1<Integer> findOne = select("id", "name").from("test").where("id = ?");
 
   @Test
   public void queryAll() {
