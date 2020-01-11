@@ -1,4 +1,4 @@
-# puredbc
+# PureDBC
 
 Pure Functional Database Connection Layer
 
@@ -28,8 +28,8 @@ Develop a comprehensible and easy to use API:
   Bindable findAll = select("id", "name").from("test");
   Bindable1<Integer> findOne = select("id", "name").from("test").where("id = ?");
   
-  // JDBC DSL
-  Free<DSL.µ, Iterable<Tuple2<Integer, String>>> program =
+  // PureDBC DSL
+  PureDBC<Iterable<Tuple2<Integer, String>>> program =
     update(createTable)
       .andThen(update(deleteAll))
       .andThen(update(insertRow.bind(1, "toni")))
@@ -38,7 +38,7 @@ Develop a comprehensible and easy to use API:
   
   assertEquals(
       listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe")), 
-      unsafeRun(program).apply(dataSource()))
+      program.unsafeRun(dataSource()))
 ```
 
 ## License

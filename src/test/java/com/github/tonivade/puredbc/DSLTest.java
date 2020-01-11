@@ -7,7 +7,6 @@ package com.github.tonivade.puredbc;
 import com.github.tonivade.purefun.Tuple;
 import com.github.tonivade.purefun.Tuple2;
 import com.github.tonivade.purefun.data.ImmutableList;
-import com.github.tonivade.purefun.free.Free;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
 import com.zaxxer.hikari.HikariConfig;
@@ -23,12 +22,9 @@ import static com.github.tonivade.puredbc.Bindable.insertInto;
 import static com.github.tonivade.puredbc.Bindable.select;
 import static com.github.tonivade.puredbc.Bindable.sql;
 import static com.github.tonivade.puredbc.Bindable.update;
-import static com.github.tonivade.puredbc.DSL.query;
-import static com.github.tonivade.puredbc.DSL.queryOne;
-import static com.github.tonivade.puredbc.DSL.runIO;
-import static com.github.tonivade.puredbc.DSL.safeRun;
-import static com.github.tonivade.puredbc.DSL.unsafeRun;
-import static com.github.tonivade.puredbc.DSL.update;
+import static com.github.tonivade.puredbc.PureDBC.query;
+import static com.github.tonivade.puredbc.PureDBC.queryOne;
+import static com.github.tonivade.puredbc.PureDBC.update;
 import static com.github.tonivade.purefun.data.Sequence.listOf;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +44,7 @@ public class DSLTest {
 
   @Test
   public void queryAll() {
-    Free<DSL.µ, Iterable<Tuple2<Integer, String>>> program =
+    PureDBC<Iterable<Tuple2<Integer, String>>> program =
       update(createTable)
         .andThen(update(deleteAll))
         .andThen(update(insertRow.bind(1, "toni")))
@@ -57,15 +53,16 @@ public class DSLTest {
 
     ImmutableList<Tuple2<Integer, String>> expected = listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe"));
     assertAll(
-        () -> assertEquals(expected, unsafeRun(program).apply(dataSource())),
-        () -> assertEquals(Try.success(expected), safeRun(program).apply(dataSource())),
-        () -> assertEquals(expected, runIO(program).apply(dataSource()).unsafeRunSync())
+        () -> assertEquals(expected, program.unsafeRun(dataSource())),
+        () -> assertEquals(Try.success(expected), program.safeRun(dataSource())),
+        () -> assertEquals(expected, program.runIO(dataSource()).unsafeRunSync()),
+        () -> assertEquals(Try.success(expected), program.asyncRun(dataSource()).await())
     );
   }
 
   @Test
   public void queryJustOne() {
-    Free<DSL.µ, Option<Tuple2<Integer, String>>> program =
+    PureDBC<Option<Tuple2<Integer, String>>> program =
         update(createTable)
             .andThen(update(deleteOne.bind(1)))
             .andThen(update(insertRow.bind(1, "toni")))
@@ -74,24 +71,26 @@ public class DSLTest {
 
     Option<Tuple2<Integer, String>> expected = Option.some(Tuple.of(1, "pepe"));
     assertAll(
-        () -> assertEquals(Try.success(expected), safeRun(program).apply(dataSource())),
-        () -> assertEquals(expected, unsafeRun(program).apply(dataSource())),
-        () -> assertEquals(expected, runIO(program).apply(dataSource()).unsafeRunSync())
+        () -> assertEquals(expected, program.unsafeRun(dataSource())),
+        () -> assertEquals(Try.success(expected), program.safeRun(dataSource())),
+        () -> assertEquals(expected, program.runIO(dataSource()).unsafeRunSync()),
+        () -> assertEquals(Try.success(expected), program.asyncRun(dataSource()).await())
     );
   }
 
   @Test
   public void queryError() {
-    Free<DSL.µ, Option<Tuple2<Integer, String>>> program =
+    PureDBC<Option<Tuple2<Integer, String>>> program =
         update(dropTable)
             .andThen(update(deleteAll))
             .andThen(update(insertRow.bind(1, "toni")))
             .andThen(queryOne(findOne.bind(1), this::asTuple));
 
     assertAll(
-        () -> assertThrows(SQLException.class, () -> unsafeRun(program).apply(dataSource())),
-        () -> assertTrue(safeRun(program).apply(dataSource()).isFailure()),
-        () -> assertThrows(SQLException.class, () -> runIO(program).apply(dataSource()).unsafeRunSync())
+        () -> assertThrows(SQLException.class, () -> program.unsafeRun(dataSource())),
+        () -> assertTrue(program.safeRun(dataSource()).isFailure()),
+        () -> assertThrows(SQLException.class, () -> program.runIO(dataSource()).unsafeRunSync()),
+        () -> assertTrue(program.asyncRun(dataSource()).await().isFailure())
     );
   }
 
