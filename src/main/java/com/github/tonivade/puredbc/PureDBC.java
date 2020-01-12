@@ -29,7 +29,6 @@ import javax.sql.DataSource;
 import java.sql.ResultSet;
 
 import static com.github.tonivade.purefun.Function1.cons;
-import static com.github.tonivade.purefun.free.Free.liftF;
 import static java.util.Objects.requireNonNull;
 
 @HigherKind
@@ -37,8 +36,12 @@ public final class PureDBC<T>  {
 
   private final Free<DSL.µ, T> value;
 
+  private PureDBC(T value) {
+    this(Free.pure(value));
+  }
+
   private PureDBC(DSL<T> value) {
-    this(liftF(value.kind1()));
+    this(Free.liftF(value.kind1()));
   }
 
   private PureDBC(Free<DSL.µ, T> value) {
@@ -78,7 +81,7 @@ public final class PureDBC<T>  {
   }
 
   public static <T> PureDBC<T> pure(T value) {
-    return new PureDBC<>(Free.pure(value));
+    return new PureDBC<>(value);
   }
 
   public static PureDBC<Unit> update(SQL query) {
