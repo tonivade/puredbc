@@ -34,7 +34,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PureDBCTest {
 
-  private final SQL createTable = sql("create table if not exists test (id identity primary key, name varchar(100))");
+  private final SQL createTable = sql(
+      "create table if not exists test",
+      "(id identity primary key, name varchar(100))");
   private final SQL dropTable = sql("drop table if exists test");
   private final SQL deleteAll = delete("test");
   private final SQL1<Integer> deleteOne = delete("test").where("id = ?");

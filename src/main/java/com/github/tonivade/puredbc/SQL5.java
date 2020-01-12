@@ -19,9 +19,17 @@ public final class SQL5<A, B, C, D, E> {
     return new SQL(query, arrayOf(value1, value2, value3, value4, value5));
   }
 
+  public SQL5<A, B, C, D, E> groupBy(String field) {
+    return new SQL5<>(query + " group by " + field);
+  }
+
+  public SQL5<A, B, C, D, E> orderBy(String field) {
+    return new SQL5<>(query + " order by " + field);
+  }
+
   @Override
   public String toString() {
-    return "Bindable5{" +
+    return "SQL5{" +
         "query='" + query + '\'' +
         '}';
   }

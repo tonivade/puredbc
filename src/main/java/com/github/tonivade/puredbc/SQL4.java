@@ -27,9 +27,17 @@ public final class SQL4<A, B, C, D> {
     return new SQL5<>(query + " where " + condition);
   }
 
+  public SQL4<A, B, C, D> groupBy(String field) {
+    return new SQL4<>(query + " group by " + field);
+  }
+
+  public SQL4<A, B, C, D> orderBy(String field) {
+    return new SQL4<>(query + " order by " + field);
+  }
+
   @Override
   public String toString() {
-    return "Bindable4{" +
+    return "SQL4{" +
         "query='" + query + '\'' +
         '}';
   }

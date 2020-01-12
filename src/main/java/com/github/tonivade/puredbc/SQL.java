@@ -34,7 +34,7 @@ public final class SQL {
 
   @Override
   public String toString() {
-    return "Bindable{" +
+    return "SQL{" +
         "query='" + query + '\'' +
         ", values=" + values +
         '}';
@@ -84,8 +84,8 @@ public final class SQL {
     return new SQL5<>(query + " (" + f1 + "," + f2 + "," + f3 + "," + f4 + "," + f5 + ") values (?,?,?,?,?)");
   }
 
-  public static SQL sql(String query) {
-    return new SQL(query);
+  public static SQL sql(String query, String... append) {
+    return new SQL(arrayOf(query).appendAll(arrayOf(append)).join(" "));
   }
 
   public static SQL select(String... fields) {
