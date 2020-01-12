@@ -33,7 +33,7 @@ public final class PureDBC<T>  {
 
   private final Free<DSL.µ, T> value;
 
-  protected PureDBC(DSL<T> value) {
+  private PureDBC(DSL<T> value) {
     this(liftF(value.kind1()));
   }
 
