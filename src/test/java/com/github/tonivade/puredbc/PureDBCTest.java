@@ -17,6 +17,7 @@ import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static com.github.tonivade.puredbc.PureDBC.updateWithKeys;
 import static com.github.tonivade.puredbc.SQL.delete;
 import static com.github.tonivade.puredbc.SQL.insert;
 import static com.github.tonivade.puredbc.SQL.select;
@@ -33,14 +34,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PureDBCTest {
 
-  private final SQL createTable = sql("create table if not exists test (id int primary key, name varchar(100))");
+  private final SQL createTable = sql("create table if not exists test (id identity primary key, name varchar(100))");
   private final SQL dropTable = sql("drop table if exists test");
   private final SQL deleteAll = delete("test");
   private final SQL1<Integer> deleteOne = delete("test").where("id = ?");
+  private final SQL1<String> insertRowWithKey = insert("test").values("name");
   private final SQL2<Integer, String> insertRow = insert("test").values("id", "name");
   private final SQL2<String, Integer> updateRow = update("test").<String>set("name").where("id = ?");
   private final SQL findAll = select("id", "name").from("test");
   private final SQL1<Integer> findOne = select("id", "name").from("test").where("id = ?");
+
+  @Test
+  public void getAllUpdateWithKeys() {
+    PureDBC<Iterable<Tuple2<Integer, String>>> program =
+        update(createTable)
+            .andThen(update(deleteAll))
+            .andThen(updateWithKeys(insertRowWithKey.bind("toni"), rs -> rs.getInt("id")))
+            .andThen(updateWithKeys(insertRowWithKey.bind("pepe"), rs -> rs.getInt("id")))
+            .andThen(query(findAll, this::asTuple));
+
+    ImmutableList<Tuple2<Integer, String>> expected = listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe"));
+
+    assertEquals(expected, program.unsafeRun(dataSource()));
+  }
 
   @Test
   public void queryAll() {
