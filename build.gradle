@@ -38,10 +38,10 @@ test {
 }
 
 dependencies {
-  annotationProcessor 'com.github.tonivade:purefun-processor:1.6'
-  compile 'com.github.tonivade:purefun-free:1.6'
-  compile 'com.github.tonivade:purefun-effect:1.6'
-  compile 'com.github.tonivade:purefun-instances:1.6'
+  annotationProcessor 'com.github.tonivade:purefun-processor:1.7-SNAPSHOT'
+  compile 'com.github.tonivade:purefun-free:1.7-SNAPSHOT'
+  compile 'com.github.tonivade:purefun-effect:1.7-SNAPSHOT'
+  compile 'com.github.tonivade:purefun-instances:1.7-SNAPSHOT'
   runtime 'com.h2database:h2:1.4.197'
   testCompile 'com.zaxxer:HikariCP:2.7.8'
   testCompile 'org.junit.jupiter:junit-jupiter-engine:5.5.2'

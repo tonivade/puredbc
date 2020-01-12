@@ -6,6 +6,8 @@ package com.github.tonivade.puredbc;
 
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Higher1;
+import com.github.tonivade.purefun.HigherKind;
+import com.github.tonivade.purefun.Instance;
 import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.concurrent.Future;
@@ -20,7 +22,8 @@ import com.github.tonivade.purefun.instances.UIOInstances;
 import com.github.tonivade.purefun.type.Id;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
-import com.github.tonivade.purefun.typeclasses.Transformer;
+import com.github.tonivade.purefun.typeclasses.Monad;
+import com.github.tonivade.purefun.typeclasses.FunctionK;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
@@ -29,6 +32,7 @@ import static com.github.tonivade.purefun.Function1.cons;
 import static com.github.tonivade.purefun.free.Free.liftF;
 import static java.util.Objects.requireNonNull;
 
+@HigherKind
 public final class PureDBC<T>  {
 
   private final Free<DSL.µ, T> value;
@@ -73,6 +77,10 @@ public final class PureDBC<T>  {
     return asyncRun(value).compose(JdbcTemplate::new).apply(dataSource);
   }
 
+  public static <T> PureDBC<T> pure(T value) {
+    return new PureDBC<>(Free.pure(value));
+  }
+
   public static PureDBC<Unit> update(SQL query) {
     return new PureDBC<>(new DSL.Update(query));
   }
@@ -87,6 +95,10 @@ public final class PureDBC<T>  {
 
   public static <T> PureDBC<Iterable<T>> query(SQL query, Function1<ResultSet, T> rowMapper) {
     return new PureDBC<>(new DSL.Query<>(query, rowMapper));
+  }
+
+  public static Monad<PureDBC.µ> monad() {
+    return PureDBCMonad.instance();
   }
 
   private static <A> Function1<JdbcTemplate, A> unsafeRun(Free<DSL.µ, A> free) {
@@ -309,7 +321,7 @@ public final class PureDBC<T>  {
     }
   }
 
-  private static class DSLTransformer<F extends Kind> implements Transformer<DSL.µ, F> {
+  private static class DSLTransformer<F extends Kind> implements FunctionK<DSL.µ, F> {
 
     private final DSL.Visitor<F> visitor;
 
@@ -321,5 +333,25 @@ public final class PureDBC<T>  {
     public <T> Higher1<F, T> apply(Higher1<DSL.µ, T> from) {
       return DSL.narrowK(from).accept(visitor);
     }
+  }
+}
+
+@Instance
+interface PureDBCMonad extends Monad<PureDBC.µ> {
+
+  @Override
+  default <T> Higher1<PureDBC.µ, T> pure(T value) {
+    return PureDBC.pure(value).kind1();
+  }
+
+  @Override
+  default <T, R> Higher1<PureDBC.µ, R> map(Higher1<PureDBC.µ, T> value, Function1<T, R> mapper) {
+    return value.fix1(PureDBC::narrowK).map(mapper).kind1();
+  }
+
+  @Override
+  default <T, R> Higher1<PureDBC.µ, R> flatMap(
+      Higher1<PureDBC.µ, T> value, Function1<T, ? extends Higher1<PureDBC.µ, R>> mapper) {
+    return value.fix1(PureDBC::narrowK).flatMap(mapper.andThen(PureDBC::narrowK)).kind1();
   }
 }

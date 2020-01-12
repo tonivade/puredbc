@@ -9,6 +9,7 @@ import com.github.tonivade.purefun.Tuple2;
 import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
+import com.github.tonivade.purefun.typeclasses.For;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Test;
@@ -48,12 +49,13 @@ public class PureDBCTest {
 
   @Test
   public void getAllUpdateWithKeys() {
-    PureDBC<Iterable<Tuple2<Integer, String>>> program =
-        update(createTable)
-            .andThen(update(deleteAll))
-            .andThen(updateWithKeys(insertRowWithKey.bind("toni"), rs -> rs.getInt("id")))
-            .andThen(updateWithKeys(insertRowWithKey.bind("pepe"), rs -> rs.getInt("id")))
-            .andThen(query(findAll, this::asTuple));
+    PureDBC<Iterable<Tuple2<Integer, String>>> program = For.with(PureDBC.monad())
+        .andThen(() -> update(createTable).kind1())
+        .andThen(() -> update(deleteAll).kind1())
+        .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), rs -> rs.getInt("id")).kind1())
+        .andThen(() -> updateWithKeys(insertRowWithKey.bind("pepe"), rs -> rs.getInt("id")).kind1())
+        .andThen(() -> query(findAll, this::asTuple).kind1())
+        .fix(PureDBC::narrowK);
 
     ImmutableList<Tuple2<Integer, String>> expected = listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe"));
 
