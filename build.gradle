@@ -47,3 +47,46 @@ dependencies {
   testCompile 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
   testCompile 'org.junit.platform:junit-platform-runner:1.5.2'
 }
+
+modifyPom {
+  project {
+    name 'PureDBC'
+    description 'Pure Functional Database Connection Layer'
+    url 'https://github.com/tonivade/puredbc'
+    inceptionYear '2020'
+
+    scm {
+      url 'https://github.com/tonivade/puredbc'
+      connection 'scm:https://github.com/tonivade/puredbc.git'
+      developerConnection 'scm:git://github.com/tonivade/puredbc.git'
+    }
+
+    licenses {
+      license {
+        name 'The MIT License (MIT)'
+        url 'https://github.com/tonivade/puredbc/blob/master/LICENSE'
+        distribution 'repo'
+      }
+    }
+
+    developers {
+      developer {
+        id 'tonivade'
+        name 'Antonio Muñoz'
+        email 'antoniogmc@gmail.com'
+      }
+    }
+  }
+}
+
+extraArchive {
+  sources = true
+  tests = false
+  javadoc = true
+}
+
+nexus {
+  sign = true
+  repositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+  snapshotRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
+}
