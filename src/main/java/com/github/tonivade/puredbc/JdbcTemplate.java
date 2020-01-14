@@ -41,11 +41,15 @@ class JdbcTemplate implements Recoverable {
     return _update(query, populateWith(params), optionExtractor(rowMapper));
   }
 
+  public <T> T query(String query, Sequence<?> params, Function1<ResultSet, T> rowMapper) {
+    return _query(query, populateWith(params), rowMapper);
+  }
+
   public <T> Option<T> queryOne(String query, Sequence<?> params, Function1<ResultSet, T> rowMapper) {
     return _query(query, populateWith(params), optionExtractor(rowMapper));
   }
 
-  public <T> Iterable<T> query(String query, Sequence<?> params, Function1<ResultSet, T> rowMapper) {
+  public <T> Iterable<T> queryIterable(String query, Sequence<?> params, Function1<ResultSet, T> rowMapper) {
     return _query(query, populateWith(params), iterableExtractor(rowMapper));
   }
 

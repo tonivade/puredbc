@@ -92,12 +92,16 @@ public final class PureDBC<T>  {
     return new PureDBC<>(new DSL.UpdateWithKeys<>(query, extractor));
   }
 
+  public static <T> PureDBC<T> query(SQL query, Function1<ResultSet, T> rowMapper) {
+    return new PureDBC<>(new DSL.Query<>(query, rowMapper));
+  }
+
   public static <T> PureDBC<Option<T>> queryOne(SQL query, Function1<ResultSet, T> rowMapper) {
     return new PureDBC<>(new DSL.QueryOne<>(query, rowMapper));
   }
 
-  public static <T> PureDBC<Iterable<T>> query(SQL query, Function1<ResultSet, T> rowMapper) {
-    return new PureDBC<>(new DSL.Query<>(query, rowMapper));
+  public static <T> PureDBC<Iterable<T>> queryIterable(SQL query, Function1<ResultSet, T> rowMapper) {
+    return new PureDBC<>(new DSL.QueryIterable<>(query, rowMapper));
   }
 
   public static Monad<PureDBC.µ> monad() {
@@ -153,16 +157,23 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<Id.µ, Iterable<T>> visit(DSL.Query<T> query) {
+    public <T> Higher1<Id.µ, T> visit(DSL.Query<T> query) {
+      Id<T> value =
+          Id.of(jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+      return value.kind1();
+    }
+
+    @Override
+    public <T> Higher1<Id.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
       Id<Iterable<T>> value =
-          Id.of(jdbc.query(query.getQuery(), query.getParams(), query.getRowMapper()));
+          Id.of(jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
       return value.kind1();
     }
 
     @Override
     public <T> Higher1<Id.µ, Option<T>> visit(DSL.QueryOne<T> query) {
       Id<Option<T>> value =
-          Id.of(jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
+          Id.of(jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
       return value.kind1();
     }
 
@@ -189,16 +200,23 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<Try.µ, Iterable<T>> visit(DSL.Query<T> query) {
+    public <T> Higher1<Try.µ, T> visit(DSL.Query<T> query) {
+      Try<T> value =
+          Try.of(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+      return value.kind1();
+    }
+
+    @Override
+    public <T> Higher1<Try.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
       Try<Iterable<T>> value =
-          Try.of(() -> jdbc.query(query.getQuery(), query.getParams(), query.getRowMapper()));
+          Try.of(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
       return value.kind1();
     }
 
     @Override
     public <T> Higher1<Try.µ, Option<T>> visit(DSL.QueryOne<T> query) {
       Try<Option<T>> value =
-          Try.of(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
+          Try.of(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
       return value.kind1();
     }
 
@@ -225,16 +243,23 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<UIO.µ, Iterable<T>> visit(DSL.Query<T> query) {
+    public <T> Higher1<UIO.µ, T> visit(DSL.Query<T> query) {
+      UIO<T> value =
+          UIO.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+      return value.kind1();
+    }
+
+    @Override
+    public <T> Higher1<UIO.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
       UIO<Iterable<T>> value =
-          UIO.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getRowMapper()));
+          UIO.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
       return value.kind1();
     }
 
     @Override
     public <T> Higher1<UIO.µ, Option<T>> visit(DSL.QueryOne<T> query) {
       UIO<Option<T>> value =
-          UIO.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
+          UIO.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
       return value.kind1();
     }
 
@@ -261,16 +286,23 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<Task.µ, Iterable<T>> visit(DSL.Query<T> query) {
+    public <T> Higher1<Task.µ, T> visit(DSL.Query<T> query) {
+      Task<T> value =
+          Task.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+      return value.kind1();
+    }
+
+    @Override
+    public <T> Higher1<Task.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
       Task<Iterable<T>> value =
-          Task.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getRowMapper()));
+          Task.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
       return value.kind1();
     }
 
     @Override
     public <T> Higher1<Task.µ, Option<T>> visit(DSL.QueryOne<T> query) {
       Task<Option<T>> value =
-          Task.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
+          Task.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
       return value.kind1();
     }
 
@@ -298,16 +330,23 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<Future.µ, Iterable<T>> visit(DSL.Query<T> query) {
+    public <T> Higher1<Future.µ, T> visit(DSL.Query<T> query) {
+      Future<T> value =
+          Future.async(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+      return value.kind1();
+    }
+
+    @Override
+    public <T> Higher1<Future.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
       Future<Iterable<T>> value =
-          Future.async(() -> jdbc.query(query.getQuery(), query.getParams(), query.getRowMapper()));
+          Future.async(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
       return value.kind1();
     }
 
     @Override
     public <T> Higher1<Future.µ, Option<T>> visit(DSL.QueryOne<T> query) {
       Future<Option<T>> value =
-          Future.async(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
+          Future.async(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
       return value.kind1();
     }
 

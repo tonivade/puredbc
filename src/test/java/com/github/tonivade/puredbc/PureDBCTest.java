@@ -24,7 +24,7 @@ import static com.github.tonivade.puredbc.SQL.insert;
 import static com.github.tonivade.puredbc.SQL.select;
 import static com.github.tonivade.puredbc.SQL.sql;
 import static com.github.tonivade.puredbc.SQL.update;
-import static com.github.tonivade.puredbc.PureDBC.query;
+import static com.github.tonivade.puredbc.PureDBC.queryIterable;
 import static com.github.tonivade.puredbc.PureDBC.queryOne;
 import static com.github.tonivade.puredbc.PureDBC.update;
 import static com.github.tonivade.purefun.data.Sequence.listOf;
@@ -54,7 +54,7 @@ public class PureDBCTest {
         .andThen(() -> update(deleteAll).kind1())
         .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), rs -> rs.getInt("id")).kind1())
         .andThen(() -> updateWithKeys(insertRowWithKey.bind("pepe"), rs -> rs.getInt("id")).kind1())
-        .andThen(() -> query(findAll, this::asTuple).kind1())
+        .andThen(() -> queryIterable(findAll, this::asTuple).kind1())
         .fix(PureDBC::narrowK);
 
     ImmutableList<Tuple2<Integer, String>> expected = listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe"));
@@ -69,7 +69,7 @@ public class PureDBCTest {
         .andThen(update(deleteAll))
         .andThen(update(insertRow.bind(1, "toni")))
         .andThen(update(insertRow.bind(2, "pepe")))
-        .andThen(query(findAll, this::asTuple));
+        .andThen(queryIterable(findAll, this::asTuple));
 
     ImmutableList<Tuple2<Integer, String>> expected = listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe"));
     assertAll(
@@ -98,6 +98,14 @@ public class PureDBCTest {
         () -> assertEquals(Try.success(expected), program.safeRunIO(dataSource()).safeRunSync()),
         () -> assertEquals(Try.success(expected), program.asyncRun(dataSource()).await())
     );
+  }
+
+  @Test
+  public void queryMetaData() {
+    PureDBC<Integer> program =
+        update(createTable).andThen(PureDBC.query(findAll, rs -> rs.getMetaData().getColumnCount()));
+
+    assertEquals(2, program.unsafeRun(dataSource()));
   }
 
   @Test
