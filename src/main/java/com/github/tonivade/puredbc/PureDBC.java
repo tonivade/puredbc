@@ -157,37 +157,28 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<Id.µ, T> visit(DSL.Query<T> query) {
-      Id<T> value =
-          Id.of(jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> Id<T> visit(DSL.Query<T> query) {
+      return Id.of(jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public <T> Higher1<Id.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      Id<Iterable<T>> value =
-          Id.of(jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> Id<Iterable<T>> visit(DSL.QueryIterable<T> query) {
+      return Id.of(jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public <T> Higher1<Id.µ, Option<T>> visit(DSL.QueryOne<T> query) {
-      Id<Option<T>> value =
-          Id.of(jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> Id<Option<T>> visit(DSL.QueryOne<T> query) {
+      return Id.of(jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public Higher1<Id.µ, Unit> visit(DSL.Update update) {
-      Id<Unit> value = Id.of(jdbc.update(update.getQuery(), update.getParams()));
-      return value.kind1();
+    public Id<Unit> visit(DSL.Update update) {
+      return Id.of(jdbc.update(update.getQuery(), update.getParams()));
     }
 
     @Override
-    public <T> Higher1<Id.µ, Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      Id<Option<T>> value =
-          Id.of(jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
-      return value.kind1();
+    public <T> Id<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
+      return Id.of(jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
     }
   }
 
@@ -200,37 +191,28 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<Try.µ, T> visit(DSL.Query<T> query) {
-      Try<T> value =
-          Try.of(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> Try<T> visit(DSL.Query<T> query) {
+      return Try.of(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public <T> Higher1<Try.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      Try<Iterable<T>> value =
-          Try.of(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> Try<Iterable<T>> visit(DSL.QueryIterable<T> query) {
+      return Try.of(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public <T> Higher1<Try.µ, Option<T>> visit(DSL.QueryOne<T> query) {
-      Try<Option<T>> value =
-          Try.of(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> Try<Option<T>> visit(DSL.QueryOne<T> query) {
+      return Try.of(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public Higher1<Try.µ, Unit> visit(DSL.Update update) {
-      Try<Unit> value = Try.of(() -> jdbc.update(update.getQuery(), update.getParams()));
-      return value.kind1();
+    public Try<Unit> visit(DSL.Update update) {
+      return Try.of(() -> jdbc.update(update.getQuery(), update.getParams()));
     }
 
     @Override
-    public <T> Higher1<Try.µ, Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      Try<Option<T>> value =
-          Try.of(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
-      return value.kind1();
+    public <T> Try<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
+      return Try.of(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
     }
   }
 
@@ -243,37 +225,28 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<UIO.µ, T> visit(DSL.Query<T> query) {
-      UIO<T> value =
-          UIO.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> UIO<T> visit(DSL.Query<T> query) {
+      return UIO.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public <T> Higher1<UIO.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      UIO<Iterable<T>> value =
-          UIO.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> UIO<Iterable<T>> visit(DSL.QueryIterable<T> query) {
+      return UIO.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public <T> Higher1<UIO.µ, Option<T>> visit(DSL.QueryOne<T> query) {
-      UIO<Option<T>> value =
-          UIO.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> UIO<Option<T>> visit(DSL.QueryOne<T> query) {
+      return UIO.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public Higher1<UIO.µ, Unit> visit(DSL.Update update) {
-      UIO<Unit> value = UIO.task(() -> jdbc.update(update.getQuery(), update.getParams()));
-      return value.kind1();
+    public UIO<Unit> visit(DSL.Update update) {
+      return UIO.task(() -> jdbc.update(update.getQuery(), update.getParams()));
     }
 
     @Override
-    public <T> Higher1<UIO.µ, Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      UIO<Option<T>> value =
-          UIO.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
-      return value.kind1();
+    public <T> UIO<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
+      return UIO.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
     }
   }
 
@@ -286,38 +259,28 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<Task.µ, T> visit(DSL.Query<T> query) {
-      Task<T> value =
-          Task.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> Task<T> visit(DSL.Query<T> query) {
+      return Task.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public <T> Higher1<Task.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      Task<Iterable<T>> value =
-          Task.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> Task<Iterable<T>> visit(DSL.QueryIterable<T> query) {
+      return Task.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public <T> Higher1<Task.µ, Option<T>> visit(DSL.QueryOne<T> query) {
-      Task<Option<T>> value =
-          Task.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> Task<Option<T>> visit(DSL.QueryOne<T> query) {
+      return Task.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public Higher1<Task.µ, Unit> visit(DSL.Update update) {
-      Task<Unit> value =
-          Task.task(() -> jdbc.update(update.getQuery(), update.getParams()));
-      return value.kind1();
+    public Task<Unit> visit(DSL.Update update) {
+      return Task.task(() -> jdbc.update(update.getQuery(), update.getParams()));
     }
 
     @Override
-    public <T> Higher1<Task.µ, Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      Task<Option<T>> value =
-          Task.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
-      return value.kind1();
+    public <T> Task<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
+      return Task.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
     }
   }
 
@@ -330,36 +293,28 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<Future.µ, T> visit(DSL.Query<T> query) {
-      Future<T> value =
-          Future.async(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> Future<T> visit(DSL.Query<T> query) {
+      return Future.async(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public <T> Higher1<Future.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      Future<Iterable<T>> value =
-          Future.async(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> Future<Iterable<T>> visit(DSL.QueryIterable<T> query) {
+      return Future.async(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public <T> Higher1<Future.µ, Option<T>> visit(DSL.QueryOne<T> query) {
-      Future<Option<T>> value =
-          Future.async(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
-      return value.kind1();
+    public <T> Future<Option<T>> visit(DSL.QueryOne<T> query) {
+      return Future.async(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
     }
 
     @Override
-    public Higher1<Future.µ, Unit> visit(DSL.Update update) {
-      Future<Unit> value = Future.async(() -> jdbc.update(update.getQuery(), update.getParams()));
-      return value.kind1();
+    public Future<Unit> visit(DSL.Update update) {
+      return Future.async(() -> jdbc.update(update.getQuery(), update.getParams()));
     }
 
     @Override
-    public <T> Higher1<Future.µ, Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      Future<Option<T>> value = Future.async(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
-      return value.kind1();
+    public <T> Future<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
+      return Future.async(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
     }
   }
 
