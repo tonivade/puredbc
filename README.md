@@ -35,11 +35,11 @@ Develop a comprehensible and easy to use API:
       .andThen(update(deleteAll))
       .andThen(update(insertRow.bind(1, "toni")))
       .andThen(update(insertRow.bind(2, "pepe")))
-      .andThen(query(findAll, this::asTuple));
+      .andThen(queryIterable(findAll, this::asTuple));
   
   assertEquals(
-      listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe")), 
-      program.unsafeRun(dataSource()))
+      listOf(Tuple.of(1, "toni"), Tu:ple.of(2, "pepe")), 
+      program.unsafeRun(dataSource));
 ```
 
 ## License
