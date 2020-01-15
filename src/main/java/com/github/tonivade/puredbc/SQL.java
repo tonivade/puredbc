@@ -61,6 +61,14 @@ public final class SQL {
     return new SQL4<>(query + " set " + f1 + "=?," + f2 + "=?," + f3 + "=?," + f4 + "=?");
   }
 
+  public <A, B, C, D, E> SQL5<A, B, C, D, E> set(String f1, String f2, String f3, String f4, String f5) {
+    return new SQL5<>(query + " set " + f1 + "=?," + f2 + "=?," + f3 + "=?," + f4 + "=?," + f5 + "=?");
+  }
+
+  public <A, B, C, D, E, F> SQL6<A, B, C, D, E, F> set(String f1, String f2, String f3, String f4, String f5, String f6) {
+    return new SQL6<>(query + " set " + f1 + "=?," + f2 + "=?," + f3 + "=?," + f4 + "=?," + f5 + "=?," + f6 + "=?");
+  }
+
   public <A> SQL1<A> values(String f1) {
     return new SQL1<>(query + " (" + f1 + ") values (?)");
   }
@@ -79,6 +87,10 @@ public final class SQL {
 
   public <A, B, C, D, E> SQL5<A, B, C, D, E> values(String f1, String f2, String f3, String f4, String f5) {
     return new SQL5<>(query + " (" + f1 + "," + f2 + "," + f3 + "," + f4 + "," + f5 + ") values (?,?,?,?,?)");
+  }
+
+  public <A, B, C, D, E, F> SQL6<A, B, C, D, E, F> values(String f1, String f2, String f3, String f4, String f5, String f6) {
+    return new SQL6<>(query + " (" + f1 + "," + f2 + "," + f3 + "," + f4 + "," + f5 + "," + f6 + ") values (?,?,?,?,?,?)");
   }
 
   public static SQL sql(String query, String... append) {

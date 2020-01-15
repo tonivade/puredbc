@@ -15,8 +15,8 @@ public final class SQL4<A, B, C, D> {
     this.query = requireNonNull(query);
   }
 
-  public SQL bind(A value1, B value2, C value3, D value4) {
-    return new SQL(query, arrayOf(value1, value2, value3, value4));
+  public SQL bind(A a, B b, C c, D d) {
+    return new SQL(query, arrayOf(a, b, c, d));
   }
 
   public <E> SQL5<A, B, C, D, E> and(String condition) {
@@ -33,6 +33,14 @@ public final class SQL4<A, B, C, D> {
 
   public SQL4<A, B, C, D> orderBy(String field) {
     return new SQL4<>(query + " order by " + field);
+  }
+
+  public SQL4<A, B, C, D> asc() {
+    return new SQL4<>(query + " asc");
+  }
+
+  public SQL4<A, B, C, D> desc() {
+    return new SQL4<>(query + " desc");
   }
 
   @Override

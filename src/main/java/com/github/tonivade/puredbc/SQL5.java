@@ -15,8 +15,16 @@ public final class SQL5<A, B, C, D, E> {
     this.query = requireNonNull(query);
   }
 
-  public SQL bind(A value1, B value2, C value3, D value4, E value5) {
-    return new SQL(query, arrayOf(value1, value2, value3, value4, value5));
+  public SQL bind(A a, B b, C c, D d, E e) {
+    return new SQL(query, arrayOf(a, b, c, d, e));
+  }
+
+  public <F> SQL6<A, B, C, D, E, F> and(String condition) {
+    return new SQL6<>(query + " and " + condition);
+  }
+
+  public <F> SQL6<A, B, C, D, E, F> where(String condition) {
+    return new SQL6<>(query + " where " + condition);
   }
 
   public SQL5<A, B, C, D, E> groupBy(String field) {
@@ -25,6 +33,14 @@ public final class SQL5<A, B, C, D, E> {
 
   public SQL5<A, B, C, D, E> orderBy(String field) {
     return new SQL5<>(query + " order by " + field);
+  }
+
+  public SQL5<A, B, C, D, E> asc() {
+    return new SQL5<>(query + " asc");
+  }
+
+  public SQL5<A, B, C, D, E> desc() {
+    return new SQL5<>(query + " desc");
   }
 
   @Override
