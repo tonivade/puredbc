@@ -22,7 +22,7 @@ Develop a comprehensible and easy to use API:
   // Query DSL
   SQL createTable = sql("create table if not exists test (id int primary key, name varchar(100))");
   SQL dropTable = sql("drop table if exists test");
-  SQL deleteAll = deleteFrom("test");
+  SQL deleteAll = delete("test");
   SQL1<Integer> deleteOne = delete("test").where("id = ?");
   SQL2<Integer, String> insertRow = insert("test").values("id", "name");
   SQL2<String, Integer> updateRow = update("test").<String>set("name").where("id = ?");
