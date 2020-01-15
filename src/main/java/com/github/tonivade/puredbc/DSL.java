@@ -21,11 +21,9 @@ import static java.util.Objects.requireNonNull;
 
 @Sealed
 @HigherKind
-public interface DSL<T> {
+interface DSL<T> {
 
   <F extends Kind> Higher1<F, T> accept(Visitor<F> visitor);
-
-  DSLModule getModule();
 
   interface Visitor<F extends Kind> {
     Higher1<F, Unit> visit(DSL.Update update);
@@ -50,8 +48,6 @@ public interface DSL<T> {
     public Sequence<?> getParams() { return query.getParams(); }
 
     public Function1<ResultSet, T> getExtractor() { return extractor; }
-
-    public DSLModule getModule() { throw new UnsupportedOperationException(); }
 
     @Override
     public String toString() { return query.toString(); }
@@ -142,5 +138,3 @@ public interface DSL<T> {
     }
   }
 }
-
-interface DSLModule { }
