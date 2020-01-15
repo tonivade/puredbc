@@ -34,10 +34,7 @@ public final class SQL {
 
   @Override
   public String toString() {
-    return "SQL{" +
-        "query='" + query + '\'' +
-        ", values=" + values +
-        '}';
+    return String.format("SQL{query='%s', values=%s}", query, values);
   }
 
   public SQL from(String table) {

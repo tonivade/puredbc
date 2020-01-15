@@ -37,8 +37,6 @@ public final class SQL3<A, B, C> {
 
   @Override
   public String toString() {
-    return "SQL3{" +
-        "query='" + query + '\'' +
-        '}';
+    return String.format("SQL3{query='%s'}", query);
   }
 }
