@@ -25,7 +25,7 @@ import static com.github.tonivade.purefun.Function1.cons;
 import static com.github.tonivade.purefun.Unit.unit;
 import static java.util.Objects.requireNonNull;
 
-class JdbcTemplate implements Recoverable {
+public class JdbcTemplate implements Recoverable {
 
   public final DataSource dataSource;
 

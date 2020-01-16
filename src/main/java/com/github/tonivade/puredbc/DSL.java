@@ -4,6 +4,7 @@
  */
 package com.github.tonivade.puredbc;
 
+import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Higher1;
 import com.github.tonivade.purefun.HigherKind;

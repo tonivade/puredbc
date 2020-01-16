@@ -4,6 +4,11 @@
  */
 package com.github.tonivade.puredbc;
 
+import com.github.tonivade.puredbc.sql.Field;
+import com.github.tonivade.puredbc.sql.SQL;
+import com.github.tonivade.puredbc.sql.SQL1;
+import com.github.tonivade.puredbc.sql.SQL2;
+import com.github.tonivade.puredbc.sql.Table2;
 import com.github.tonivade.purefun.Tuple;
 import com.github.tonivade.purefun.Tuple2;
 import com.github.tonivade.purefun.data.ImmutableList;
@@ -18,15 +23,15 @@ import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static com.github.tonivade.puredbc.PureDBC.updateWithKeys;
-import static com.github.tonivade.puredbc.SQL.delete;
-import static com.github.tonivade.puredbc.SQL.insert;
-import static com.github.tonivade.puredbc.SQL.select;
-import static com.github.tonivade.puredbc.SQL.sql;
-import static com.github.tonivade.puredbc.SQL.update;
 import static com.github.tonivade.puredbc.PureDBC.queryIterable;
 import static com.github.tonivade.puredbc.PureDBC.queryOne;
 import static com.github.tonivade.puredbc.PureDBC.update;
+import static com.github.tonivade.puredbc.PureDBC.updateWithKeys;
+import static com.github.tonivade.puredbc.sql.SQL.delete;
+import static com.github.tonivade.puredbc.sql.SQL.insert;
+import static com.github.tonivade.puredbc.sql.SQL.select;
+import static com.github.tonivade.puredbc.sql.SQL.update;
+import static com.github.tonivade.puredbc.sql.SQL.sql;
 import static com.github.tonivade.purefun.data.Sequence.listOf;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,17 +40,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PureDBCTest {
 
+  private static final TestTable TEST = new TestTable();
+
   private final SQL createTable = sql(
       "create table if not exists test",
       "(id identity primary key, name varchar(100))");
   private final SQL dropTable = sql("drop table if exists test");
-  private final SQL deleteAll = delete("test");
-  private final SQL1<Integer> deleteOne = delete("test").where("id = ?");
-  private final SQL1<String> insertRowWithKey = insert("test").values("name");
-  private final SQL2<Integer, String> insertRow = insert("test").values("id", "name");
-  private final SQL2<String, Integer> updateRow = update("test").<String>set("name").where("id = ?");
-  private final SQL findAll = select("id", "name").from("test");
-  private final SQL1<Integer> findOne = select("id", "name").from("test").where("id = ?");
+  private final SQL deleteAll = delete(TEST);
+  private final SQL1<Integer> deleteOne = delete(TEST).where(TEST.ID.eq());
+  private final SQL1<String> insertRowWithKey = insert(TEST).values(TEST.NAME);
+  private final SQL2<Integer, String> insertRow = insert(TEST).values(TEST.ID, TEST.NAME);
+  private final SQL2<String, Integer> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
+  private final SQL findAll = select(TEST.ID, TEST.NAME).from(TEST);
+  private final SQL1<Integer> findOne = select(TEST.ID, TEST.NAME).from(TEST).where(TEST.ID.eq());
 
   @Test
   public void getAllUpdateWithKeys() {
@@ -135,5 +142,16 @@ public class PureDBCTest {
 
   private Tuple2<Integer, String> asTuple(ResultSet rs) throws SQLException {
     return Tuple.of(rs.getInt("id"), rs.getString("name"));
+  }
+}
+
+final class TestTable implements Table2<Integer, String> {
+
+  public final Field<Integer> ID = Field.of("id");
+  public final Field<String> NAME = Field.of("name");
+
+  @Override
+  public String toString() {
+    return "test";
   }
 }

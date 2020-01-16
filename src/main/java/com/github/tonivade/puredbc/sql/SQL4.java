@@ -2,7 +2,7 @@
  * Copyright (c) 2020, Antonio Gabriel Muñoz Conejo <antoniogmc at gmail dot com>
  * Distributed under the terms of the MIT License
  */
-package com.github.tonivade.puredbc;
+package com.github.tonivade.puredbc.sql;
 
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
 import static java.util.Objects.requireNonNull;
@@ -19,19 +19,19 @@ public final class SQL4<A, B, C, D> {
     return new SQL(query, arrayOf(a, b, c, d));
   }
 
-  public <E> SQL5<A, B, C, D, E> and(String condition) {
+  public <E> SQL5<A, B, C, D, E> and(Condition<E> condition) {
     return new SQL5<>(query + " and " + condition);
   }
 
-  public <E> SQL5<A, B, C, D, E> where(String condition) {
+  public <E> SQL5<A, B, C, D, E> where(Condition<E> condition) {
     return new SQL5<>(query + " where " + condition);
   }
 
-  public SQL4<A, B, C, D> groupBy(String field) {
+  public <E> SQL4<A, B, C, D> groupBy(Field<E> field) {
     return new SQL4<>(query + " group by " + field);
   }
 
-  public SQL4<A, B, C, D> orderBy(String field) {
+  public <E> SQL4<A, B, C, D> orderBy(Field<E> field) {
     return new SQL4<>(query + " order by " + field);
   }
 
