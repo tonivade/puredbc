@@ -5,4 +5,5 @@
 package com.github.tonivade.puredbc.sql;
 
 public interface Table {
+  String name();
 }

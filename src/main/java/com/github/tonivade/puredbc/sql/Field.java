@@ -4,7 +4,23 @@
  */
 package com.github.tonivade.puredbc.sql;
 
+import static java.util.Objects.requireNonNull;
+
 public interface Field<T> {
+
+  String name();
+
+  default Field<T> count() {
+    return of("count(" + name() + ")");
+  }
+
+  default Field<T> as(String alias) {
+    return of(name() + " as " + alias);
+  }
+
+  default Field<T> alias(String alias) {
+    return of(requireNonNull(alias) + "." + name());
+  }
 
   default Condition<T> eq() {
     return Condition.eq(this);
@@ -30,16 +46,7 @@ public interface Field<T> {
     return Condition.lte(this);
   }
 
-  default Condition<T> between() {
-    return Condition.between(this);
-  }
-
   static <T> Field<T> of(String name) {
-    return new Field<T>() {
-      @Override
-      public String toString() {
-        return name;
-      }
-    };
+    return () -> name;
   }
 }

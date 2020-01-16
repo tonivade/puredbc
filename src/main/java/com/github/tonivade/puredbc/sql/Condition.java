@@ -7,31 +7,27 @@ package com.github.tonivade.puredbc.sql;
 public interface Condition<T> {
 
   static <T> Condition<T> eq(Field<T> field) {
-    return of(field + " = ?");
+    return of(field.name() + " = ?");
   }
 
   static <T> Condition<T> notEq(Field<T> field) {
-    return of(field + " <> ?");
+    return of(field.name() + " <> ?");
   }
 
   static <T> Condition<T> lt(Field<T> field) {
-    return of(field + " < ?");
+    return of(field.name() + " < ?");
   }
 
   static <T> Condition<T> lte(Field<T> field) {
-    return of(field + " <= ?");
+    return of(field.name() + " <= ?");
   }
 
   static <T> Condition<T> gt(Field<T> field) {
-    return of(field + " > ?");
+    return of(field.name() + " > ?");
   }
 
   static <T> Condition<T> gte(Field<T> field) {
-    return of(field + " >= ?");
-  }
-
-  static <T> Condition<T> between(Field<T> field) {
-    return of(field + " between ?");
+    return of(field.name() + " >= ?");
   }
 
   static <T> Condition<T> of(String condition) {
