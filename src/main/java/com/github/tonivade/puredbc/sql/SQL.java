@@ -4,6 +4,7 @@
  */
 package com.github.tonivade.puredbc.sql;
 
+import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Sequence;
 
 import static com.github.tonivade.purefun.Function1.cons;
@@ -98,8 +99,12 @@ public final class SQL {
     return new SQL(arrayOf(line).appendAll(arrayOf(lines)).join(" "));
   }
 
-  public static SQL select(Field<?>... fields) {
-    return sql(arrayOf(fields).map(Field::name).join(",", "select ", " "));
+  public static SQL select(Field<?> field, Field<?>... fields) {
+    return select(NonEmptyList.of(field, fields));
+  }
+
+  public static SQL select(NonEmptyList<Field<?>> fields) {
+    return sql(fields.map(Field::name).join(",", "select ", " "));
   }
 
   public static SQL insert(Table table) {

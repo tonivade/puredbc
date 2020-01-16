@@ -12,6 +12,8 @@ import com.github.tonivade.puredbc.sql.Table2;
 import com.github.tonivade.purefun.Tuple;
 import com.github.tonivade.purefun.Tuple2;
 import com.github.tonivade.purefun.data.ImmutableList;
+import com.github.tonivade.purefun.data.NonEmptyList;
+import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
 import com.github.tonivade.purefun.typeclasses.For;
@@ -32,6 +34,7 @@ import static com.github.tonivade.puredbc.sql.SQL.insert;
 import static com.github.tonivade.puredbc.sql.SQL.select;
 import static com.github.tonivade.puredbc.sql.SQL.update;
 import static com.github.tonivade.puredbc.sql.SQL.sql;
+import static com.github.tonivade.purefun.data.Sequence.arrayOf;
 import static com.github.tonivade.purefun.data.Sequence.listOf;
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -56,7 +59,7 @@ public class PureDBCTest {
   private final SQL1<String> insertRowWithKey = insert(TEST).values(TEST.NAME);
   private final SQL2<Integer, String> insertRow = insert(TEST).values(TEST.ID, TEST.NAME);
   private final SQL2<String, Integer> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
-  private final SQL findAll = select(ALIAS.ID, ALIAS.NAME).from(ALIAS);
+  private final SQL findAll = select(ALIAS.all()).from(ALIAS);
   private final SQL count = select(TEST.ID.count().as("elements")).from(TEST);
   private final SQL1<Integer> findOne = select(TEST.ID, TEST.NAME).from(TEST).where(TEST.ID.eq());
 
@@ -182,6 +185,11 @@ final class TestTable implements Table2<Integer, String> {
   @Override
   public String name() {
     return name;
+  }
+
+  @Override
+  public NonEmptyList<Field<?>> all() {
+    return NonEmptyList.of(ID, NAME);
   }
 
   public TestTable as(String alias) {
