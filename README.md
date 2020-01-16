@@ -20,14 +20,18 @@ Develop a comprehensible and easy to use API:
 
 ```java
   // Query DSL
-  SQL createTable = sql("create table if not exists test (id int primary key, name varchar(100))");
+  SQL createTable = sql(
+      "create table if not exists test(",
+      "id identity primary key,",
+      "name varchar(100))");
   SQL dropTable = sql("drop table if exists test");
-  SQL deleteAll = delete("test");
-  SQL1<Integer> deleteOne = delete("test").where("id = ?");
-  SQL2<Integer, String> insertRow = insert("test").values("id", "name");
-  SQL2<String, Integer> updateRow = update("test").<String>set("name").where("id = ?");
-  SQL findAll = select("id", "name").from("test");
-  SQL1<Integer> findOne = select("id", "name").from("test").where("id = ?");
+  SQL deleteAll = delete(TEST);
+  SQL1<Integer> deleteOne = delete(TEST).where(TEST.ID.eq());
+  SQL1<String> insertRowWithKey = insert(TEST).values(TEST.NAME);
+  SQL2<Integer, String> insertRow = insert(TEST).values(TEST.ID, TEST.NAME);
+  SQL2<String, Integer> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
+  SQL findAll = select(TEST.ID, TEST.NAME).from(TEST);
+  SQL1<Integer> findOne = select(TEST.ID, TEST.NAME).from(TEST).where(TEST.ID.eq());
   
   // PureDBC DSL
   PureDBC<Iterable<Tuple2<Integer, String>>> program =

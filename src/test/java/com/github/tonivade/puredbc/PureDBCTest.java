@@ -43,8 +43,9 @@ public class PureDBCTest {
   private static final TestTable TEST = new TestTable();
 
   private final SQL createTable = sql(
-      "create table if not exists test",
-      "(id identity primary key, name varchar(100))");
+      "create table if not exists test(",
+      "id identity primary key,",
+      "name varchar(100))");
   private final SQL dropTable = sql("drop table if exists test");
   private final SQL deleteAll = delete(TEST);
   private final SQL1<Integer> deleteOne = delete(TEST).where(TEST.ID.eq());
@@ -53,6 +54,8 @@ public class PureDBCTest {
   private final SQL2<String, Integer> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
   private final SQL findAll = select(TEST.ID, TEST.NAME).from(TEST);
   private final SQL1<Integer> findOne = select(TEST.ID, TEST.NAME).from(TEST).where(TEST.ID.eq());
+
+  private final DataSource dataSource = dataSource();
 
   @Test
   public void getAllUpdateWithKeys() {
@@ -66,7 +69,7 @@ public class PureDBCTest {
 
     ImmutableList<Tuple2<Integer, String>> expected = listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe"));
 
-    assertEquals(expected, program.unsafeRun(dataSource()));
+    assertEquals(expected, program.unsafeRun(dataSource));
   }
 
   @Test
@@ -80,11 +83,11 @@ public class PureDBCTest {
 
     ImmutableList<Tuple2<Integer, String>> expected = listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe"));
     assertAll(
-        () -> assertEquals(expected, program.unsafeRun(dataSource())),
-        () -> assertEquals(Try.success(expected), program.safeRun(dataSource())),
-        () -> assertEquals(expected, program.unsafeRunIO(dataSource()).unsafeRunSync()),
-        () -> assertEquals(Try.success(expected), program.safeRunIO(dataSource()).safeRunSync()),
-        () -> assertEquals(Try.success(expected), program.asyncRun(dataSource()).await())
+        () -> assertEquals(expected, program.unsafeRun(dataSource)),
+        () -> assertEquals(Try.success(expected), program.safeRun(dataSource)),
+        () -> assertEquals(expected, program.unsafeRunIO(dataSource).unsafeRunSync()),
+        () -> assertEquals(Try.success(expected), program.safeRunIO(dataSource).safeRunSync()),
+        () -> assertEquals(Try.success(expected), program.asyncRun(dataSource).await())
     );
   }
 
@@ -99,11 +102,11 @@ public class PureDBCTest {
 
     Option<Tuple2<Integer, String>> expected = Option.some(Tuple.of(1, "pepe"));
     assertAll(
-        () -> assertEquals(expected, program.unsafeRun(dataSource())),
-        () -> assertEquals(Try.success(expected), program.safeRun(dataSource())),
-        () -> assertEquals(expected, program.unsafeRunIO(dataSource()).unsafeRunSync()),
-        () -> assertEquals(Try.success(expected), program.safeRunIO(dataSource()).safeRunSync()),
-        () -> assertEquals(Try.success(expected), program.asyncRun(dataSource()).await())
+        () -> assertEquals(expected, program.unsafeRun(dataSource)),
+        () -> assertEquals(Try.success(expected), program.safeRun(dataSource)),
+        () -> assertEquals(expected, program.unsafeRunIO(dataSource).unsafeRunSync()),
+        () -> assertEquals(Try.success(expected), program.safeRunIO(dataSource).safeRunSync()),
+        () -> assertEquals(Try.success(expected), program.asyncRun(dataSource).await())
     );
   }
 
@@ -124,11 +127,11 @@ public class PureDBCTest {
             .andThen(queryOne(findOne.bind(1), this::asTuple));
 
     assertAll(
-        () -> assertThrows(SQLException.class, () -> program.unsafeRun(dataSource())),
-        () -> assertTrue(program.safeRun(dataSource()).isFailure()),
-        () -> assertThrows(SQLException.class, () -> program.unsafeRunIO(dataSource()).unsafeRunSync()),
-        () -> assertTrue(program.safeRunIO(dataSource()).safeRunSync().isFailure()),
-        () -> assertTrue(program.asyncRun(dataSource()).await().isFailure())
+        () -> assertThrows(SQLException.class, () -> program.unsafeRun(dataSource)),
+        () -> assertTrue(program.safeRun(dataSource).isFailure()),
+        () -> assertThrows(SQLException.class, () -> program.unsafeRunIO(dataSource).unsafeRunSync()),
+        () -> assertTrue(program.safeRunIO(dataSource).safeRunSync().isFailure()),
+        () -> assertTrue(program.asyncRun(dataSource).await().isFailure())
     );
   }
 
