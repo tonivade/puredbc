@@ -44,7 +44,7 @@ public final class SQL {
   }
 
   public <T> SQL1<T> where(Condition<T> condition) {
-    return new SQL1<>(query + " where " + condition);
+    return new SQL1<>(query + " where " + condition.expression());
   }
 
   public <A> SQL1<A> set(Field<A> f1) {

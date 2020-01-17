@@ -4,7 +4,15 @@
  */
 package com.github.tonivade.puredbc.sql;
 
+import com.github.tonivade.purefun.Equal;
+
+import java.util.Objects;
+
+import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
+
 public interface Condition<T> {
+
+  String expression();
 
   static <T> Condition<T> eq(Field<T> field) {
     return of(field.name() + " = ?");
@@ -31,11 +39,37 @@ public interface Condition<T> {
   }
 
   static <T> Condition<T> of(String condition) {
-    return new Condition<T>() {
-      @Override
-      public String toString() {
-        return condition;
-      }
-    };
+    return requireNonEmpty(condition).<Condition<T>>map(ConditionImpl::new).getOrElseThrow();
+  }
+}
+
+final class ConditionImpl<T> implements Condition<T> {
+
+  private static final Equal<Condition<?>> EQUAL = Equal.<Condition<?>>of().comparing(Condition::expression);
+
+  private final String expression;
+
+  ConditionImpl(String expression) {
+    this.expression = expression;
+  }
+
+  @Override
+  public String expression() {
+    return expression;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EQUAL.applyTo(this, obj);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(expression);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Condition{expression='%s'}", expression);
   }
 }

@@ -4,6 +4,11 @@
  */
 package com.github.tonivade.puredbc.sql;
 
+import com.github.tonivade.purefun.Equal;
+
+import java.util.Objects;
+
+import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
 import static java.util.Objects.requireNonNull;
 
 public interface Field<T> {
@@ -12,6 +17,14 @@ public interface Field<T> {
 
   default Field<T> count() {
     return of("count(" + name() + ")");
+  }
+
+  default Field<T> min() {
+    return of("min(" + name() + ")");
+  }
+
+  default Field<T> max() {
+    return of("min(" + name() + ")");
   }
 
   default Field<T> as(String alias) {
@@ -47,6 +60,37 @@ public interface Field<T> {
   }
 
   static <T> Field<T> of(String name) {
-    return () -> name;
+    return requireNonEmpty(name).<Field<T>>map(FieldImpl::new).getOrElseThrow();
+  }
+}
+
+final class FieldImpl<T> implements Field<T> {
+
+  private static final Equal<Field<?>> EQUAL = Equal.<Field<?>>of().comparing(Field::name);
+
+  private final String name;
+
+  FieldImpl(String name) {
+    this.name = name;
+  }
+
+  @Override
+  public String name() {
+    return name;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return EQUAL.applyTo(this, obj);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("Field{name='%s'}", name);
   }
 }

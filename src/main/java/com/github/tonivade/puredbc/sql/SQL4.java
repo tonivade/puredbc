@@ -20,11 +20,11 @@ public final class SQL4<A, B, C, D> {
   }
 
   public <E> SQL5<A, B, C, D, E> and(Condition<E> condition) {
-    return new SQL5<>(query + " and " + condition);
+    return new SQL5<>(query + " and " + condition.expression());
   }
 
   public <E> SQL5<A, B, C, D, E> where(Condition<E> condition) {
-    return new SQL5<>(query + " where " + condition);
+    return new SQL5<>(query + " where " + condition.expression());
   }
 
   public <E> SQL4<A, B, C, D> groupBy(Field<E> field) {
