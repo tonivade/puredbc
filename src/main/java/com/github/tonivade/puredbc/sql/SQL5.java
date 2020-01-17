@@ -19,14 +19,6 @@ public final class SQL5<A, B, C, D, E> {
     return new SQL(query, arrayOf(a, b, c, d, e));
   }
 
-  public <F> SQL6<A, B, C, D, E, F> and(Condition<F> condition) {
-    return new SQL6<>(query + " and " + condition);
-  }
-
-  public <F> SQL6<A, B, C, D, E, F> where(Condition<F> condition) {
-    return new SQL6<>(query + " where " + condition);
-  }
-
   public <F> SQL5<A, B, C, D, E> groupBy(Field<F> field) {
     return new SQL5<>(query + " group by " + field.name());
   }

@@ -5,7 +5,6 @@
 package com.github.tonivade.puredbc.sql;
 
 import com.github.tonivade.purefun.data.NonEmptyList;
-import com.github.tonivade.purefun.data.Sequence;
 
 public interface Table {
   NonEmptyList<Field<?>> all();

@@ -67,10 +67,6 @@ public final class SQL {
     return new SQL5<>(query + set(arrayOf(a, b, c, d, e)));
   }
 
-  public <A, B, C, D, E, F> SQL6<A, B, C, D, E, F> set(Field<A> a, Field<B> b, Field<C> c, Field<D> d, Field<E> e, Field<F> f) {
-    return new SQL6<>(query + set(arrayOf(a, b, c, d, e, f)));
-  }
-
   public <A> SQL1<A> values(Field<A> f1) {
     return new SQL1<>(query + values(arrayOf(f1)));
   }
@@ -89,10 +85,6 @@ public final class SQL {
 
   public <A, B, C, D, E> SQL5<A, B, C, D, E> values(Field<A> a, Field<B> b, Field<C> c, Field<D> d, Field<E> e) {
     return new SQL5<>(query + values(arrayOf(a, b, c, d, e)));
-  }
-
-  public <A, B, C, D, E, F> SQL6<A, B, C, D, E, F> values(Field<A> a, Field<B> b, Field<C> c, Field<D> d, Field<E> e, Field<F> f) {
-    return new SQL6<>(query + values(arrayOf(a, b, c, d, e, f)));
   }
 
   public static SQL sql(String line, String... lines) {
