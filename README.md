@@ -19,6 +19,9 @@ Develop a comprehensible and easy to use API:
 ## Example
 
 ```java
+  // Table instance
+  Test TEST = new Test();
+  
   // Query DSL
   SQL createTable = sql(
       "create table if not exists test(",
@@ -31,6 +34,7 @@ Develop a comprehensible and easy to use API:
   SQL2<Integer, String> insertRow = insert(TEST).values(TEST.ID, TEST.NAME);
   SQL2<String, Integer> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
   SQL findAll = select(TEST.ID, TEST.NAME).from(TEST);
+  SQL count = select(TEST.ID.count().as("elements")).from(TEST);
   SQL1<Integer> findOne = select(TEST.ID, TEST.NAME).from(TEST).where(TEST.ID.eq());
   
   // PureDBC DSL
