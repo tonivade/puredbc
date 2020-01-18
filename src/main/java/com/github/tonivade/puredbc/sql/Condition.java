@@ -46,6 +46,14 @@ public interface Condition<T> {
     return of(field.name() + " >= ?");
   }
 
+  static <T> Condition<T> isNull(Field<T> field) {
+    return of(field.name() + " is null");
+  }
+
+  static <T> Condition<T> isNotNull(Field<T> field) {
+    return of(field.name() + " is not null");
+  }
+
   static <T> Condition<T> of(String condition) {
     return requireNonEmpty(condition).<Condition<T>>map(ConditionImpl::new).getOrElseThrow();
   }

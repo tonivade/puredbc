@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import static com.github.tonivade.puredbc.sql.Condition.eq;
 import static com.github.tonivade.puredbc.sql.Condition.gt;
 import static com.github.tonivade.puredbc.sql.Condition.gte;
+import static com.github.tonivade.puredbc.sql.Condition.isNotNull;
+import static com.github.tonivade.puredbc.sql.Condition.isNull;
 import static com.github.tonivade.puredbc.sql.Condition.like;
 import static com.github.tonivade.puredbc.sql.Condition.lt;
 import static com.github.tonivade.puredbc.sql.Condition.lte;
@@ -36,6 +38,8 @@ class ConditionTest {
         () -> assertEquals("name >= ?", gte(name).expression()),
         () -> assertEquals("name <= ?", lte(name).expression()),
         () -> assertEquals("name like ?", like(name).expression()),
+        () -> assertEquals("name is null", isNull(name).expression()),
+        () -> assertEquals("name is not null", isNotNull(name).expression()),
         () -> assertEquals("name <> ?", notEq(name).expression())
     );
   }

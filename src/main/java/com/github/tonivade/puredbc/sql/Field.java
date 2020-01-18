@@ -75,6 +75,14 @@ public interface Field<T> {
     return Condition.lte(this);
   }
 
+  default Condition<T> isNull() {
+    return Condition.isNull(this);
+  }
+
+  default Condition<T> isNotNull() {
+    return Condition.isNotNull(this);
+  }
+
   static <T> Field<T> of(String name) {
     return requireNonEmpty(name).<Field<T>>map(FieldImpl::new).getOrElseThrow();
   }

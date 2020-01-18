@@ -34,6 +34,8 @@ class FieldTest {
         () -> assertEquals(Condition.gte(field), field.gte()),
         () -> assertEquals(Condition.lte(field), field.lte()),
         () -> assertEquals(Condition.like(field), field.like()),
+        () -> assertEquals(Condition.isNull(field), field.isNull()),
+        () -> assertEquals(Condition.isNotNull(field), field.isNotNull()),
         () -> assertEquals(Condition.notEq(field), field.notEq())
     );
   }
