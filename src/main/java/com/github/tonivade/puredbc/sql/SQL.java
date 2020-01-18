@@ -67,6 +67,14 @@ public final class SQL {
     return new SQL1<>(query + " where " + condition.expression());
   }
 
+  public SQL limit(int limit) {
+    return sql(query + " limit " + limit);
+  }
+
+  public SQL offset(int offset) {
+    return sql(query + " offset " + offset);
+  }
+
   public <A> SQL1<A> set(Field<A> f1) {
     return new SQL1<>(query + set(arrayOf(f1)));
   }

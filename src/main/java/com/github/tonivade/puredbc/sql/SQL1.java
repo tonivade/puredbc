@@ -43,6 +43,14 @@ public final class SQL1<A> {
     return new SQL1<>(query + " desc");
   }
 
+  public SQL1<A> limit(int limit) {
+    return new SQL1<>(query + " limit " + limit);
+  }
+
+  public SQL1<A> offset(int offset) {
+    return new SQL1<>(query + " offset " + offset);
+  }
+
   @Override
   public String toString() {
     return String.format("SQL1{query='%s'}", query);

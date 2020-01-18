@@ -35,6 +35,14 @@ public final class SQL5<A, B, C, D, E> {
     return new SQL5<>(query + " desc");
   }
 
+  public SQL5<A, B, C, D, E> limit(int limit) {
+    return new SQL5<>(query + " limit " + limit);
+  }
+
+  public SQL5<A, B, C, D, E> offset(int offset) {
+    return new SQL5<>(query + " offset " + offset);
+  }
+
   @Override
   public String toString() {
     return String.format("SQL5{query='%s'}", query);
