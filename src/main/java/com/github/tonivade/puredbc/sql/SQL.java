@@ -39,8 +39,28 @@ public final class SQL {
     return String.format("SQL{query='%s', values=%s}", query, values);
   }
 
-  public SQL from(Table table) {
-    return sql(query + " from " + table.name());
+  public SQL from(Table table, Table... tables) {
+    return sql(query + " from " + NonEmptyList.of(table, tables).map(Table::name).join(","));
+  }
+
+  public SQL innerJoin(Table table) {
+    return sql(query + " inner join " + table.name());
+  }
+
+  public SQL leftJoin(Table table) {
+    return sql(query + " left join " + table.name());
+  }
+
+  public SQL rightJoin(Table table) {
+    return sql(query + " right join " + table.name());
+  }
+
+  public SQL fullJoin(Table table) {
+    return sql(query + " full join " + table.name());
+  }
+
+  public <T> SQL on(Field<T> from, Field<T> to) {
+    return sql(query + " on " + from.name() + " = " + to.name());
   }
 
   public <T> SQL1<T> where(Condition<T> condition) {
@@ -112,7 +132,8 @@ public final class SQL {
   }
 
   private String values(Sequence<Field<?>> values) {
-    return values.map(Field::name).join(",", " (", values.map(cons("?")).join(",", ") values (", ")"));
+    String suffix = values.map(cons("?")).join(",", ") values (", ")");
+    return values.map(Field::name).join(",", " (", suffix);
   }
 
   private String set(Sequence<Field<?>> values) {

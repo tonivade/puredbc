@@ -24,7 +24,15 @@ public interface Field<T> {
   }
 
   default Field<T> max() {
-    return of("min(" + name() + ")");
+    return of("max(" + name() + ")");
+  }
+
+  default Field<T> sum() {
+    return of("sum(" + name() + ")");
+  }
+
+  default Field<T> coalesce(int value) {
+    return of("coalesce(" + name() + ", " + value + ")");
   }
 
   default Field<T> as(String alias) {
@@ -37,6 +45,14 @@ public interface Field<T> {
 
   default Condition<T> eq() {
     return Condition.eq(this);
+  }
+
+  default Condition<T> eq(Field<T> other) {
+    return Condition.eq(this, other);
+  }
+
+  default Condition<T> like() {
+    return Condition.like(this);
   }
 
   default Condition<T> notEq() {

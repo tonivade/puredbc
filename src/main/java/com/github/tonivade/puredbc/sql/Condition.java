@@ -18,6 +18,14 @@ public interface Condition<T> {
     return of(field.name() + " = ?");
   }
 
+  static <T> Condition<T> eq(Field<T> field1, Field<T> field2) {
+    return of(field1.name() + " = " + field2.name());
+  }
+
+  static <T> Condition<T> like(Field<T> field) {
+    return of(field.name() + " like ?");
+  }
+
   static <T> Condition<T> notEq(Field<T> field) {
     return of(field.name() + " <> ?");
   }
