@@ -14,6 +14,10 @@ public interface Condition<T> {
 
   String expression();
 
+  default Condition<T> not() {
+    return of("not " + expression());
+  }
+
   static <T> Condition<T> eq(Field<T> field) {
     return of(field.name() + " = ?");
   }

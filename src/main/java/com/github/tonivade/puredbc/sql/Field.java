@@ -31,6 +31,10 @@ public interface Field<T> {
     return of("sum(" + name() + ")");
   }
 
+  default Field<T> avg() {
+    return of("avg(" + name() + ")");
+  }
+
   default Field<T> coalesce(int value) {
     return of("coalesce(" + name() + ", " + value + ")");
   }

@@ -32,6 +32,7 @@ class ConditionTest {
         () -> assertEquals("name as a", name.as("a").name()),
         () -> assertEquals("a.name", name.alias("a").name()),
         () -> assertEquals("name = ?", eq(name).expression()),
+        () -> assertEquals("not name = ?", eq(name).not().expression()),
         () -> assertEquals("name = other", eq(name, other).expression()),
         () -> assertEquals("name > ?", gt(name).expression()),
         () -> assertEquals("name < ?", lt(name).expression()),

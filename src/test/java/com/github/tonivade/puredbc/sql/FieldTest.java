@@ -26,6 +26,7 @@ class FieldTest {
         () -> assertEquals("sum(name)", field.sum().name()),
         () -> assertEquals("max(name)", field.max().name()),
         () -> assertEquals("min(name)", field.min().name()),
+        () -> assertEquals("avg(name)", field.avg().name()),
         () -> assertEquals("coalesce(name, 1)", field.coalesce(1).name()),
         () -> assertEquals(Condition.eq(field), field.eq()),
         () -> assertEquals(Condition.eq(field, other), field.eq(other)),
