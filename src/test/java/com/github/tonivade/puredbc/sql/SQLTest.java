@@ -1,10 +1,18 @@
+/*
+ * Copyright (c) 2020, Antonio Gabriel Muñoz Conejo <antoniogmc at gmail dot com>
+ * Distributed under the terms of the MIT License
+ */
 package com.github.tonivade.puredbc.sql;
 
 import com.github.tonivade.purefun.data.NonEmptyList;
 import org.junit.jupiter.api.Test;
 
-import static com.github.tonivade.puredbc.sql.SQL.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.github.tonivade.puredbc.sql.SQL.delete;
+import static com.github.tonivade.puredbc.sql.SQL.insert;
+import static com.github.tonivade.puredbc.sql.SQL.select;
+import static com.github.tonivade.puredbc.sql.SQL.update;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SQLTest {
 

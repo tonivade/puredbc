@@ -5,6 +5,7 @@
 package com.github.tonivade.puredbc;
 
 import com.github.tonivade.puredbc.sql.Field;
+import com.github.tonivade.puredbc.sql.Row;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.puredbc.sql.SQL1;
 import com.github.tonivade.puredbc.sql.SQL2;
@@ -21,7 +22,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static com.github.tonivade.puredbc.PureDBC.queryIterable;
@@ -66,8 +66,8 @@ class PureDBCTest {
     PureDBC<Iterable<Tuple2<Integer, String>>> program = For.with(PureDBC.monad())
         .andThen(() -> update(createTable).kind1())
         .andThen(() -> update(deleteAll).kind1())
-        .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), rs -> rs.getInt("id")).kind1())
-        .andThen(() -> updateWithKeys(insertRowWithKey.bind("pepe"), rs -> rs.getInt("id")).kind1())
+        .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), row -> row.getInteger(TEST.ID)).kind1())
+        .andThen(() -> updateWithKeys(insertRowWithKey.bind("pepe"), row -> row.getInteger(TEST.ID)).kind1())
         .andThen(() -> queryIterable(findAll, TEST::asTuple).kind1())
         .fix(PureDBC::narrowK);
 
@@ -90,15 +90,15 @@ class PureDBCTest {
 
   @Test
   void count() {
-    PureDBC<Option<Integer>> program =
+    PureDBC<Integer> program =
       update(createTable)
         .andThen(update(deleteAll))
         .andThen(update(insertRow.bind(1, "toni")))
         .andThen(update(insertRow.bind(2, "pepe")))
         .andThen(update(insertRow.bind(3, "paco")))
-        .andThen(queryOne(count, rs -> rs.getInt("elements")));
+        .andThen(PureDBC.query(count, rs -> rs.next() ? rs.getInt("elements") : 0));
 
-    assertProgram(program, Option.some(3));
+    assertProgram(program, 3);
   }
 
   @Test
@@ -194,7 +194,7 @@ final class TestTable implements Table2<Integer, String> {
     return new TestTable(this, requireNonNull(alias));
   }
 
-  public Tuple2<Integer, String> asTuple(ResultSet rs) throws SQLException {
-    return Tuple.of(rs.getInt(ID.name()), rs.getString(NAME.name()));
+  public Tuple2<Integer, String> asTuple(Row row) throws SQLException {
+    return Tuple.of(row.getInteger(ID), row.getString(NAME));
   }
 }

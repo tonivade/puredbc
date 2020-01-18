@@ -6,9 +6,8 @@ package com.github.tonivade.puredbc.sql;
 
 import com.github.tonivade.purefun.Tuple3;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public interface Table3<A, B, C> extends Table {
-  Tuple3<A, B, C> asTuple(ResultSet rs) throws SQLException;
+  Tuple3<A, B, C> asTuple(Row row) throws SQLException;
 }

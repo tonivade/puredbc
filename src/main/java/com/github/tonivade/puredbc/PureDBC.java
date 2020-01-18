@@ -4,6 +4,7 @@
  */
 package com.github.tonivade.puredbc;
 
+import com.github.tonivade.puredbc.sql.Row;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Higher1;
@@ -89,7 +90,7 @@ public final class PureDBC<T>  {
     return new PureDBC<>(new DSL.Update(query));
   }
 
-  public static <T> PureDBC<Option<T>> updateWithKeys(SQL query, Function1<ResultSet, T> extractor) {
+  public static <T> PureDBC<Option<T>> updateWithKeys(SQL query, Function1<Row, T> extractor) {
     return new PureDBC<>(new DSL.UpdateWithKeys<>(query, extractor));
   }
 
@@ -97,11 +98,11 @@ public final class PureDBC<T>  {
     return new PureDBC<>(new DSL.Query<>(query, rowMapper));
   }
 
-  public static <T> PureDBC<Option<T>> queryOne(SQL query, Function1<ResultSet, T> rowMapper) {
+  public static <T> PureDBC<Option<T>> queryOne(SQL query, Function1<Row, T> rowMapper) {
     return new PureDBC<>(new DSL.QueryOne<>(query, rowMapper));
   }
 
-  public static <T> PureDBC<Iterable<T>> queryIterable(SQL query, Function1<ResultSet, T> rowMapper) {
+  public static <T> PureDBC<Iterable<T>> queryIterable(SQL query, Function1<Row, T> rowMapper) {
     return new PureDBC<>(new DSL.QueryIterable<>(query, rowMapper));
   }
 
