@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class PureDBCTest {
+class PureDBCTest {
 
   private static final TestTable TEST = new TestTable();
   private static final TestTable ALIAS = TEST.as("a");
@@ -62,7 +62,7 @@ public class PureDBCTest {
   private final SQL1<Integer> findOne = select(TEST.ID, TEST.NAME).from(TEST).where(TEST.ID.eq());
 
   @Test
-  public void getAllUpdateWithKeys() {
+  void getAllUpdateWithKeys() {
     PureDBC<Iterable<Tuple2<Integer, String>>> program = For.with(PureDBC.monad())
         .andThen(() -> update(createTable).kind1())
         .andThen(() -> update(deleteAll).kind1())
@@ -77,7 +77,7 @@ public class PureDBCTest {
   }
 
   @Test
-  public void queryAll() {
+  void queryAll() {
     PureDBC<Iterable<Tuple2<Integer, String>>> program =
         update(createTable)
             .andThen(update(deleteAll))
@@ -89,7 +89,7 @@ public class PureDBCTest {
   }
 
   @Test
-  public void count() {
+  void count() {
     PureDBC<Option<Integer>> program =
       update(createTable)
         .andThen(update(deleteAll))
@@ -102,7 +102,7 @@ public class PureDBCTest {
   }
 
   @Test
-  public void queryJustOne() {
+  void queryJustOne() {
     PureDBC<Option<Tuple2<Integer, String>>> program =
         update(createTable)
             .andThen(update(deleteOne.bind(1)))
@@ -114,7 +114,7 @@ public class PureDBCTest {
   }
 
   @Test
-  public void queryMetaData() {
+  void queryMetaData() {
     PureDBC<Integer> program =
         update(createTable).andThen(PureDBC.query(findAll, rs -> rs.getMetaData().getColumnCount()));
 
@@ -122,7 +122,7 @@ public class PureDBCTest {
   }
 
   @Test
-  public void queryError() {
+  void queryError() {
     PureDBC<Option<Tuple2<Integer, String>>> program =
         update(dropTable)
             .andThen(update(deleteAll))

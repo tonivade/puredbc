@@ -116,7 +116,7 @@ public final class SQL {
   }
 
   public static SQL select(NonEmptyList<Field<?>> fields) {
-    return sql(fields.map(Field::name).join(",", "select ", " "));
+    return sql(fields.map(Field::name).join(", ", "select ", ""));
   }
 
   public static SQL insert(Table table) {
@@ -132,11 +132,11 @@ public final class SQL {
   }
 
   private String values(Sequence<Field<?>> values) {
-    String suffix = values.map(cons("?")).join(",", ") values (", ")");
-    return values.map(Field::name).join(",", " (", suffix);
+    String suffix = values.map(cons("?")).join(", ", ") values (", ")");
+    return values.map(Field::name).join(", ", " (", suffix);
   }
 
   private String set(Sequence<Field<?>> values) {
-    return values.map(field -> field.name() + "=?").join(",", " set ", "");
+    return values.map(field -> field.name() + " = ?").join(",", " set ", "");
   }
 }
