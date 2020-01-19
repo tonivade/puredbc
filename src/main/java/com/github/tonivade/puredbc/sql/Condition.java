@@ -5,6 +5,8 @@
 package com.github.tonivade.puredbc.sql;
 
 import com.github.tonivade.purefun.Equal;
+import com.github.tonivade.purefun.data.Range;
+import com.github.tonivade.purefun.data.Sequence;
 
 import java.util.Objects;
 
@@ -56,6 +58,14 @@ public interface Condition<T> {
 
   static <T> Condition<T> isNotNull(Field<T> field) {
     return of(field.name() + " is not null");
+  }
+
+  static Condition<Range> between(Field<Integer> field) {
+    return of(field.name() + " between ? and ?");
+  }
+
+  static <T> Condition<Sequence<T>> in(Field<T> field) {
+    return of(field.name() + " in (?)");
   }
 
   static <T> Condition<T> of(String condition) {

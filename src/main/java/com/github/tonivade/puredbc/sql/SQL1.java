@@ -19,6 +19,10 @@ public final class SQL1<A> {
     return new SQL(query, arrayOf(a));
   }
 
+  public SQL1<A> from(SQL other) {
+    return new SQL1<>(other.getQuery() + " from (" + query + ")");
+  }
+
   public <B> SQL2<A, B> and(Condition<B> condition) {
     return new SQL2<>(query + " and " + condition.expression());
   }
