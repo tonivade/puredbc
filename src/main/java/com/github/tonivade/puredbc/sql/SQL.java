@@ -4,13 +4,19 @@
  */
 package com.github.tonivade.puredbc.sql;
 
+import com.github.tonivade.purefun.data.ImmutableArray;
 import com.github.tonivade.purefun.data.NonEmptyList;
+import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.data.Sequence;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static com.github.tonivade.purefun.Function1.cons;
 import static com.github.tonivade.purefun.data.ImmutableArray.empty;
+import static com.github.tonivade.purefun.data.ImmutableArray.toImmutableArray;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
-import static java.util.Objects.requireNonNull;
 
 public final class SQL {
 
@@ -22,8 +28,8 @@ public final class SQL {
   }
 
   protected SQL(String query, Sequence<?> values) {
-    this.query = requireNonNull(query);
-    this.values = requireNonNull(values);
+    this.query = SQLModule.process(query, values);
+    this.values = values;
   }
 
   public String getQuery() {
@@ -154,5 +160,55 @@ public final class SQL {
 
   private String set(Sequence<Field<?>> values) {
     return values.map(field -> field.name() + " = ?").join(",", " set ", "");
+  }
+}
+
+interface SQLModule {
+  static String process(String query, Sequence<?> values) {
+    long count = placeHolders(query);
+
+    if (values.size() != count) {
+      throw new IllegalArgumentException(
+          String.format("invalid placeholder number: was=%d, expected=%d", count, values.size()));
+    }
+
+    return replace(query, replacements(values));
+  }
+
+  static ImmutableArray<String> replacements(Sequence<?> values) {
+    return values.stream().map(SQLModule::replacement).collect(toImmutableArray());
+  }
+
+  static String replace(String query, ImmutableArray<String> replacements) {
+    Matcher matcher = placeHolderMatcher(query);
+
+    StringBuffer sb = new StringBuffer();
+    int i = 0;
+    while (matcher.find()) {
+      matcher.appendReplacement(sb, replacements.get(i++));
+    }
+    matcher.appendTail(sb);
+    return sb.toString();
+  }
+
+  static String replacement(Object value) {
+    if (value instanceof Range) { // between
+      return "? and ?";
+    }
+    if (value instanceof Sequence) { // in
+      return ((Sequence<?>) value).map(cons("?")).join(", ");
+    }
+    return "?";
+  }
+
+  static int placeHolders(String query) {
+    Matcher matcher = placeHolderMatcher(query);
+    return Stream.iterate(0, i -> i + 1)
+        .filter(i -> !matcher.find())
+        .findFirst().orElseThrow(IllegalStateException::new);
+  }
+
+  static Matcher placeHolderMatcher(String query) {
+    return Pattern.compile("\\?").matcher(query);
   }
 }

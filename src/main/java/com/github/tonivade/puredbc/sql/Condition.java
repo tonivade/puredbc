@@ -61,7 +61,7 @@ public interface Condition<T> {
   }
 
   static Condition<Range> between(Field<Integer> field) {
-    return of(field.name() + " between ? and ?");
+    return of(field.name() + " between ?");
   }
 
   static <T> Condition<Sequence<T>> in(Field<T> field) {

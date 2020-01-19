@@ -9,6 +9,7 @@ import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Recoverable;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.data.ImmutableList;
+import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Option;
 
@@ -101,7 +102,17 @@ public class JdbcTemplate implements Recoverable {
     return stmt -> {
       int i = 1;
       for (Object param : params) {
-        stmt.setObject(i++, param);
+        if (param instanceof Range) {
+          Range range = (Range) param;
+          stmt.setObject(i++, range.begin());
+          stmt.setObject(i++, range.end());
+        } else if (param instanceof Sequence) {
+          for (Object p : ((Sequence<?>) param)) {
+            stmt.setObject(i++, p);
+          }
+        } else {
+          stmt.setObject(i++, param);
+        }
       }
     };
   }

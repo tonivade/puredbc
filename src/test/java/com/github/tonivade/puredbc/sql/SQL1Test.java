@@ -25,7 +25,7 @@ class SQL1Test {
     SQL sql = query.bind(range.collect());
 
     assertAll(
-        () -> assertEquals("select x from z where y in (?)", sql.getQuery()),
+        () -> assertEquals("select x from z where y in (?, ?, ?, ?, ?, ?, ?, ?, ?)", sql.getQuery()),
         () -> assertEquals(arrayOf(range.collect()), sql.getParams())
     );
   }

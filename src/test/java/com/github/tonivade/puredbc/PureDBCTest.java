@@ -4,6 +4,7 @@
  */
 package com.github.tonivade.puredbc;
 
+import com.github.tonivade.puredbc.sql.Condition;
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.Row;
 import com.github.tonivade.puredbc.sql.SQL;
@@ -14,6 +15,8 @@ import com.github.tonivade.purefun.Tuple;
 import com.github.tonivade.purefun.Tuple2;
 import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.data.NonEmptyList;
+import com.github.tonivade.purefun.data.Range;
+import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
 import com.github.tonivade.purefun.typeclasses.For;
@@ -28,11 +31,13 @@ import static com.github.tonivade.puredbc.PureDBC.queryIterable;
 import static com.github.tonivade.puredbc.PureDBC.queryOne;
 import static com.github.tonivade.puredbc.PureDBC.update;
 import static com.github.tonivade.puredbc.PureDBC.updateWithKeys;
+import static com.github.tonivade.puredbc.sql.Condition.between;
 import static com.github.tonivade.puredbc.sql.SQL.delete;
 import static com.github.tonivade.puredbc.sql.SQL.insert;
 import static com.github.tonivade.puredbc.sql.SQL.select;
 import static com.github.tonivade.puredbc.sql.SQL.update;
 import static com.github.tonivade.puredbc.sql.SQL.sql;
+import static com.github.tonivade.purefun.data.Sequence.arrayOf;
 import static com.github.tonivade.purefun.data.Sequence.listOf;
 import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -58,6 +63,8 @@ class PureDBCTest {
   private final SQL2<Integer, String> insertRow = insert(TEST).values(TEST.ID, TEST.NAME);
   private final SQL2<String, Integer> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
   private final SQL findAll = select(ALIAS.all()).from(ALIAS);
+  private final SQL1<Sequence<Integer>> findIn = select(ALIAS.all()).from(ALIAS).where(ALIAS.ID.in());
+  private final SQL1<Range> findBetween = select(ALIAS.all()).from(ALIAS).where(between(ALIAS.ID));
   private final SQL count = select(TEST.ID.count().as("elements")).from(TEST);
   private final SQL1<Integer> findOne = select(TEST.ID, TEST.NAME).from(TEST).where(TEST.ID.eq());
 
@@ -84,6 +91,30 @@ class PureDBCTest {
             .andThen(update(insertRow.bind(1, "toni")))
             .andThen(update(insertRow.bind(2, "pepe")))
             .andThen(queryIterable(findAll, TEST::asTuple));
+
+    assertProgram(program, listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe")));
+  }
+
+  @Test
+  void queryIn() {
+    PureDBC<Iterable<Tuple2<Integer, String>>> program =
+        update(createTable)
+            .andThen(update(deleteAll))
+            .andThen(update(insertRow.bind(1, "toni")))
+            .andThen(update(insertRow.bind(2, "pepe")))
+            .andThen(queryIterable(findIn.bind(arrayOf(1, 2, 3)), TEST::asTuple));
+
+    assertProgram(program, listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe")));
+  }
+
+  @Test
+  void queryBetween() {
+    PureDBC<Iterable<Tuple2<Integer, String>>> program =
+        update(createTable)
+            .andThen(update(deleteAll))
+            .andThen(update(insertRow.bind(1, "toni")))
+            .andThen(update(insertRow.bind(2, "pepe")))
+            .andThen(queryIterable(findBetween.bind(Range.of(1, 2)), TEST::asTuple));
 
     assertProgram(program, listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe")));
   }
