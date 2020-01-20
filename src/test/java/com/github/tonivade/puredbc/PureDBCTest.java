@@ -4,7 +4,6 @@
  */
 package com.github.tonivade.puredbc;
 
-import com.github.tonivade.puredbc.sql.Condition;
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.Row;
 import com.github.tonivade.puredbc.sql.SQL;

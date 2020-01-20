@@ -8,6 +8,7 @@ import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.data.Sequence;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -164,13 +165,12 @@ public final class SQL {
 
 interface SQLModule {
   static String process(String query, Sequence<?> values) {
-    if (values.isEmpty()) {
-      return query;
-    }
+    if (values.isEmpty()) return query;
     Stream<String> split = Pattern.compile("\\?").splitAsStream(query);
     Stream<String> replacements = values.stream().map(SQLModule::replacement);
     return zip(split, replacements)
-        .map(tuple -> tuple.applyTo(String::concat))
+        .flatMap(tuple -> Stream.of(tuple.get1(), tuple.get2()))
+        .filter(Objects::nonNull)
         .collect(joining());
   }
 
