@@ -28,6 +28,7 @@ import com.github.tonivade.purefun.typeclasses.Monad;
 import com.github.tonivade.purefun.typeclasses.FunctionK;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.ResultSet;
 
 import static com.github.tonivade.purefun.Function1.cons;
@@ -63,23 +64,23 @@ public final class PureDBC<T>  {
   }
 
   public T unsafeRun(DataSource dataSource) {
-    return unsafeRun(value).compose(JdbcTemplate::new).apply(dataSource);
+    return unsafeRun(value).compose(getConnection()).apply(dataSource);
   }
 
   public Try<T> safeRun(DataSource dataSource) {
-    return safeRun(value).compose(JdbcTemplate::new).apply(dataSource);
+    return safeRun(value).compose(getConnection()).apply(dataSource);
   }
 
   public UIO<T> unsafeRunIO(DataSource dataSource) {
-    return unsafeRunIO(value).compose(JdbcTemplate::new).apply(dataSource);
+    return unsafeRunIO(value).compose(getConnection()).apply(dataSource);
   }
 
   public Task<T> safeRunIO(DataSource dataSource) {
-    return safeRunIO(value).compose(JdbcTemplate::new).apply(dataSource);
+    return safeRunIO(value).compose(getConnection()).apply(dataSource);
   }
 
   public Future<T> asyncRun(DataSource dataSource) {
-    return asyncRun(value).compose(JdbcTemplate::new).apply(dataSource);
+    return asyncRun(value).compose(getConnection()).apply(dataSource);
   }
 
   public static <T> PureDBC<T> pure(T value) {
@@ -91,7 +92,7 @@ public final class PureDBC<T>  {
   }
 
   public static <T> PureDBC<Option<T>> updateWithKeys(SQL query, Function1<Row, T> extractor) {
-    return new PureDBC<>(new DSL.UpdateWithKeys<>(query, extractor));
+    return new PureDBC<>(new DSL.UpdateWithKeys<>(query, extractor.compose(Row::new)));
   }
 
   public static <T> PureDBC<T> query(SQL query, Function1<ResultSet, T> rowMapper) {
@@ -99,15 +100,19 @@ public final class PureDBC<T>  {
   }
 
   public static <T> PureDBC<Option<T>> queryOne(SQL query, Function1<Row, T> rowMapper) {
-    return new PureDBC<>(new DSL.QueryOne<>(query, rowMapper));
+    return new PureDBC<>(new DSL.QueryOne<>(query, rowMapper.compose(Row::new)));
   }
 
   public static <T> PureDBC<Iterable<T>> queryIterable(SQL query, Function1<Row, T> rowMapper) {
-    return new PureDBC<>(new DSL.QueryIterable<>(query, rowMapper));
+    return new PureDBC<>(new DSL.QueryIterable<>(query, rowMapper.compose(Row::new)));
   }
 
   public static Monad<PureDBC.µ> monad() {
     return PureDBCMonad.instance();
+  }
+
+  private static Function1<DataSource, JdbcTemplate> getConnection() {
+    return Function1.<DataSource, Connection>of(DataSource::getConnection).andThen(JdbcTemplate::new);
   }
 
   private static <A> Function1<JdbcTemplate, A> unsafeRun(Free<DSL.µ, A> free) {

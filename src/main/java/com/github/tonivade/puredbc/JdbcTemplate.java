@@ -13,7 +13,6 @@ import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Option;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -28,10 +27,10 @@ import static java.util.Objects.requireNonNull;
 
 public class JdbcTemplate implements Recoverable {
 
-  public final DataSource dataSource;
+  public final Connection conn;
 
-  public JdbcTemplate(DataSource dataSource) {
-    this.dataSource = requireNonNull(dataSource);
+  public JdbcTemplate(Connection conn) {
+    this.conn = requireNonNull(conn);
   }
 
   public Unit update(String query, Sequence<?> params) {
@@ -42,8 +41,8 @@ public class JdbcTemplate implements Recoverable {
     return _update(query, populateWith(params), optionExtractor(rowMapper));
   }
 
-  public <T> T query(String query, Sequence<?> params, Function1<ResultSet, T> rowMapper) {
-    return _query(query, populateWith(params), rowMapper);
+  public <T> T query(String query, Sequence<?> params, Function1<ResultSet, T> extractor) {
+    return _query(query, populateWith(params), extractor);
   }
 
   public <T> Option<T> queryOne(String query, Sequence<?> params, Function1<ResultSet, T> rowMapper) {
@@ -55,10 +54,10 @@ public class JdbcTemplate implements Recoverable {
   }
 
   private <T> T _query(String query, Consumer1<PreparedStatement> setter, Function1<ResultSet, T> extractor) {
-    try (Connection conn = dataSource.getConnection()) {
-      try (PreparedStatement stmt = conn.prepareStatement(query)) {
-        setter.accept(stmt);
-        return extractor.apply(stmt.executeQuery());
+    try (PreparedStatement stmt = conn.prepareStatement(query)) {
+      setter.accept(stmt);
+      try (ResultSet rs = stmt.executeQuery()) {
+        return extractor.apply(rs);
       }
     } catch (SQLException e) {
       return sneakyThrow(e);
@@ -66,13 +65,11 @@ public class JdbcTemplate implements Recoverable {
   }
 
   private <T> T _update(String query, Consumer1<PreparedStatement> setter, Function1<ResultSet, T> extractor) {
-    try (Connection conn = dataSource.getConnection()) {
-      try (PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-        setter.accept(stmt);
-        stmt.executeUpdate();
-        try (ResultSet rs = stmt.getGeneratedKeys()) {
-          return extractor.apply(rs);
-        }
+    try (PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
+      setter.accept(stmt);
+      stmt.executeUpdate();
+      try (ResultSet rs = stmt.getGeneratedKeys()) {
+        return extractor.apply(rs);
       }
     } catch (SQLException e) {
       return sneakyThrow(e);

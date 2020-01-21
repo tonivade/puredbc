@@ -4,7 +4,6 @@
  */
 package com.github.tonivade.puredbc;
 
-import com.github.tonivade.puredbc.sql.Row;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Higher1;
@@ -74,8 +73,8 @@ interface DSL<T> {
 
   final class QueryIterable<T> extends AbstractQuery<T> implements DSL<Iterable<T>> {
 
-    protected QueryIterable(SQL query, Function1<Row, T> rowMapper) {
-      super(query, rowMapper.compose(Row::new));
+    protected QueryIterable(SQL query, Function1<ResultSet, T> rowMapper) {
+      super(query, rowMapper);
     }
 
     @Override
@@ -91,8 +90,8 @@ interface DSL<T> {
 
   final class QueryOne<T> extends AbstractQuery<T> implements DSL<Option<T>> {
 
-    protected QueryOne(SQL query, Function1<Row, T> rowMapper) {
-      super(query, rowMapper.compose(Row::new));
+    protected QueryOne(SQL query, Function1<ResultSet, T> rowMapper) {
+      super(query, rowMapper);
     }
 
     @Override
@@ -108,8 +107,8 @@ interface DSL<T> {
 
   final class UpdateWithKeys<T> extends AbstractQuery<T> implements DSL<Option<T>> {
 
-    protected UpdateWithKeys(SQL query, Function1<Row, T> extractor) {
-      super(query, extractor.compose(Row::new));
+    protected UpdateWithKeys(SQL query, Function1<ResultSet, T> extractor) {
+      super(query, extractor);
     }
 
     @Override
