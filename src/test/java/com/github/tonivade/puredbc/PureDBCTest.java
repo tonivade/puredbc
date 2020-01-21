@@ -15,7 +15,6 @@ import com.github.tonivade.purefun.Tuple2;
 import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Range;
-import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
 import com.github.tonivade.purefun.typeclasses.For;
@@ -62,7 +61,7 @@ class PureDBCTest {
   private final SQL2<Integer, String> insertRow = insert(TEST).values(TEST.ID, TEST.NAME);
   private final SQL2<String, Integer> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
   private final SQL findAll = select(ALIAS.all()).from(ALIAS);
-  private final SQL1<Sequence<Integer>> findIn = select(ALIAS.all()).from(ALIAS).where(ALIAS.ID.in());
+  private final SQL1<Iterable<Integer>> findIn = select(ALIAS.all()).from(ALIAS).where(ALIAS.ID.in());
   private final SQL1<Range> findBetween = select(ALIAS.all()).from(ALIAS).where(between(ALIAS.ID));
   private final SQL count = select(TEST.ID.count().as("elements")).from(TEST);
   private final SQL1<Integer> findOne = select(TEST.ID, TEST.NAME).from(TEST).where(TEST.ID.eq());

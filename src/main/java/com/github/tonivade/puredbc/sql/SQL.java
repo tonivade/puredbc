@@ -4,6 +4,7 @@
  */
 package com.github.tonivade.puredbc.sql;
 
+import com.github.tonivade.purefun.data.ImmutableArray;
 import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.data.Sequence;
@@ -174,8 +175,8 @@ interface SQLModule {
     if (value instanceof Range) { // between
       return "? and ?";
     }
-    if (value instanceof Sequence) { // in
-      return ((Sequence<?>) value).map(cons("?")).join(", ");
+    if (value instanceof Iterable) { // in
+      return ImmutableArray.from((Iterable<?>) value).map(cons("?")).join(", ");
     }
     return "?";
   }

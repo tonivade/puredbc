@@ -5,7 +5,6 @@
 package com.github.tonivade.puredbc.sql;
 
 import com.github.tonivade.purefun.Equal;
-import com.github.tonivade.purefun.data.Sequence;
 
 import java.util.Objects;
 
@@ -88,7 +87,7 @@ public interface Field<T> {
     return Condition.isNotNull(this);
   }
 
-  default Condition<Sequence<T>> in() {
+  default Condition<Iterable<T>> in() {
     return Condition.in(this);
   }
 

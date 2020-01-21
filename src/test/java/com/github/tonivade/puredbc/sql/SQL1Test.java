@@ -5,13 +5,13 @@
 package com.github.tonivade.puredbc.sql;
 
 import com.github.tonivade.purefun.data.Range;
-import com.github.tonivade.purefun.data.Sequence;
 import org.junit.jupiter.api.Test;
 
 import static com.github.tonivade.puredbc.sql.Condition.between;
 import static com.github.tonivade.puredbc.sql.SQL.sql;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SQL1Test {
 
@@ -20,7 +20,7 @@ class SQL1Test {
 
   @Test
   void bindIn() {
-    SQL1<Sequence<Integer>> query = sql("select x from z").where(field.in());
+    SQL1<Iterable<Integer>> query = sql("select x from z").where(field.in());
 
     SQL sql = query.bind(range.collect());
 

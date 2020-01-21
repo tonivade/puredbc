@@ -103,8 +103,8 @@ public class JdbcTemplate implements Recoverable {
           Range range = (Range) param;
           stmt.setObject(i++, range.begin());
           stmt.setObject(i++, range.end());
-        } else if (param instanceof Sequence) {
-          for (Object p : ((Sequence<?>) param)) {
+        } else if (param instanceof Iterable) {
+          for (Object p : (Iterable<?>) param) {
             stmt.setObject(i++, p);
           }
         } else {

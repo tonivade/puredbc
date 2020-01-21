@@ -6,7 +6,6 @@ package com.github.tonivade.puredbc.sql;
 
 import com.github.tonivade.purefun.Equal;
 import com.github.tonivade.purefun.data.Range;
-import com.github.tonivade.purefun.data.Sequence;
 
 import java.util.Objects;
 
@@ -64,7 +63,7 @@ public interface Condition<T> {
     return of(field.name() + " between ?");
   }
 
-  static <T> Condition<Sequence<T>> in(Field<T> field) {
+  static <T> Condition<Iterable<T>> in(Field<T> field) {
     return of(field.name() + " in (?)");
   }
 
