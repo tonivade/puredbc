@@ -25,7 +25,7 @@ import static com.github.tonivade.purefun.Function1.cons;
 import static com.github.tonivade.purefun.Unit.unit;
 import static java.util.Objects.requireNonNull;
 
-public class JdbcTemplate implements Recoverable {
+public class JdbcTemplate implements Recoverable, AutoCloseable {
 
   public final Connection conn;
 
@@ -51,6 +51,11 @@ public class JdbcTemplate implements Recoverable {
 
   public <T> Iterable<T> queryIterable(String query, Sequence<?> params, Function1<ResultSet, T> rowMapper) {
     return _query(query, populateWith(params), iterableExtractor(rowMapper));
+  }
+
+  @Override
+  public void close() throws Exception {
+    conn.close();
   }
 
   private <T> T _query(String query, Consumer1<PreparedStatement> setter, Function1<ResultSet, T> extractor) {

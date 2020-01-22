@@ -28,7 +28,6 @@ import com.github.tonivade.purefun.typeclasses.Monad;
 import com.github.tonivade.purefun.typeclasses.FunctionK;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.ResultSet;
 
 import static com.github.tonivade.purefun.Function1.cons;
@@ -64,23 +63,23 @@ public final class PureDBC<T>  {
   }
 
   public T unsafeRun(DataSource dataSource) {
-    return unsafeRun(value).compose(getConnection()).apply(dataSource);
+    return unsafeRun(value).apply(dataSource);
   }
 
   public Try<T> safeRun(DataSource dataSource) {
-    return safeRun(value).compose(getConnection()).apply(dataSource);
+    return safeRun(value).apply(dataSource);
   }
 
   public UIO<T> unsafeRunIO(DataSource dataSource) {
-    return unsafeRunIO(value).compose(getConnection()).apply(dataSource);
+    return unsafeRunIO(value).apply(dataSource);
   }
 
   public Task<T> safeRunIO(DataSource dataSource) {
-    return safeRunIO(value).compose(getConnection()).apply(dataSource);
+    return safeRunIO(value).apply(dataSource);
   }
 
   public Future<T> asyncRun(DataSource dataSource) {
-    return asyncRun(value).compose(getConnection()).apply(dataSource);
+    return asyncRun(value).apply(dataSource);
   }
 
   public static <T> PureDBC<T> pure(T value) {
@@ -111,48 +110,51 @@ public final class PureDBC<T>  {
     return PureDBCMonad.instance();
   }
 
-  private static Function1<DataSource, JdbcTemplate> getConnection() {
-    return Function1.<DataSource, Connection>of(DataSource::getConnection).andThen(JdbcTemplate::new);
-  }
-
-  private static <A> Function1<JdbcTemplate, A> unsafeRun(Free<DSL.µ, A> free) {
-    return jdbc -> {
-      DSLIdVisitor visitor = new DSLIdVisitor(jdbc);
-      Higher1<Id.µ, A> foldMap = free.foldMap(IdInstances.monad(), new DSLTransformer<>(visitor));
-      return foldMap.fix1(Id::narrowK).get();
+  private static <A> Function1<DataSource, A> unsafeRun(Free<DSL.µ, A> free) {
+    return dataSource -> {
+      try (JdbcTemplate jdbc = new JdbcTemplate(dataSource.getConnection())) {
+        DSLIdVisitor visitor = new DSLIdVisitor(jdbc);
+        Higher1<Id.µ, A> foldMap = free.foldMap(IdInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix1(Id::narrowK).get();
+      }
     };
   }
 
-  private static <A> Function1<JdbcTemplate, Try<A>> safeRun(Free<DSL.µ, A> free) {
-    return jdbc -> {
-      DSLTryVisitor visitor = new DSLTryVisitor(jdbc);
-      Higher1<Try.µ, A> foldMap = free.foldMap(TryInstances.monad(), new DSLTransformer<>(visitor));
-      return foldMap.fix1(Try::narrowK);
+  private static <A> Function1<DataSource, Try<A>> safeRun(Free<DSL.µ, A> free) {
+    return dataSource -> {
+      try (JdbcTemplate jdbc = new JdbcTemplate(dataSource.getConnection())) {
+        DSLTryVisitor visitor = new DSLTryVisitor(jdbc);
+        Higher1<Try.µ, A> foldMap = free.foldMap(TryInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix1(Try::narrowK);
+      }
     };
   }
 
-  private static <A> Function1<JdbcTemplate, UIO<A>> unsafeRunIO(Free<DSL.µ, A> free) {
-    return jdbc -> {
-      DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
-      Higher1<UIO.µ, A> foldMap = free.foldMap(UIOInstances.monad(), new DSLTransformer<>(visitor));
-      return foldMap.fix1(UIO::narrowK);
-    };
+  private static <A> Function1<DataSource, UIO<A>> unsafeRunIO(Free<DSL.µ, A> free) {
+    return dataSource ->
+      UIO.bracket(UIO.task(() -> new JdbcTemplate(dataSource.getConnection())), jdbc -> {
+        DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
+        Higher1<UIO.µ, A> foldMap = free.foldMap(UIOInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix1(UIO::narrowK);
+      });
   }
 
-  private static <A> Function1<JdbcTemplate, Task<A>> safeRunIO(Free<DSL.µ, A> free) {
-    return jdbc -> {
-      DSLTaskVisitor visitor = new DSLTaskVisitor(jdbc);
-      Higher1<Task.µ, A> foldMap = free.foldMap(TaskInstances.monad(), new DSLTransformer<>(visitor));
-      return foldMap.fix1(Task::narrowK);
-    };
+  private static <A> Function1<DataSource, Task<A>> safeRunIO(Free<DSL.µ, A> free) {
+    return dataSource ->
+      Task.bracket(Task.task(() -> new JdbcTemplate(dataSource.getConnection())), jdbc -> {
+        DSLTaskVisitor visitor = new DSLTaskVisitor(jdbc);
+        Higher1<Task.µ, A> foldMap = free.foldMap(TaskInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix1(Task::narrowK);
+      });
   }
 
-  private static <A> Function1<JdbcTemplate, Future<A>> asyncRun(Free<DSL.µ, A> free) {
-    return jdbc -> {
-      DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
-      Higher1<Future.µ, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
-      return foldMap.fix1(Future::narrowK);
-    };
+  private static <A> Function1<DataSource, Future<A>> asyncRun(Free<DSL.µ, A> free) {
+    return dataSource ->
+      Future.bracket(Future.async(() -> new JdbcTemplate(dataSource.getConnection())), jdbc -> {
+        DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
+        Higher1<Future.µ, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix1(Future::narrowK);
+      });
   }
 
   private static class DSLIdVisitor implements DSL.Visitor<Id.µ> {
