@@ -29,6 +29,7 @@ import com.github.tonivade.purefun.typeclasses.FunctionK;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import static com.github.tonivade.purefun.Function1.cons;
 import static java.util.Objects.requireNonNull;
@@ -112,7 +113,7 @@ public final class PureDBC<T>  {
 
   private static <A> Function1<DataSource, A> unsafeRun(Free<DSL.µ, A> free) {
     return dataSource -> {
-      try (JdbcTemplate jdbc = new JdbcTemplate(dataSource.getConnection())) {
+      try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLIdVisitor visitor = new DSLIdVisitor(jdbc);
         Higher1<Id.µ, A> foldMap = free.foldMap(IdInstances.monad(), new DSLTransformer<>(visitor));
         return foldMap.fix1(Id::narrowK).get();
@@ -122,7 +123,7 @@ public final class PureDBC<T>  {
 
   private static <A> Function1<DataSource, Try<A>> safeRun(Free<DSL.µ, A> free) {
     return dataSource -> {
-      try (JdbcTemplate jdbc = new JdbcTemplate(dataSource.getConnection())) {
+      try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLTryVisitor visitor = new DSLTryVisitor(jdbc);
         Higher1<Try.µ, A> foldMap = free.foldMap(TryInstances.monad(), new DSLTransformer<>(visitor));
         return foldMap.fix1(Try::narrowK);
@@ -132,7 +133,7 @@ public final class PureDBC<T>  {
 
   private static <A> Function1<DataSource, UIO<A>> unsafeRunIO(Free<DSL.µ, A> free) {
     return dataSource ->
-      UIO.bracket(UIO.task(() -> new JdbcTemplate(dataSource.getConnection())), jdbc -> {
+      UIO.bracket(UIO.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
         Higher1<UIO.µ, A> foldMap = free.foldMap(UIOInstances.monad(), new DSLTransformer<>(visitor));
         return foldMap.fix1(UIO::narrowK);
@@ -141,7 +142,7 @@ public final class PureDBC<T>  {
 
   private static <A> Function1<DataSource, Task<A>> safeRunIO(Free<DSL.µ, A> free) {
     return dataSource ->
-      Task.bracket(Task.task(() -> new JdbcTemplate(dataSource.getConnection())), jdbc -> {
+      Task.bracket(Task.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLTaskVisitor visitor = new DSLTaskVisitor(jdbc);
         Higher1<Task.µ, A> foldMap = free.foldMap(TaskInstances.monad(), new DSLTransformer<>(visitor));
         return foldMap.fix1(Task::narrowK);
@@ -150,11 +151,15 @@ public final class PureDBC<T>  {
 
   private static <A> Function1<DataSource, Future<A>> asyncRun(Free<DSL.µ, A> free) {
     return dataSource ->
-      Future.bracket(Future.async(() -> new JdbcTemplate(dataSource.getConnection())), jdbc -> {
+      Future.bracket(Future.async(() -> newTemplate(dataSource)), jdbc -> {
         DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
         Higher1<Future.µ, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
         return foldMap.fix1(Future::narrowK);
       });
+  }
+
+  private static JdbcTemplate newTemplate(DataSource dataSource) throws SQLException {
+    return new JdbcTemplate(dataSource.getConnection());
   }
 
   private static class DSLIdVisitor implements DSL.Visitor<Id.µ> {
