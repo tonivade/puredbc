@@ -5,46 +5,43 @@
 package com.github.tonivade.puredbc.sql;
 
 import com.github.tonivade.purefun.Equal;
+import com.github.tonivade.purefun.type.Validation;
 
 import java.util.Objects;
 
+import static com.github.tonivade.purefun.data.Sequence.arrayOf;
 import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
-import static java.util.Objects.requireNonNull;
+import static com.github.tonivade.purefun.type.Validation.requireNonNull;
 
 public interface Field<T> {
 
   String name();
+  String fullName();
 
-  default Field<T> count() {
-    return of("count(" + name() + ")");
+  Field<T> as(String alias);
+
+  default Function<T> count() {
+    return Function.of("count", this);
   }
 
-  default Field<T> min() {
-    return of("min(" + name() + ")");
+  default Function<T> min() {
+    return Function.of("min", this);
   }
 
-  default Field<T> max() {
-    return of("max(" + name() + ")");
+  default Function<T> max() {
+    return Function.of("max", this);
   }
 
-  default Field<T> sum() {
-    return of("sum(" + name() + ")");
+  default Function<T> sum() {
+    return Function.of("sum", this);
   }
 
-  default Field<T> avg() {
-    return of("avg(" + name() + ")");
+  default Function<T> avg() {
+    return Function.of("avg", this);
   }
 
-  default Field<T> coalesce(int value) {
-    return of("coalesce(" + name() + ", " + value + ")");
-  }
-
-  default Field<T> as(String alias) {
-    return of(name() + " as " + alias);
-  }
-
-  default Field<T> alias(String alias) {
-    return of(requireNonNull(alias) + "." + name());
+  default Function<T> coalesce(int value) {
+    return Function.of("coalesce", this, arrayOf(value));
   }
 
   default Condition<T> eq() {
@@ -91,24 +88,40 @@ public interface Field<T> {
     return Condition.in(this);
   }
 
-  static <T> Field<T> of(String name) {
-    return requireNonEmpty(name).<Field<T>>map(FieldImpl::new).getOrElseThrow();
+  static <T> Field<T> of(Table table, String name) {
+    Validation<String, Table> validation1 = requireNonNull(table);
+    Validation<String, String> validation2 = requireNonEmpty(name);
+    Validation<Validation.Result<String>, Field<T>> validation = Validation.map2(validation1, validation2, FieldImpl::new);
+    return validation.getOrElseThrow();
   }
 }
 
 final class FieldImpl<T> implements Field<T> {
 
-  private static final Equal<Field<?>> EQUAL = Equal.<Field<?>>of().comparing(Field::name);
+  private static final Equal<FieldImpl<?>> EQUAL =
+      Equal.<FieldImpl<?>>of().comparing(x -> x.table).comparing(x -> x.name);
 
+  private final Table table;
   private final String name;
 
-  FieldImpl(String name) {
+  FieldImpl(Table table, String name) {
+    this.table = table;
     this.name = name;
   }
 
   @Override
   public String name() {
     return name;
+  }
+
+  @Override
+  public String fullName() {
+    return table.name() + "." + name;
+  }
+
+  @Override
+  public Field<T> as(String alias) {
+    return new FieldImpl<>(table, name + " as " + alias);
   }
 
   @Override
@@ -123,6 +136,6 @@ final class FieldImpl<T> implements Field<T> {
 
   @Override
   public String toString() {
-    return String.format("Field{name='%s'}", name);
+    return String.format("Field{table=%s, name='%s'}", table, name);
   }
 }

@@ -20,51 +20,51 @@ public interface Condition<T> {
   }
 
   static <T> Condition<T> eq(Field<T> field) {
-    return of(field.name() + " = ?");
+    return of(field.fullName() + " = ?");
   }
 
   static <T> Condition<T> eq(Field<T> field1, Field<T> field2) {
-    return of(field1.name() + " = " + field2.name());
+    return of(field1.fullName() + " = " + field2.fullName());
   }
 
   static <T> Condition<T> like(Field<T> field) {
-    return of(field.name() + " like ?");
+    return of(field.fullName() + " like ?");
   }
 
   static <T> Condition<T> notEq(Field<T> field) {
-    return of(field.name() + " <> ?");
+    return of(field.fullName() + " <> ?");
   }
 
   static <T> Condition<T> lt(Field<T> field) {
-    return of(field.name() + " < ?");
+    return of(field.fullName() + " < ?");
   }
 
   static <T> Condition<T> lte(Field<T> field) {
-    return of(field.name() + " <= ?");
+    return of(field.fullName() + " <= ?");
   }
 
   static <T> Condition<T> gt(Field<T> field) {
-    return of(field.name() + " > ?");
+    return of(field.fullName() + " > ?");
   }
 
   static <T> Condition<T> gte(Field<T> field) {
-    return of(field.name() + " >= ?");
+    return of(field.fullName() + " >= ?");
   }
 
   static <T> Condition<T> isNull(Field<T> field) {
-    return of(field.name() + " is null");
+    return of(field.fullName() + " is null");
   }
 
   static <T> Condition<T> isNotNull(Field<T> field) {
-    return of(field.name() + " is not null");
+    return of(field.fullName() + " is not null");
   }
 
   static Condition<Range> between(Field<Integer> field) {
-    return of(field.name() + " between ?");
+    return of(field.fullName() + " between ?");
   }
 
   static <T> Condition<Iterable<T>> in(Field<T> field) {
-    return of(field.name() + " in (?)");
+    return of(field.fullName() + " in (?)");
   }
 
   static <T> Condition<T> of(String condition) {
