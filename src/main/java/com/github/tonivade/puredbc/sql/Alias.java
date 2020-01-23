@@ -14,15 +14,8 @@ import static com.github.tonivade.purefun.type.Validation.requireNonNull;
 
 public interface Alias<T> extends Field<T> {
 
-  @Override
-  default String fullName() {
-    return name();
-  }
-
   static <T> Alias<T> of(String alias, Field<T> field) {
-    Validation<String, String> validation = requireNonEmpty(alias);
-    Validation<String, Field<T>> validation1 = requireNonNull(field);
-    return Validation.map2(validation, validation1, AliasImpl::new).getOrElseThrow();
+    return Validation.map2(requireNonEmpty(alias), requireNonNull(field), AliasImpl::new).getOrElseThrow();
   }
 }
 
@@ -42,11 +35,6 @@ class AliasImpl<T> implements Alias<T> {
   @Override
   public String name() {
     return field.name() + " as " + alias;
-  }
-
-  @Override
-  public Field<T> as(String alias) {
-    return new AliasImpl<>(alias, this);
   }
 
   @Override

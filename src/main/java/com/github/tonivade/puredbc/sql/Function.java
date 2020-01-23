@@ -17,22 +17,17 @@ import static com.github.tonivade.purefun.type.Validation.requireNonNull;
 
 public interface Function<T> extends Field<T> {
 
-  @Override
-  default String fullName() {
-    return name();
-  }
-
   static <T> Function<T> of(String name, Field<T> field) {
     return of(name, field, empty());
   }
 
-  static <T> Function<T> of(String name, Field<T> field, Sequence<Object> args) {
+  static <T> Function<T> of(String name, Field<T> field, Sequence<Object> params) {
     Validation<String, String> validation1 = requireNonEmpty(name);
     Validation<String, Field<T>> validation2 = requireNonNull(field);
-    Validation<String, Sequence<Object>> validation3 = requireNonNull(args);
+    Validation<String, Sequence<Object>> validation3 = requireNonNull(params);
     Validation<Validation.Result<String>, Function<T>> validation =
         Validation.map3(validation1, validation2, validation3,
-            (n, f, p) -> new FunctionImpl<>(n, ImmutableArray.<Object>of(f.fullName()).appendAll(p)));
+            (n, f, p) -> new FunctionImpl<>(n, ImmutableArray.<Object>of(f.name()).appendAll(p)));
     return validation.getOrElseThrow();
   }
 }
@@ -53,11 +48,6 @@ class FunctionImpl<T> implements Function<T> {
   @Override
   public String name() {
     return name + params.join(", ", "(", ")");
-  }
-
-  @Override
-  public Field<T> as(String alias) {
-    return new AliasImpl<>(alias, this);
   }
 
   @Override
