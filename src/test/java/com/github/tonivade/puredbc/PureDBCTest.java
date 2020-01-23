@@ -60,8 +60,7 @@ class PureDBCTest {
   private final SQL1<String> insertRowWithKey = insert(TEST).values(TEST.NAME);
   private final SQL2<Integer, String> insertRow = insert(TEST).values(TEST.ID, TEST.NAME);
   private final SQL2<String, Integer> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
-  private final SQL findAll = select(TEST.all()).from(TEST);
-  private final SQL findAllAlias = select(ALIAS.all()).from(ALIAS);
+  private final SQL findAll = select(ALIAS.all()).from(ALIAS);
   private final SQL1<Iterable<Integer>> findIn = select(ALIAS.all()).from(ALIAS).where(ALIAS.ID.in());
   private final SQL1<Range> findBetween = select(ALIAS.all()).from(ALIAS).where(between(ALIAS.ID));
   private final SQL count = select(TEST.ID.count().as("elements")).from(TEST);
@@ -89,7 +88,7 @@ class PureDBCTest {
             .andThen(update(deleteAll))
             .andThen(update(insertRow.bind(1, "toni")))
             .andThen(update(insertRow.bind(2, "pepe")))
-            .andThen(queryIterable(findAllAlias, TEST::asTuple));
+            .andThen(queryIterable(findAll, TEST::asTuple));
 
     assertProgram(program, listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe")));
   }
@@ -193,29 +192,26 @@ class PureDBCTest {
 
 final class TestTable implements Table2<Integer, String> {
 
-  public final Field<Integer> ID = Field.of(this, "id");
-  public final Field<String> NAME = Field.of(this, "name");
+  public final Field<Integer> ID;
+  public final Field<String> NAME;
 
   private final String name;
-  private final String alias;
 
   TestTable() {
-    this(null);
+    this.name = "test";
+    this.ID = Field.of("id");
+    this.NAME = Field.of("name");
   }
 
-  private TestTable(String alias) {
-    this.name = "test";
-    this.alias = alias;
+  private TestTable(TestTable other, String alias) {
+    this.name = "test as " + alias;
+    this.ID = other.ID.alias(alias);
+    this.NAME = other.NAME.alias(alias);
   }
 
   @Override
   public String name() {
-    return alias != null ? alias : name;
-  }
-
-  @Override
-  public String alias() {
-    return alias != null ? name + " as " + alias : name;
+    return name;
   }
 
   @Override
@@ -224,7 +220,7 @@ final class TestTable implements Table2<Integer, String> {
   }
 
   public TestTable as(String alias) {
-    return new TestTable(requireNonNull(alias));
+    return new TestTable(this, requireNonNull(alias));
   }
 
   public Tuple2<Integer, String> asTuple(Row row) throws SQLException {

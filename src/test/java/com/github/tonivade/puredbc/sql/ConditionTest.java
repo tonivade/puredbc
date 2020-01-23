@@ -21,25 +21,27 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ConditionTest {
 
-  private final Example EXAMPLE = new Example();
-  private final Example ALIAS = EXAMPLE.as("a");
+  final Field<String> name = Field.of("name");
+  final Field<String> other = Field.of("other");
 
   @Test
   void condition() {
     assertAll(
         () -> assertThrows(IllegalArgumentException.class, () -> Condition.of(null)),
         () -> assertThrows(IllegalArgumentException.class, () -> Condition.of("")),
-        () -> assertEquals("example.name = ?", eq(EXAMPLE.field).expression()),
-        () -> assertEquals("not example.name = ?", eq(EXAMPLE.field).not().expression()),
-        () -> assertEquals("example.name = example.other", eq(EXAMPLE.field, EXAMPLE.other).expression()),
-        () -> assertEquals("example.name > ?", gt(EXAMPLE.field).expression()),
-        () -> assertEquals("example.name < ?", lt(EXAMPLE.field).expression()),
-        () -> assertEquals("example.name >= ?", gte(EXAMPLE.field).expression()),
-        () -> assertEquals("example.name <= ?", lte(EXAMPLE.field).expression()),
-        () -> assertEquals("example.name like ?", like(EXAMPLE.field).expression()),
-        () -> assertEquals("example.name is null", isNull(EXAMPLE.field).expression()),
-        () -> assertEquals("example.name is not null", isNotNull(EXAMPLE.field).expression()),
-        () -> assertEquals("example.name <> ?", notEq(EXAMPLE.field).expression())
+        () -> assertEquals("name as a", name.as("a").name()),
+        () -> assertEquals("a.name", name.alias("a").name()),
+        () -> assertEquals("name = ?", eq(name).expression()),
+        () -> assertEquals("not name = ?", eq(name).not().expression()),
+        () -> assertEquals("name = other", eq(name, other).expression()),
+        () -> assertEquals("name > ?", gt(name).expression()),
+        () -> assertEquals("name < ?", lt(name).expression()),
+        () -> assertEquals("name >= ?", gte(name).expression()),
+        () -> assertEquals("name <= ?", lte(name).expression()),
+        () -> assertEquals("name like ?", like(name).expression()),
+        () -> assertEquals("name is null", isNull(name).expression()),
+        () -> assertEquals("name is not null", isNotNull(name).expression()),
+        () -> assertEquals("name <> ?", notEq(name).expression())
     );
   }
 }

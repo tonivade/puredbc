@@ -9,5 +9,4 @@ import com.github.tonivade.purefun.data.NonEmptyList;
 public interface Table {
   NonEmptyList<Field<?>> all();
   String name();
-  String alias();
 }

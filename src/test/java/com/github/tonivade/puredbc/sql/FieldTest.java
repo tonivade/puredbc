@@ -12,36 +12,32 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FieldTest {
 
-
-  private final Example EXAMPLE = new Example();
-  private final Example ALIAS = EXAMPLE.as("a");
+  Field<String> field = Field.of("name");
+  Field<String> other = Field.of("other");
 
   @Test
   void field() {
     assertAll(
-        () -> assertThrows(IllegalArgumentException.class, () -> Field.of(EXAMPLE, null)),
-        () -> assertThrows(IllegalArgumentException.class, () -> Field.of(EXAMPLE, "")),
-        () -> assertEquals("name", EXAMPLE.field.name()),
-        () -> assertEquals("name", ALIAS.field.name()),
-        () -> assertEquals("example.name", EXAMPLE.field.fullName()),
-        () -> assertEquals("a.name", ALIAS.field.fullName()),
-        () -> assertEquals("name as a", EXAMPLE.field.as("a").name()),
-        () -> assertEquals("count(example.name)", EXAMPLE.field.count().name()),
-        () -> assertEquals("sum(example.name)", EXAMPLE.field.sum().name()),
-        () -> assertEquals("max(example.name)", EXAMPLE.field.max().name()),
-        () -> assertEquals("min(example.name)", EXAMPLE.field.min().name()),
-        () -> assertEquals("avg(example.name)", EXAMPLE.field.avg().name()),
-        () -> assertEquals("coalesce(example.name, 1)", EXAMPLE.field.coalesce(1).name()),
-        () -> assertEquals(Condition.eq(EXAMPLE.field), EXAMPLE.field.eq()),
-        () -> assertEquals(Condition.eq(EXAMPLE.field, EXAMPLE.other), EXAMPLE.field.eq(EXAMPLE.other)),
-        () -> assertEquals(Condition.gt(EXAMPLE.field), EXAMPLE.field.gt()),
-        () -> assertEquals(Condition.lt(EXAMPLE.field), EXAMPLE.field.lt()),
-        () -> assertEquals(Condition.gte(EXAMPLE.field), EXAMPLE.field.gte()),
-        () -> assertEquals(Condition.lte(EXAMPLE.field), EXAMPLE.field.lte()),
-        () -> assertEquals(Condition.like(EXAMPLE.field), EXAMPLE.field.like()),
-        () -> assertEquals(Condition.isNull(EXAMPLE.field), EXAMPLE.field.isNull()),
-        () -> assertEquals(Condition.isNotNull(EXAMPLE.field), EXAMPLE.field.isNotNull()),
-        () -> assertEquals(Condition.notEq(EXAMPLE.field), EXAMPLE.field.notEq())
+        () -> assertThrows(IllegalArgumentException.class, () -> Field.of(null)),
+        () -> assertThrows(IllegalArgumentException.class, () -> Field.of("")),
+        () -> assertEquals("a.name", field.alias("a").name()),
+        () -> assertEquals("name as a", field.as("a").name()),
+        () -> assertEquals("count(name)", field.count().name()),
+        () -> assertEquals("sum(name)", field.sum().name()),
+        () -> assertEquals("max(name)", field.max().name()),
+        () -> assertEquals("min(name)", field.min().name()),
+        () -> assertEquals("avg(name)", field.avg().name()),
+        () -> assertEquals("coalesce(name, 1)", field.coalesce(1).name()),
+        () -> assertEquals(Condition.eq(field), field.eq()),
+        () -> assertEquals(Condition.eq(field, other), field.eq(other)),
+        () -> assertEquals(Condition.gt(field), field.gt()),
+        () -> assertEquals(Condition.lt(field), field.lt()),
+        () -> assertEquals(Condition.gte(field), field.gte()),
+        () -> assertEquals(Condition.lte(field), field.lte()),
+        () -> assertEquals(Condition.like(field), field.like()),
+        () -> assertEquals(Condition.isNull(field), field.isNull()),
+        () -> assertEquals(Condition.isNotNull(field), field.isNotNull()),
+        () -> assertEquals(Condition.notEq(field), field.notEq())
     );
   }
 }

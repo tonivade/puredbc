@@ -54,27 +54,27 @@ public final class SQL {
   }
 
   public SQL from(Table table, Table... tables) {
-    return sql(query + " from " + NonEmptyList.of(table, tables).map(Table::alias).join(","));
+    return sql(query + " from " + NonEmptyList.of(table, tables).map(Table::name).join(","));
   }
 
   public SQL innerJoin(Table table) {
-    return sql(query + " inner join " + table.alias());
+    return sql(query + " inner join " + table.name());
   }
 
   public SQL leftJoin(Table table) {
-    return sql(query + " left join " + table.alias());
+    return sql(query + " left join " + table.name());
   }
 
   public SQL rightJoin(Table table) {
-    return sql(query + " right join " + table.alias());
+    return sql(query + " right join " + table.name());
   }
 
   public SQL fullJoin(Table table) {
-    return sql(query + " full join " + table.alias());
+    return sql(query + " full join " + table.name());
   }
 
   public <T> SQL on(Field<T> from, Field<T> to) {
-    return sql(query + " on " + from.fullName() + " = " + to.fullName());
+    return sql(query + " on " + from.name() + " = " + to.name());
   }
 
   public <T> SQL1<T> where(Condition<T> condition) {
@@ -138,7 +138,7 @@ public final class SQL {
   }
 
   public static SQL select(NonEmptyList<Field<?>> fields) {
-    return sql(fields.map(Field::fullName).join(", ", "select ", ""));
+    return sql(fields.map(Field::name).join(", ", "select ", ""));
   }
 
   public static SQL insert(Table table) {

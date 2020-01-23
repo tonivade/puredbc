@@ -28,11 +28,11 @@ public final class SQL4<A, B, C, D> {
   }
 
   public <E> SQL4<A, B, C, D> groupBy(Field<E> field) {
-    return new SQL4<>(query + " group by " + field.fullName());
+    return new SQL4<>(query + " group by " + field.name());
   }
 
   public <E> SQL4<A, B, C, D> orderBy(Field<E> field) {
-    return new SQL4<>(query + " order by " + field.fullName());
+    return new SQL4<>(query + " order by " + field.name());
   }
 
   public SQL4<A, B, C, D> asc() {
