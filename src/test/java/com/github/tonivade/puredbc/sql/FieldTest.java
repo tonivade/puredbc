@@ -4,6 +4,7 @@
  */
 package com.github.tonivade.puredbc.sql;
 
+import com.github.tonivade.purefun.data.NonEmptyList;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertAll;

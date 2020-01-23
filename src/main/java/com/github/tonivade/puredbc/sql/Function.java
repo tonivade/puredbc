@@ -8,10 +8,12 @@ import com.github.tonivade.purefun.Equal;
 import com.github.tonivade.purefun.data.ImmutableArray;
 import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Validation;
+import com.github.tonivade.purefun.type.Validation.Result;
 
 import java.util.Objects;
 
 import static com.github.tonivade.purefun.data.ImmutableArray.empty;
+import static com.github.tonivade.purefun.type.Validation.map3;
 import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
 import static com.github.tonivade.purefun.type.Validation.requireNonNull;
 
@@ -22,11 +24,8 @@ public interface Function<T> extends Field<T> {
   }
 
   static <T> Function<T> of(String name, Field<T> field, Sequence<Object> params) {
-    Validation<String, String> validation1 = requireNonEmpty(name);
-    Validation<String, Field<T>> validation2 = requireNonNull(field);
-    Validation<String, Sequence<Object>> validation3 = requireNonNull(params);
-    Validation<Validation.Result<String>, Function<T>> validation =
-        Validation.map3(validation1, validation2, validation3,
+    Validation<Result<String>, Function<T>> validation =
+        map3(requireNonEmpty(name), requireNonNull(field), requireNonNull(params),
             (n, f, p) -> new FunctionImpl<>(n, ImmutableArray.<Object>of(f.name()).appendAll(p)));
     return validation.getOrElseThrow();
   }

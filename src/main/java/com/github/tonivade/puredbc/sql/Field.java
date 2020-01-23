@@ -5,17 +5,23 @@
 package com.github.tonivade.puredbc.sql;
 
 import com.github.tonivade.purefun.Equal;
-import com.github.tonivade.purefun.data.Sequence;
 
 import java.util.Objects;
 
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
 import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
-import static java.util.Objects.requireNonNull;
 
 public interface Field<T> {
 
   String name();
+
+  default Alias<T> as(String alias) {
+    return Alias.of(alias, this);
+  }
+
+  default TableField<T> alias(String alias) {
+    return TableField.of(alias, name());
+  }
 
   default Function<T> count() {
     return Function.of("count", this);
@@ -39,14 +45,6 @@ public interface Field<T> {
 
   default Function<T> coalesce(int value) {
     return Function.of("coalesce", this, arrayOf(value));
-  }
-
-  default Alias<T> as(String alias) {
-    return Alias.of(alias, this);
-  }
-
-  default Field<T> alias(String alias) {
-    return of(requireNonNull(alias) + "." + name());
   }
 
   default Condition<T> eq() {
