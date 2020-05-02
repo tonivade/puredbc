@@ -5,7 +5,6 @@
 package com.github.tonivade.puredbc;
 
 import com.github.tonivade.puredbc.sql.Field;
-import com.github.tonivade.puredbc.sql.Row;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.puredbc.sql.SQL1;
 import com.github.tonivade.puredbc.sql.SQL2;
@@ -15,6 +14,7 @@ import com.github.tonivade.purefun.Tuple2;
 import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Range;
+import com.github.tonivade.purefun.instances.TryInstances;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
 import com.github.tonivade.purefun.typeclasses.For;
@@ -23,6 +23,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.junit.jupiter.api.Test;
 
 import javax.sql.DataSource;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static com.github.tonivade.puredbc.PureDBC.queryIterable;
@@ -68,7 +69,7 @@ class PureDBCTest {
 
   @Test
   void getAllUpdateWithKeys() {
-    PureDBC<Iterable<Tuple2<Integer, String>>> program = For.with(PureDBC.monad())
+    PureDBC<Iterable<Try<Tuple2<Integer, String>>>> program = For.with(PureDBC.monad())
         .andThen(() -> update(createTable).kind1())
         .andThen(() -> update(deleteAll).kind1())
         .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), row -> row.getInteger(TEST.ID)).kind1())
@@ -76,45 +77,46 @@ class PureDBCTest {
         .andThen(() -> queryIterable(findAll, TEST::asTuple).kind1())
         .fix(PureDBC::narrowK);
 
-    ImmutableList<Tuple2<Integer, String>> expected = listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe"));
+    ImmutableList<Try<Tuple2<Integer, String>>> expected =
+        listOf(Try.success(Tuple.of(1, "toni")), Try.success(Tuple.of(2, "pepe")));
 
     assertEquals(expected, program.unsafeRun(dataSource));
   }
 
   @Test
   void queryAll() {
-    PureDBC<Iterable<Tuple2<Integer, String>>> program =
+    PureDBC<Iterable<Try<Tuple2<Integer, String>>>> program =
         update(createTable)
             .andThen(update(deleteAll))
             .andThen(update(insertRow.bind(1, "toni")))
             .andThen(update(insertRow.bind(2, "pepe")))
             .andThen(queryIterable(findAll, TEST::asTuple));
 
-    assertProgram(program, listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe")));
+    assertProgram(program, listOf(Try.success(Tuple.of(1, "toni")), Try.success(Tuple.of(2, "pepe"))));
   }
 
   @Test
   void queryIn() {
-    PureDBC<Iterable<Tuple2<Integer, String>>> program =
+    PureDBC<Iterable<Try<Tuple2<Integer, String>>>> program =
         update(createTable)
             .andThen(update(deleteAll))
             .andThen(update(insertRow.bind(1, "toni")))
             .andThen(update(insertRow.bind(2, "pepe")))
             .andThen(queryIterable(findIn.bind(arrayOf(1, 2, 3)), TEST::asTuple));
 
-    assertProgram(program, listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe")));
+    assertProgram(program, listOf(Try.success(Tuple.of(1, "toni")), Try.success(Tuple.of(2, "pepe"))));
   }
 
   @Test
   void queryBetween() {
-    PureDBC<Iterable<Tuple2<Integer, String>>> program =
+    PureDBC<Iterable<Try<Tuple2<Integer, String>>>> program =
         update(createTable)
             .andThen(update(deleteAll))
             .andThen(update(insertRow.bind(1, "toni")))
             .andThen(update(insertRow.bind(2, "pepe")))
             .andThen(queryIterable(findBetween.bind(Range.of(1, 2)), TEST::asTuple));
 
-    assertProgram(program, listOf(Tuple.of(1, "toni"), Tuple.of(2, "pepe")));
+    assertProgram(program, listOf(Try.success(Tuple.of(1, "toni")), Try.success(Tuple.of(2, "pepe"))));
   }
 
   @Test
@@ -125,34 +127,37 @@ class PureDBCTest {
         .andThen(update(insertRow.bind(1, "toni")))
         .andThen(update(insertRow.bind(2, "pepe")))
         .andThen(update(insertRow.bind(3, "paco")))
-        .andThen(PureDBC.query(count, rs -> rs.next() ? rs.getInt("elements") : 0));
+        .andThen(PureDBC.query(count, result -> {
+          ResultSet rs = result.unwrap();
+          return rs.next() ? rs.getInt("elements") : 0;
+        }));
 
     assertProgram(program, 3);
   }
 
   @Test
   void queryJustOne() {
-    PureDBC<Option<Tuple2<Integer, String>>> program =
+    PureDBC<Option<Try<Tuple2<Integer, String>>>> program =
         update(createTable)
             .andThen(update(deleteOne.bind(1)))
             .andThen(update(insertRow.bind(1, "toni")))
             .andThen(update(updateRow.bind("pepe", 1)))
             .andThen(queryOne(findOne.bind(1), TEST::asTuple));
 
-    assertProgram(program, Option.some(Tuple.of(1, "pepe")));
+    assertProgram(program, Option.some(Try.success(Tuple.of(1, "pepe"))));
   }
 
   @Test
   void queryMetaData() {
     PureDBC<Integer> program =
-        update(createTable).andThen(PureDBC.query(findAll, rs -> rs.getMetaData().getColumnCount()));
+        update(createTable).andThen(PureDBC.query(findAll, rs -> rs.<ResultSet>unwrap().getMetaData().getColumnCount()));
 
     assertEquals(2, program.unsafeRun(dataSource()));
   }
 
   @Test
   void queryError() {
-    PureDBC<Option<Tuple2<Integer, String>>> program =
+    PureDBC<Option<Try<Tuple2<Integer, String>>>> program =
         update(dropTable)
             .andThen(update(deleteAll))
             .andThen(update(insertRow.bind(1, "toni")))
@@ -179,7 +184,7 @@ class PureDBCTest {
     );
   }
 
-  private void assertProgramFailure(PureDBC<Option<Tuple2<Integer, String>>> program) {
+  private void assertProgramFailure(PureDBC<Option<Try<Tuple2<Integer, String>>>> program) {
     assertAll(
         () -> assertThrows(SQLException.class, () -> program.unsafeRun(dataSource)),
         () -> assertTrue(program.safeRun(dataSource).isFailure()),
@@ -223,7 +228,7 @@ final class TestTable implements Table2<Integer, String> {
     return new TestTable(this, requireNonNull(alias));
   }
 
-  public Tuple2<Integer, String> asTuple(Row row) throws SQLException {
-    return Tuple.of(row.getInteger(ID), row.getString(NAME));
+  public Try<Tuple2<Integer, String>> asTuple(Row row) {
+    return TryInstances.applicative().map2(row.getInteger(ID), row.getString(NAME), Tuple2::of).fix1(Try::narrowK);
   }
 }

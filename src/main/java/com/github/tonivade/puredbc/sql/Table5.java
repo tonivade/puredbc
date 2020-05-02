@@ -4,10 +4,10 @@
  */
 package com.github.tonivade.puredbc.sql;
 
+import com.github.tonivade.puredbc.Row;
 import com.github.tonivade.purefun.Tuple5;
-
-import java.sql.SQLException;
+import com.github.tonivade.purefun.type.Try;
 
 public interface Table5<A, B, C, D, E> extends Table {
-  Tuple5<A, B, C, D, E> asTuple(Row row) throws SQLException;
+  Try<Tuple5<A, B, C, D, E>> asTuple(Row row);
 }
