@@ -45,9 +45,8 @@ public final class R2dbcTemplate {
         .map(Option::some).defaultIfEmpty(Option.none());
   }
 
-  public <T> Flux<Option<T>> query(String query, Sequence<?> params, Function1<Result, T> mapper) {
-    // TODO:
-    return Flux.empty();
+  public <T> Flux<T> query(String query, Sequence<?> params, Function1<Result, T> mapper) {
+    throw new UnsupportedOperationException("TODO: not implemented yet");
   }
 
   public <T> Mono<Option<T>> queryOne(String query, Sequence<?> params, Function1<Row, T> rowMapper) {

@@ -86,8 +86,8 @@ public final class PureDBC<T>  {
     return asyncRun(value).apply(dataSource);
   }
 
-  public Publisher<T> reactRun(ConnectionFactory connectionFactory) {
-    return reactRun(value).apply(connectionFactory);
+  public Publisher<T> reactorRun(ConnectionFactory connectionFactory) {
+    return reactorRun(value).apply(connectionFactory);
   }
 
   public static <T> PureDBC<T> pure(T value) {
@@ -165,7 +165,7 @@ public final class PureDBC<T>  {
         });
   }
 
-  private static <A> Function1<ConnectionFactory, Publisher<A>> reactRun(Free<DSL.µ, A> free) {
+  private static <A> Function1<ConnectionFactory, Publisher<A>> reactorRun(Free<DSL.µ, A> free) {
     return connectionFactory -> {
       R2dbcTemplate r2dbc = newTemplate(connectionFactory);
       DSLReactVisitor visitor = new DSLReactVisitor(r2dbc);
@@ -371,7 +371,7 @@ public final class PureDBC<T>  {
 
     @Override
     public <T> Higher1<PublisherK.µ, T> visit(DSL.Query<T> query) {
-      return null;
+      return PublisherK.from(r2dbc.query(query.getQuery(), query.getParams(), query.getExtractor())).kind1();
     }
 
     @Override

@@ -194,7 +194,7 @@ class PureDBCTest {
         () -> assertEquals(Try.success(expected), program.safeRunIO(dataSource).safeRunSync()),
         () -> assertEquals(Try.success(expected), program.asyncRun(dataSource).await()),
         () -> assertEquals(Try.success(expected), program.asyncRun(dataSource).await()),
-        () -> assertEquals(expected, Mono.from(program.reactRun(connectionFactory)).block())
+        () -> assertEquals(expected, Mono.from(program.reactorRun(connectionFactory)).block())
     );
   }
 
