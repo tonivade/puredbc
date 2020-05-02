@@ -6,8 +6,7 @@ package com.github.tonivade.puredbc.sql;
 
 import com.github.tonivade.puredbc.Row;
 import com.github.tonivade.purefun.Tuple4;
-import com.github.tonivade.purefun.type.Try;
 
 public interface Table4<A, B, C, D> extends Table {
-  Try<Tuple4<A, B, C, D>> asTuple(Row row);
+  Tuple4<A, B, C, D> asTuple(Row row);
 }

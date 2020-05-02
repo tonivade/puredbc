@@ -5,7 +5,8 @@
 package com.github.tonivade.puredbc;
 
 import com.github.tonivade.puredbc.sql.Field;
-import com.github.tonivade.purefun.type.Try;
+import com.github.tonivade.purefun.Producer;
+import com.github.tonivade.purefun.Recoverable;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -13,7 +14,7 @@ import java.util.Date;
 
 import static java.util.Objects.requireNonNull;
 
-final class JdbcRow implements Row {
+final class JdbcRow implements Row, Recoverable {
 
   private final ResultSet resultSet;
 
@@ -22,62 +23,66 @@ final class JdbcRow implements Row {
   }
 
   @Override
-  public Try<String> getString(Field<String> field) {
-    return Try.of(() -> resultSet.getString(field.name()));
+  public String getString(Field<String> field) {
+    return run(() -> resultSet.getString(field.name()));
   }
 
   @Override
-  public Try<Integer> getInteger(Field<Integer> field) {
-    return Try.of(() -> resultSet.getObject(field.name(), Integer.class));
+  public Integer getInteger(Field<Integer> field) {
+    return run(() -> resultSet.getObject(field.name(), Integer.class));
   }
 
   @Override
-  public Try<Long> getLong(Field<Long> field) {
-    return Try.of(() -> resultSet.getObject(field.name(), Long.class));
+  public Long getLong(Field<Long> field) {
+    return run(() -> resultSet.getObject(field.name(), Long.class));
   }
 
   @Override
-  public Try<Short> getShort(Field<Short> field) {
-    return Try.of(() -> resultSet.getObject(field.name(), Short.class));
+  public Short getShort(Field<Short> field) {
+    return run(() -> resultSet.getObject(field.name(), Short.class));
   }
 
   @Override
-  public Try<Byte> getByte(Field<Byte> field) {
-    return Try.of(() -> resultSet.getObject(field.name(), Byte.class));
+  public Byte getByte(Field<Byte> field) {
+    return run(() -> resultSet.getObject(field.name(), Byte.class));
   }
 
   @Override
-  public Try<Float> getFloat(Field<Float> field) {
-    return Try.of(() -> resultSet.getObject(field.name(), Float.class));
+  public Float getFloat(Field<Float> field) {
+    return run(() -> resultSet.getObject(field.name(), Float.class));
   }
 
   @Override
-  public Try<Double> getDouble(Field<Double> field) {
-    return Try.of(() -> resultSet.getObject(field.name(), Double.class));
+  public Double getDouble(Field<Double> field) {
+    return run(() -> resultSet.getObject(field.name(), Double.class));
   }
 
   @Override
-  public Try<BigDecimal> getBigDecimal(Field<BigDecimal> field) {
-    return Try.of(() -> resultSet.getBigDecimal(field.name()));
+  public BigDecimal getBigDecimal(Field<BigDecimal> field) {
+    return run(() -> resultSet.getBigDecimal(field.name()));
   }
 
   @Override
-  public Try<Boolean> getBoolean(Field<Boolean> field) {
-    return Try.of(() -> resultSet.getObject(field.name(), Boolean.class));
+  public Boolean getBoolean(Field<Boolean> field) {
+    return run(() -> resultSet.getObject(field.name(), Boolean.class));
   }
 
   @Override
-  public Try<Date> getTimestamp(Field<Date> field) {
-    return Try.of(() -> resultSet.getTimestamp(field.name()));
+  public Date getTimestamp(Field<Date> field) {
+    return run(() -> resultSet.getTimestamp(field.name()));
   }
 
   @Override
-  public Try<Date> getDate(Field<Date> field) {
-    return Try.of(() -> resultSet.getDate(field.name()));
+  public Date getDate(Field<Date> field) {
+    return run(() -> resultSet.getDate(field.name()));
   }
 
   @Override
-  public Try<Date> getTime(Field<Date> field) {
-    return Try.of(() -> resultSet.getTime(field.name()));
+  public Date getTime(Field<Date> field) {
+    return run(() -> resultSet.getTime(field.name()));
+  }
+
+  private static <T> T run(Producer<T> producer) {
+    return producer.get();
   }
 }

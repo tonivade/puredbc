@@ -6,6 +6,7 @@ package com.github.tonivade.puredbc;
 
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Unit;
+import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Option;
 import io.r2dbc.spi.Connection;
@@ -75,7 +76,17 @@ public final class R2dbcTemplate {
         .flatMap(stmt -> {
           int i = 0;
           for (Object param : params) {
-            stmt.bind(i++, param);
+            if (param instanceof Range) {
+              Range range = (Range) param;
+              stmt.bind(i++, range.begin());
+              stmt.bind(i++, range.end());
+            } else if (param instanceof Iterable) {
+              for (Object p : (Iterable<?>) param) {
+                stmt.bind(i++, p);
+              }
+            } else {
+              stmt.bind(i++, param);
+            }
           }
           return Mono.from(stmt.execute());
         });

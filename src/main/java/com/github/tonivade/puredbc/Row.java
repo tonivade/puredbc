@@ -5,34 +5,33 @@
 package com.github.tonivade.puredbc;
 
 import com.github.tonivade.puredbc.sql.Field;
-import com.github.tonivade.purefun.type.Try;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
 public interface Row {
 
-  Try<String> getString(Field<String> field);
+  String getString(Field<String> field);
 
-  Try<Integer> getInteger(Field<Integer> field);
+  Integer getInteger(Field<Integer> field);
 
-  Try<Long> getLong(Field<Long> field);
+  Long getLong(Field<Long> field);
 
-  Try<Short> getShort(Field<Short> field);
+  Short getShort(Field<Short> field);
 
-  Try<Byte> getByte(Field<Byte> field);
+  Byte getByte(Field<Byte> field);
 
-  Try<Float> getFloat(Field<Float> field);
+  Float getFloat(Field<Float> field);
 
-  Try<Double> getDouble(Field<Double> field);
+  Double getDouble(Field<Double> field);
 
-  Try<BigDecimal> getBigDecimal(Field<BigDecimal> field);
+  BigDecimal getBigDecimal(Field<BigDecimal> field);
 
-  Try<Boolean> getBoolean(Field<Boolean> field);
+  Boolean getBoolean(Field<Boolean> field);
 
-  Try<Date> getTimestamp(Field<Date> field);
+  Date getTimestamp(Field<Date> field);
 
-  Try<Date> getDate(Field<Date> field);
+  Date getDate(Field<Date> field);
 
-  Try<Date> getTime(Field<Date> field);
+  Date getTime(Field<Date> field);
 }

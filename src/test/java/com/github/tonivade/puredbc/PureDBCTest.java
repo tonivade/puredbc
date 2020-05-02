@@ -14,7 +14,6 @@ import com.github.tonivade.purefun.Tuple2;
 import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Range;
-import com.github.tonivade.purefun.instances.TryInstances;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
 import com.github.tonivade.purefun.typeclasses.For;
@@ -74,7 +73,7 @@ class PureDBCTest {
 
   @Test
   void getAllUpdateWithKeys() {
-    PureDBC<Iterable<Try<Tuple2<Long, String>>>> program = For.with(PureDBC.monad())
+    PureDBC<Iterable<Tuple2<Long, String>>> program = For.with(PureDBC.monad())
         .andThen(() -> update(createTable).kind1())
         .andThen(() -> update(deleteAll).kind1())
         .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), row -> row.getLong(TEST.ID)).kind1())
@@ -82,46 +81,46 @@ class PureDBCTest {
         .andThen(() -> queryIterable(findAll, TEST::asTuple).kind1())
         .fix(PureDBC::narrowK);
 
-    ImmutableList<Try<Tuple2<Long, String>>> expected =
-        listOf(Try.success(Tuple.of(1l, "toni")), Try.success(Tuple.of(2l, "pepe")));
+    ImmutableList<Tuple2<Long, String>> expected =
+        listOf(Tuple.of(1L, "toni"), Tuple.of(2L, "pepe"));
 
     assertEquals(expected, program.unsafeRun(dataSource));
   }
 
   @Test
   void queryAll() {
-    PureDBC<Iterable<Try<Tuple2<Long, String>>>> program =
+    PureDBC<Iterable<Tuple2<Long, String>>> program =
         update(createTable)
             .andThen(update(deleteAll))
-            .andThen(update(insertRow.bind(1l, "toni")))
-            .andThen(update(insertRow.bind(2l, "pepe")))
+            .andThen(update(insertRow.bind(1L, "toni")))
+            .andThen(update(insertRow.bind(2L, "pepe")))
             .andThen(queryIterable(findAll, TEST::asTuple));
 
-    assertProgram(program, listOf(Try.success(Tuple.of(1l, "toni")), Try.success(Tuple.of(2l, "pepe"))));
+    assertProgram(program, listOf(Tuple.of(1L, "toni"), Tuple.of(2L, "pepe")));
   }
 
   @Test
   void queryIn() {
-    PureDBC<Iterable<Try<Tuple2<Long, String>>>> program =
+    PureDBC<Iterable<Tuple2<Long, String>>> program =
         update(createTable)
             .andThen(update(deleteAll))
-            .andThen(update(insertRow.bind(1l, "toni")))
-            .andThen(update(insertRow.bind(2l, "pepe")))
-            .andThen(queryIterable(findIn.bind(arrayOf(1l, 2l, 3l)), TEST::asTuple));
+            .andThen(update(insertRow.bind(1L, "toni")))
+            .andThen(update(insertRow.bind(2L, "pepe")))
+            .andThen(queryIterable(findIn.bind(arrayOf(1L, 2L, 3L)), TEST::asTuple));
 
-    assertProgram(program, listOf(Try.success(Tuple.of(1l, "toni")), Try.success(Tuple.of(2l, "pepe"))));
+    assertProgram(program, listOf(Tuple.of(1L, "toni"), Tuple.of(2L, "pepe")));
   }
 
   @Test
   void queryBetween() {
-    PureDBC<Iterable<Try<Tuple2<Long, String>>>> program =
+    PureDBC<Iterable<Tuple2<Long, String>>> program =
         update(createTable)
             .andThen(update(deleteAll))
-            .andThen(update(insertRow.bind(1l, "toni")))
-            .andThen(update(insertRow.bind(2l, "pepe")))
+            .andThen(update(insertRow.bind(1L, "toni")))
+            .andThen(update(insertRow.bind(2L, "pepe")))
             .andThen(queryIterable(findBetween.bind(Range.of(1, 2)), TEST::asTuple));
 
-    assertProgram(program, listOf(Try.success(Tuple.of(1l, "toni")), Try.success(Tuple.of(2l, "pepe"))));
+    assertProgram(program, listOf(Tuple.of(1L, "toni"), Tuple.of(2L, "pepe")));
   }
 
   @Test
@@ -129,9 +128,9 @@ class PureDBCTest {
     PureDBC<Integer> program =
       update(createTable)
         .andThen(update(deleteAll))
-        .andThen(update(insertRow.bind(1l, "toni")))
-        .andThen(update(insertRow.bind(2l, "pepe")))
-        .andThen(update(insertRow.bind(3l, "paco")))
+        .andThen(update(insertRow.bind(1L, "toni")))
+        .andThen(update(insertRow.bind(2L, "pepe")))
+        .andThen(update(insertRow.bind(3L, "paco")))
         .andThen(PureDBC.query(count, result -> {
           ResultSet rs = result.unwrap();
           return rs.next() ? rs.getInt("elements") : 0;
@@ -142,27 +141,14 @@ class PureDBCTest {
 
   @Test
   void queryJustOne() {
-    PureDBC<Option<Try<Tuple2<Long, String>>>> program =
+    PureDBC<Option<Tuple2<Long, String>>> program =
         update(createTable)
-            .andThen(update(deleteOne.bind(1l)))
-            .andThen(update(insertRow.bind(1l, "toni")))
-            .andThen(update(updateRow.bind("pepe", 1l)))
-            .andThen(queryOne(findOne.bind(1l), TEST::asTuple));
+            .andThen(update(deleteOne.bind(1L)))
+            .andThen(update(insertRow.bind(1L, "toni")))
+            .andThen(update(updateRow.bind("pepe", 1L)))
+            .andThen(queryOne(findOne.bind(1L), TEST::asTuple));
 
-    assertProgram(program, Option.some(Try.success(Tuple.of(1l, "pepe"))));
-  }
-
-  @Test
-  void queryJustOneReactor() {
-    PureDBC<Option<Try<Tuple2<Long, String>>>> program =
-        update(createTable)
-            .andThen(update(deleteOne.bind(1l)))
-            .andThen(update(insertRow.bind(1l, "toni")))
-            .andThen(update(updateRow.bind("pepe", 1l)))
-            .andThen(queryOne(findOne.bind(1l), TEST::asTuple));
-
-    Option<Try<Tuple2<Long, String>>> result = Mono.from(program.reactRun(connectionFactory)).block();
-    assertEquals(Option.some(Try.success(Tuple.of(1l, "pepe"))), result);
+    assertProgram(program, Option.some(Tuple.of(1L, "pepe")));
   }
 
   @Test
@@ -175,11 +161,11 @@ class PureDBCTest {
 
   @Test
   void queryError() {
-    PureDBC<Option<Try<Tuple2<Long, String>>>> program =
+    PureDBC<Option<Tuple2<Long, String>>> program =
         update(dropTable)
             .andThen(update(deleteAll))
-            .andThen(update(insertRow.bind(1l, "toni")))
-            .andThen(queryOne(findOne.bind(1l), TEST::asTuple));
+            .andThen(update(insertRow.bind(1L, "toni")))
+            .andThen(queryOne(findOne.bind(1L), TEST::asTuple));
 
     assertProgramFailure(program);
   }
@@ -206,11 +192,13 @@ class PureDBCTest {
         () -> assertEquals(Try.success(expected), program.safeRun(dataSource)),
         () -> assertEquals(expected, program.unsafeRunIO(dataSource).unsafeRunSync()),
         () -> assertEquals(Try.success(expected), program.safeRunIO(dataSource).safeRunSync()),
-        () -> assertEquals(Try.success(expected), program.asyncRun(dataSource).await())
+        () -> assertEquals(Try.success(expected), program.asyncRun(dataSource).await()),
+        () -> assertEquals(Try.success(expected), program.asyncRun(dataSource).await()),
+        () -> assertEquals(expected, Mono.from(program.reactRun(connectionFactory)).block())
     );
   }
 
-  private void assertProgramFailure(PureDBC<Option<Try<Tuple2<Long, String>>>> program) {
+  private void assertProgramFailure(PureDBC<Option<Tuple2<Long, String>>> program) {
     assertAll(
         () -> assertThrows(SQLException.class, () -> program.unsafeRun(dataSource)),
         () -> assertTrue(program.safeRun(dataSource).isFailure()),
@@ -254,7 +242,7 @@ final class TestTable implements Table2<Long, String> {
     return new TestTable(this, requireNonNull(alias));
   }
 
-  public Try<Tuple2<Long, String>> asTuple(Row row) {
-    return TryInstances.applicative().map2(row.getLong(ID), row.getString(NAME), Tuple2::of).fix1(Try::narrowK);
+  public Tuple2<Long, String> asTuple(Row row) {
+    return Tuple2.of(row.getLong(ID), row.getString(NAME));
   }
 }
