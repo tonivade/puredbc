@@ -20,7 +20,11 @@ import com.github.tonivade.purefun.type.Try;
 import com.github.tonivade.purefun.typeclasses.For;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import io.r2dbc.spi.ConnectionFactories;
+import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.ConnectionFactoryOptions;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
@@ -50,6 +54,7 @@ class PureDBCTest {
   private static final TestTable ALIAS = TEST.as("a");
 
   private final DataSource dataSource = dataSource();
+  private final ConnectionFactory connectionFactory = connectionFactory();
 
   private final SQL createTable = sql(
       "create table if not exists test(",
@@ -57,66 +62,66 @@ class PureDBCTest {
       "name varchar(100))");
   private final SQL dropTable = sql("drop table if exists test");
   private final SQL deleteAll = delete(TEST);
-  private final SQL1<Integer> deleteOne = delete(TEST).where(TEST.ID.eq());
+  private final SQL1<Long> deleteOne = delete(TEST).where(TEST.ID.eq());
   private final SQL1<String> insertRowWithKey = insert(TEST).values(TEST.NAME);
-  private final SQL2<Integer, String> insertRow = insert(TEST).values(TEST.ID, TEST.NAME);
-  private final SQL2<String, Integer> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
+  private final SQL2<Long, String> insertRow = insert(TEST).values(TEST.ID, TEST.NAME);
+  private final SQL2<String, Long> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
   private final SQL findAll = select(ALIAS.all()).from(ALIAS);
-  private final SQL1<Iterable<Integer>> findIn = select(ALIAS.all()).from(ALIAS).where(ALIAS.ID.in());
+  private final SQL1<Iterable<Long>> findIn = select(ALIAS.all()).from(ALIAS).where(ALIAS.ID.in());
   private final SQL1<Range> findBetween = select(ALIAS.all()).from(ALIAS).where(between(ALIAS.ID));
   private final SQL count = select(TEST.ID.count().as("elements")).from(TEST);
-  private final SQL1<Integer> findOne = select(TEST.ID, TEST.NAME).from(TEST).where(TEST.ID.eq());
+  private final SQL1<Long> findOne = select(TEST.ID, TEST.NAME).from(TEST).where(TEST.ID.eq());
 
   @Test
   void getAllUpdateWithKeys() {
-    PureDBC<Iterable<Try<Tuple2<Integer, String>>>> program = For.with(PureDBC.monad())
+    PureDBC<Iterable<Try<Tuple2<Long, String>>>> program = For.with(PureDBC.monad())
         .andThen(() -> update(createTable).kind1())
         .andThen(() -> update(deleteAll).kind1())
-        .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), row -> row.getInteger(TEST.ID)).kind1())
-        .andThen(() -> updateWithKeys(insertRowWithKey.bind("pepe"), row -> row.getInteger(TEST.ID)).kind1())
+        .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), row -> row.getLong(TEST.ID)).kind1())
+        .andThen(() -> updateWithKeys(insertRowWithKey.bind("pepe"), row -> row.getLong(TEST.ID)).kind1())
         .andThen(() -> queryIterable(findAll, TEST::asTuple).kind1())
         .fix(PureDBC::narrowK);
 
-    ImmutableList<Try<Tuple2<Integer, String>>> expected =
-        listOf(Try.success(Tuple.of(1, "toni")), Try.success(Tuple.of(2, "pepe")));
+    ImmutableList<Try<Tuple2<Long, String>>> expected =
+        listOf(Try.success(Tuple.of(1l, "toni")), Try.success(Tuple.of(2l, "pepe")));
 
     assertEquals(expected, program.unsafeRun(dataSource));
   }
 
   @Test
   void queryAll() {
-    PureDBC<Iterable<Try<Tuple2<Integer, String>>>> program =
+    PureDBC<Iterable<Try<Tuple2<Long, String>>>> program =
         update(createTable)
             .andThen(update(deleteAll))
-            .andThen(update(insertRow.bind(1, "toni")))
-            .andThen(update(insertRow.bind(2, "pepe")))
+            .andThen(update(insertRow.bind(1l, "toni")))
+            .andThen(update(insertRow.bind(2l, "pepe")))
             .andThen(queryIterable(findAll, TEST::asTuple));
 
-    assertProgram(program, listOf(Try.success(Tuple.of(1, "toni")), Try.success(Tuple.of(2, "pepe"))));
+    assertProgram(program, listOf(Try.success(Tuple.of(1l, "toni")), Try.success(Tuple.of(2l, "pepe"))));
   }
 
   @Test
   void queryIn() {
-    PureDBC<Iterable<Try<Tuple2<Integer, String>>>> program =
+    PureDBC<Iterable<Try<Tuple2<Long, String>>>> program =
         update(createTable)
             .andThen(update(deleteAll))
-            .andThen(update(insertRow.bind(1, "toni")))
-            .andThen(update(insertRow.bind(2, "pepe")))
-            .andThen(queryIterable(findIn.bind(arrayOf(1, 2, 3)), TEST::asTuple));
+            .andThen(update(insertRow.bind(1l, "toni")))
+            .andThen(update(insertRow.bind(2l, "pepe")))
+            .andThen(queryIterable(findIn.bind(arrayOf(1l, 2l, 3l)), TEST::asTuple));
 
-    assertProgram(program, listOf(Try.success(Tuple.of(1, "toni")), Try.success(Tuple.of(2, "pepe"))));
+    assertProgram(program, listOf(Try.success(Tuple.of(1l, "toni")), Try.success(Tuple.of(2l, "pepe"))));
   }
 
   @Test
   void queryBetween() {
-    PureDBC<Iterable<Try<Tuple2<Integer, String>>>> program =
+    PureDBC<Iterable<Try<Tuple2<Long, String>>>> program =
         update(createTable)
             .andThen(update(deleteAll))
-            .andThen(update(insertRow.bind(1, "toni")))
-            .andThen(update(insertRow.bind(2, "pepe")))
+            .andThen(update(insertRow.bind(1l, "toni")))
+            .andThen(update(insertRow.bind(2l, "pepe")))
             .andThen(queryIterable(findBetween.bind(Range.of(1, 2)), TEST::asTuple));
 
-    assertProgram(program, listOf(Try.success(Tuple.of(1, "toni")), Try.success(Tuple.of(2, "pepe"))));
+    assertProgram(program, listOf(Try.success(Tuple.of(1l, "toni")), Try.success(Tuple.of(2l, "pepe"))));
   }
 
   @Test
@@ -124,9 +129,9 @@ class PureDBCTest {
     PureDBC<Integer> program =
       update(createTable)
         .andThen(update(deleteAll))
-        .andThen(update(insertRow.bind(1, "toni")))
-        .andThen(update(insertRow.bind(2, "pepe")))
-        .andThen(update(insertRow.bind(3, "paco")))
+        .andThen(update(insertRow.bind(1l, "toni")))
+        .andThen(update(insertRow.bind(2l, "pepe")))
+        .andThen(update(insertRow.bind(3l, "paco")))
         .andThen(PureDBC.query(count, result -> {
           ResultSet rs = result.unwrap();
           return rs.next() ? rs.getInt("elements") : 0;
@@ -137,14 +142,27 @@ class PureDBCTest {
 
   @Test
   void queryJustOne() {
-    PureDBC<Option<Try<Tuple2<Integer, String>>>> program =
+    PureDBC<Option<Try<Tuple2<Long, String>>>> program =
         update(createTable)
-            .andThen(update(deleteOne.bind(1)))
-            .andThen(update(insertRow.bind(1, "toni")))
-            .andThen(update(updateRow.bind("pepe", 1)))
-            .andThen(queryOne(findOne.bind(1), TEST::asTuple));
+            .andThen(update(deleteOne.bind(1l)))
+            .andThen(update(insertRow.bind(1l, "toni")))
+            .andThen(update(updateRow.bind("pepe", 1l)))
+            .andThen(queryOne(findOne.bind(1l), TEST::asTuple));
 
-    assertProgram(program, Option.some(Try.success(Tuple.of(1, "pepe"))));
+    assertProgram(program, Option.some(Try.success(Tuple.of(1l, "pepe"))));
+  }
+
+  @Test
+  void queryJustOneReactor() {
+    PureDBC<Option<Try<Tuple2<Long, String>>>> program =
+        update(createTable)
+            .andThen(update(deleteOne.bind(1l)))
+            .andThen(update(insertRow.bind(1l, "toni")))
+            .andThen(update(updateRow.bind("pepe", 1l)))
+            .andThen(queryOne(findOne.bind(1l), TEST::asTuple));
+
+    Option<Try<Tuple2<Long, String>>> result = Mono.from(program.reactRun(connectionFactory)).block();
+    assertEquals(Option.some(Try.success(Tuple.of(1l, "pepe"))), result);
   }
 
   @Test
@@ -157,11 +175,11 @@ class PureDBCTest {
 
   @Test
   void queryError() {
-    PureDBC<Option<Try<Tuple2<Integer, String>>>> program =
+    PureDBC<Option<Try<Tuple2<Long, String>>>> program =
         update(dropTable)
             .andThen(update(deleteAll))
-            .andThen(update(insertRow.bind(1, "toni")))
-            .andThen(queryOne(findOne.bind(1), TEST::asTuple));
+            .andThen(update(insertRow.bind(1l, "toni")))
+            .andThen(queryOne(findOne.bind(1l), TEST::asTuple));
 
     assertProgramFailure(program);
   }
@@ -174,6 +192,14 @@ class PureDBCTest {
     return new HikariDataSource(poolConfig);
   }
 
+  private ConnectionFactory connectionFactory() {
+    ConnectionFactoryOptions baseOptions = ConnectionFactoryOptions.parse("r2dbc:h2:mem:///test");
+    ConnectionFactoryOptions.Builder builder = ConnectionFactoryOptions.builder().from(baseOptions)
+        .option(ConnectionFactoryOptions.USER, "sa")
+        .option(ConnectionFactoryOptions.PASSWORD, "");
+    return ConnectionFactories.get(builder.build());
+  }
+
   private <T> void assertProgram(PureDBC<T> program, T expected) {
     assertAll(
         () -> assertEquals(expected, program.unsafeRun(dataSource)),
@@ -184,7 +210,7 @@ class PureDBCTest {
     );
   }
 
-  private void assertProgramFailure(PureDBC<Option<Try<Tuple2<Integer, String>>>> program) {
+  private void assertProgramFailure(PureDBC<Option<Try<Tuple2<Long, String>>>> program) {
     assertAll(
         () -> assertThrows(SQLException.class, () -> program.unsafeRun(dataSource)),
         () -> assertTrue(program.safeRun(dataSource).isFailure()),
@@ -195,9 +221,9 @@ class PureDBCTest {
   }
 }
 
-final class TestTable implements Table2<Integer, String> {
+final class TestTable implements Table2<Long, String> {
 
-  public final Field<Integer> ID;
+  public final Field<Long> ID;
   public final Field<String> NAME;
 
   private final String name;
@@ -228,7 +254,7 @@ final class TestTable implements Table2<Integer, String> {
     return new TestTable(this, requireNonNull(alias));
   }
 
-  public Try<Tuple2<Integer, String>> asTuple(Row row) {
-    return TryInstances.applicative().map2(row.getInteger(ID), row.getString(NAME), Tuple2::of).fix1(Try::narrowK);
+  public Try<Tuple2<Long, String>> asTuple(Row row) {
+    return TryInstances.applicative().map2(row.getLong(ID), row.getString(NAME), Tuple2::of).fix1(Try::narrowK);
   }
 }

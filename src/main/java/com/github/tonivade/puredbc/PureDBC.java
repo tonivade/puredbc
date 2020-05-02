@@ -169,8 +169,7 @@ public final class PureDBC<T>  {
     return connectionFactory -> {
       R2dbcTemplate r2dbc = newTemplate(connectionFactory);
       DSLReactVisitor visitor = new DSLReactVisitor(r2dbc);
-      free.foldMap(PublisherMonad.instance(), new DSLTransformer<>(visitor));
-      return Mono.empty();
+      return PublisherK.narrowK(free.foldMap(PublisherMonad.instance(), new DSLTransformer<>(visitor)));
     };
   }
 
@@ -362,12 +361,12 @@ public final class PureDBC<T>  {
 
     @Override
     public Higher1<PublisherK.µ, Unit> visit(DSL.Update update) {
-      return null;
+      return PublisherK.from(r2dbc.update(update.getQuery(), update.getParams())).kind1();
     }
 
     @Override
     public <T> Higher1<PublisherK.µ, Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return null;
+      return PublisherK.from(r2dbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper())).kind1();
     }
 
     @Override
@@ -377,7 +376,8 @@ public final class PureDBC<T>  {
 
     @Override
     public <T> Higher1<PublisherK.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return null;
+      return PublisherK.from(r2dbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()))
+          .map(list -> (Iterable<T>) list).kind1();
     }
 
     @Override
@@ -445,8 +445,12 @@ class PublisherK<T> implements Publisher<T> {
     this.value = requireNonNull(value);
   }
 
+  public <R> PublisherK<R> map(Function1<T, R> mapper) {
+    return new PublisherK<>(Flux.from(value).map(mapper::apply));
+  }
+
   public <R> PublisherK<R> flatMap(Function1<T, PublisherK<R>> mapper) {
-    return new PublisherK<>(Flux.from(value).flatMap(x -> Flux.from(mapper.apply(x))));
+    return new PublisherK<>(Flux.from(value).flatMap(mapper.andThen(Flux::from)::apply));
   }
 
   public static <T> PublisherK<T> from(Publisher<T> value) {
