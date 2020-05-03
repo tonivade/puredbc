@@ -4,15 +4,23 @@
  */
 package com.github.tonivade.puredbc;
 
+import com.github.tonivade.purefun.data.ImmutableList;
+import com.github.tonivade.purefun.type.Option;
+import com.github.tonivade.purefun.type.Try;
+import io.r2dbc.spi.ColumnMetadata;
+import io.r2dbc.spi.Nullability;
 import io.r2dbc.spi.RowMetadata;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.util.Objects.requireNonNull;
 
-public class R2dbcRowMetaData implements RowMetaData {
+final class R2dbcRowMetaData implements RowMetaData {
 
   private final RowMetadata impl;
 
-  public R2dbcRowMetaData(RowMetadata impl) {
+  protected R2dbcRowMetaData(RowMetadata impl) {
     this.impl = requireNonNull(impl);
   }
 
@@ -24,5 +32,31 @@ public class R2dbcRowMetaData implements RowMetaData {
   @Override
   public Iterable<String> columnNames() {
     return impl.getColumnNames();
+  }
+
+  @Override
+  public Iterable<ColumnMetaData> allColumns() {
+    List<ColumnMetaData> columns = new ArrayList<>();
+    for (ColumnMetadata meta : impl.getColumnMetadatas()) {
+      columns.add(createColumn(meta));
+    }
+    return ImmutableList.from(columns);
+  }
+
+  @Override
+  public Option<ColumnMetaData> column(String name) {
+    return Try.of(() -> impl.getColumnMetadata(name)).map(R2dbcRowMetaData::createColumn).toOption();
+  }
+
+  @Override
+  public Option<ColumnMetaData> column(int index) {
+    return Try.of(() -> impl.getColumnMetadata(index)).map(R2dbcRowMetaData::createColumn).toOption();
+  }
+
+  private static ColumnMetaData createColumn(ColumnMetadata meta) {
+    return new ColumnMetaData(
+        meta.getName(),
+        meta.getJavaType(),
+        meta.getNullability() != Nullability.UNKNOWN ? meta.getNullability() == Nullability.NULLABLE : null);
   }
 }

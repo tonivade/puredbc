@@ -4,40 +4,63 @@
  */
 package com.github.tonivade.puredbc;
 
-import com.github.tonivade.purefun.Producer;
-import com.github.tonivade.purefun.data.ImmutableList;
+import com.github.tonivade.purefun.Recoverable;
+import com.github.tonivade.purefun.type.Option;
 
 import java.sql.ResultSetMetaData;
-import java.util.LinkedList;
-import java.util.List;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
-import static java.util.Objects.requireNonNull;
+final class JdbcRowMetaData implements RowMetaData, Recoverable {
 
-public class JdbcRowMetaData implements RowMetaData {
+  private final Map<String, ColumnMetaData> columnsByName;
+  private final Map<Integer, ColumnMetaData> columnsByIndex;
 
-  private final ResultSetMetaData impl;
-
-  public JdbcRowMetaData(ResultSetMetaData impl) {
-    this.impl = requireNonNull(impl);
+  protected JdbcRowMetaData(ResultSetMetaData impl) {
+    columnsByName = new HashMap<>();
+    columnsByIndex = new HashMap<>();
+    try {
+      for (int i = 1; i <= impl.getColumnCount(); i++) {
+        ColumnMetaData columnMetadata = createColumn(impl, i);
+        columnsByIndex.put(i, columnMetadata);
+        columnsByName.put(columnMetadata.getName(), columnMetadata);
+      }
+    } catch (SQLException | ClassNotFoundException e) {
+      sneakyThrow(e);
+    }
   }
 
   @Override
   public int columnCount() {
-    return run(impl::getColumnCount);
+    return columnsByIndex.size();
   }
 
   @Override
   public Iterable<String> columnNames() {
-    return run(() -> {
-      List<String> list = new LinkedList<>();
-      for (int i = 1; i <= impl.getColumnCount(); i++) {
-        list.add(impl.getColumnName(i));
-      }
-      return ImmutableList.from(list);
-    });
+    return columnsByName.keySet();
   }
 
-  private static <T> T run(Producer<T> producer) {
-    return producer.get();
+  @Override
+  public Iterable<ColumnMetaData> allColumns() {
+    return columnsByIndex.values();
+  }
+
+  @Override
+  public Option<ColumnMetaData> column(String name) {
+    return Option.of(columnsByName.get(name));
+  }
+
+  @Override
+  public Option<ColumnMetaData> column(int index) {
+    return Option.of(columnsByIndex.get(index));
+  }
+
+  private static ColumnMetaData createColumn(ResultSetMetaData impl, int i) throws SQLException, ClassNotFoundException {
+    return new ColumnMetaData(
+        impl.getColumnName(i),
+        Class.forName(impl.getColumnClassName(i)),
+        impl.isNullable(i) != ResultSetMetaData.columnNullableUnknown ?
+            impl.isNullable(i) == ResultSetMetaData.columnNullable : null);
   }
 }
