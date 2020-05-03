@@ -39,7 +39,7 @@ public final class R2dbcTemplate {
   public <T> Mono<Option<T>> updateWithKeys(String query, Sequence<?> params, Function1<Row, T> rowMapper) {
     return Mono.from(connectionFactory.create())
         .flatMap(conn -> _update(query, params, conn)
-            .flatMap(result -> Mono.from(apply(rowMapper, result)))
+            .flatMap(result -> Mono.from(applyToRow(rowMapper, result)))
             .delayUntil(result -> conn.commitTransaction())
             .doFinally(stmt -> conn.close()))
         .map(Option::some).defaultIfEmpty(Option.none());
@@ -49,15 +49,21 @@ public final class R2dbcTemplate {
     throw new UnsupportedOperationException("TODO: not implemented yet");
   }
 
+  public <T> Mono<Option<T>> queryMeta(String query, Sequence<?> params, Function1<RowMetaData, T> rowMapper) {
+    return _query(query, params)
+        .flatMap(result -> Mono.from(applyToMeta(rowMapper, result)))
+        .map(Option::some).defaultIfEmpty(Option.none());
+  }
+
   public <T> Mono<Option<T>> queryOne(String query, Sequence<?> params, Function1<Row, T> rowMapper) {
     return _query(query, params)
-        .flatMap(result -> Mono.from(apply(rowMapper, result)))
+        .flatMap(result -> Mono.from(applyToRow(rowMapper, result)))
         .map(Option::some).defaultIfEmpty(Option.none());
   }
 
   public <T> Flux<List<T>> queryIterable(String query, Sequence<?> params, Function1<Row, T> rowMapper) {
     return _query(query, params)
-        .flatMapMany(result -> Flux.from(apply(rowMapper, result))).buffer(10);
+        .flatMapMany(result -> Flux.from(applyToRow(rowMapper, result))).buffer(10);
   }
 
   private Mono<io.r2dbc.spi.Result> _update(String query, Sequence<?> params, Connection conn) {
@@ -91,7 +97,11 @@ public final class R2dbcTemplate {
         });
   }
 
-  private <T> Publisher<T> apply(Function1<Row, T> rowMapper, io.r2dbc.spi.Result result) {
+  private <T> Publisher<T> applyToRow(Function1<Row, T> rowMapper, io.r2dbc.spi.Result result) {
     return result.map((row, meta) -> rowMapper.compose(R2dbcRow::new).apply(row));
+  }
+
+  private <T> Publisher<T> applyToMeta(Function1<RowMetaData, T> rowMapper, io.r2dbc.spi.Result result) {
+    return result.map((row, meta) -> rowMapper.compose(R2dbcRowMetaData::new).apply(meta));
   }
 }

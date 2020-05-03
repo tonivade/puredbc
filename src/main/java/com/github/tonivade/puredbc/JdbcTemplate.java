@@ -45,6 +45,11 @@ public class JdbcTemplate implements Recoverable, AutoCloseable {
     return _query(query, populateWith(params), rs -> extractor.apply(Result.wrap(rs)));
   }
 
+  public <T> Option<T> queryMeta(String query, Sequence<?> params, Function1<RowMetaData, T> rowMapper) {
+    return _query(query, populateWith(params),
+        optionExtractor(rowMapper.compose(rs -> new JdbcRowMetaData(rs.getMetaData()))));
+  }
+
   public <T> Option<T> queryOne(String query, Sequence<?> params, Function1<Row, T> rowMapper) {
     return _query(query, populateWith(params), optionExtractor(rowMapper.compose(JdbcRow::new)));
   }

@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static com.github.tonivade.puredbc.PureDBC.queryIterable;
@@ -125,18 +124,15 @@ class PureDBCTest {
 
   @Test
   void count() {
-    PureDBC<Integer> program =
+    PureDBC<Option<Long>> program =
       update(createTable)
         .andThen(update(deleteAll))
         .andThen(update(insertRow.bind(1L, "toni")))
         .andThen(update(insertRow.bind(2L, "pepe")))
         .andThen(update(insertRow.bind(3L, "paco")))
-        .andThen(PureDBC.query(count, result -> {
-          ResultSet rs = result.unwrap();
-          return rs.next() ? rs.getInt("elements") : 0;
-        }));
+        .andThen(PureDBC.queryOne(count, row -> row.getLong(Field.of("elements"))));
 
-    assertProgram(program, 3);
+    assertProgram(program, Option.some(3L));
   }
 
   @Test
@@ -153,10 +149,10 @@ class PureDBCTest {
 
   @Test
   void queryMetaData() {
-    PureDBC<Integer> program =
-        update(createTable).andThen(PureDBC.query(findAll, rs -> rs.<ResultSet>unwrap().getMetaData().getColumnCount()));
+    PureDBC<Option<Integer>> program =
+        update(createTable).andThen(PureDBC.queryMeta(findAll, RowMetaData::columnCount));
 
-    assertEquals(2, program.unsafeRun(dataSource()));
+    assertEquals(Option.some(2), program.unsafeRun(dataSource()));
   }
 
   @Test

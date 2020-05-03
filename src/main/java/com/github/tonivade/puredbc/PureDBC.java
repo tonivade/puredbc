@@ -12,6 +12,7 @@ import com.github.tonivade.purefun.Instance;
 import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.concurrent.Future;
+import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.effect.Task;
 import com.github.tonivade.purefun.effect.UIO;
 import com.github.tonivade.purefun.free.Free;
@@ -102,8 +103,8 @@ public final class PureDBC<T>  {
     return new PureDBC<>(new DSL.UpdateWithKeys<>(query, extractor));
   }
 
-  public static <T> PureDBC<T> query(SQL query, Function1<Result, T> rowMapper) {
-    return new PureDBC<>(new DSL.Query<>(query, rowMapper));
+  public static <T> PureDBC<Option<T>> queryMeta(SQL query, Function1<RowMetaData, T> rowMapper) {
+    return new PureDBC<>(new DSL.QueryMeta<>(query, rowMapper));
   }
 
   public static <T> PureDBC<Option<T>> queryOne(SQL query, Function1<Row, T> rowMapper) {
@@ -190,8 +191,8 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Id<T> visit(DSL.Query<T> query) {
-      return Id.of(jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> Id<Option<T>> visit(DSL.QueryMeta<T> query) {
+      return Id.of(jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
@@ -224,8 +225,8 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Try<T> visit(DSL.Query<T> query) {
-      return Try.of(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> Try<Option<T>> visit(DSL.QueryMeta<T> query) {
+      return Try.of(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
@@ -258,8 +259,8 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> UIO<T> visit(DSL.Query<T> query) {
-      return UIO.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> UIO<Option<T>> visit(DSL.QueryMeta<T> query) {
+      return UIO.task(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
@@ -292,8 +293,8 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Task<T> visit(DSL.Query<T> query) {
-      return Task.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> Task<Option<T>> visit(DSL.QueryMeta<T> query) {
+      return Task.task(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
@@ -326,8 +327,8 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Future<T> visit(DSL.Query<T> query) {
-      return Future.async(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> Future<Option<T>> visit(DSL.QueryMeta<T> query) {
+      return Future.async(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
@@ -360,6 +361,11 @@ public final class PureDBC<T>  {
     }
 
     @Override
+    public <T> Higher1<PublisherK.µ, Option<T>> visit(DSL.QueryMeta<T> query) {
+      return PublisherK.from(r2dbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper())).kind1();
+    }
+
+    @Override
     public Higher1<PublisherK.µ, Unit> visit(DSL.Update update) {
       return PublisherK.from(r2dbc.update(update.getQuery(), update.getParams())).kind1();
     }
@@ -370,13 +376,9 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<PublisherK.µ, T> visit(DSL.Query<T> query) {
-      return PublisherK.from(r2dbc.query(query.getQuery(), query.getParams(), query.getExtractor())).kind1();
-    }
-
-    @Override
     public <T> Higher1<PublisherK.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
       return PublisherK.from(r2dbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()))
+          .map(ImmutableList::from)
           .map(list -> (Iterable<T>) list).kind1();
     }
 

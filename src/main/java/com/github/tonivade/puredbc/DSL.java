@@ -25,7 +25,7 @@ interface DSL<T> {
   interface Visitor<F extends Kind> {
     Higher1<F, Unit> visit(DSL.Update update);
     <T> Higher1<F, Option<T>> visit(DSL.UpdateWithKeys<T> update);
-    <T> Higher1<F, T> visit(Query<T> query);
+    <T> Higher1<F, Option<T>> visit(DSL.QueryMeta<T> query);
     <T> Higher1<F, Iterable<T>> visit(QueryIterable<T> query);
     <T> Higher1<F, Option<T>> visit(DSL.QueryOne<T> query);
   }
@@ -44,30 +44,6 @@ interface DSL<T> {
 
     @Override
     public String toString() { return query.toString(); }
-  }
-
-  final class Query<T> extends AbstractQuery implements DSL<T> {
-
-    private final Function1<Result, T> extractor;
-
-    protected Query(SQL query, Function1<Result, T> extractor) {
-      super(query);
-      this.extractor = requireNonNull(extractor);
-    }
-
-    public Function1<Result, T> getExtractor() {
-      return extractor;
-    }
-
-    @Override
-    public <F extends Kind> Higher1<F, T> accept(Visitor<F> visitor) {
-      return visitor.visit(this);
-    }
-
-    @Override
-    public String toString() {
-      return String.format("Query{query=%s}", super.toString());
-    }
   }
 
   final class QueryIterable<T> extends AbstractQuery implements DSL<Iterable<T>> {
@@ -91,6 +67,30 @@ interface DSL<T> {
     @Override
     public String toString() {
       return String.format("QueryIterable{query=%s}", super.toString());
+    }
+  }
+
+  final class QueryMeta<T> extends AbstractQuery implements DSL<Option<T>> {
+
+    private final Function1<RowMetaData, T> rowMapper;
+
+    protected QueryMeta(SQL query, Function1<RowMetaData, T> rowMapper) {
+      super(query);
+      this.rowMapper = requireNonNull(rowMapper);
+    }
+
+    public Function1<RowMetaData, T> getRowMapper() {
+      return rowMapper;
+    }
+
+    @Override
+    public <F extends Kind> Higher1<F, Option<T>> accept(Visitor<F> visitor) {
+      return visitor.visit(this);
+    }
+
+    @Override
+    public String toString() {
+      return String.format("QueryOne{query=%s}", super.toString());
     }
   }
 
