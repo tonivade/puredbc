@@ -24,7 +24,7 @@ final class JdbcRowMetaData implements RowMetaData, Recoverable {
       for (int i = 1; i <= impl.getColumnCount(); i++) {
         ColumnMetaData columnMetadata = createColumn(impl, i);
         columnsByIndex.put(i, columnMetadata);
-        columnsByName.put(columnMetadata.getName(), columnMetadata);
+        columnsByName.put(columnMetadata.getName().toUpperCase(), columnMetadata);
       }
     } catch (SQLException | ClassNotFoundException e) {
       sneakyThrow(e);
@@ -48,7 +48,7 @@ final class JdbcRowMetaData implements RowMetaData, Recoverable {
 
   @Override
   public Option<ColumnMetaData> column(String name) {
-    return Option.of(columnsByName.get(name));
+    return Option.of(columnsByName.get(name.toUpperCase()));
   }
 
   @Override

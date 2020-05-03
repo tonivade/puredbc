@@ -45,10 +45,6 @@ public final class R2dbcTemplate {
         .map(Option::some).defaultIfEmpty(Option.none());
   }
 
-  public <T> Flux<T> query(String query, Sequence<?> params, Function1<Result, T> mapper) {
-    throw new UnsupportedOperationException("TODO: not implemented yet");
-  }
-
   public <T> Mono<Option<T>> queryMeta(String query, Sequence<?> params, Function1<RowMetaData, T> rowMapper) {
     return _query(query, params)
         .flatMap(result -> Mono.from(applyToMeta(rowMapper, result)))
