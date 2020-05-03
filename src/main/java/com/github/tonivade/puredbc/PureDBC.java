@@ -196,7 +196,7 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Id<Iterable<T>> visit(DSL.QueryIterable<T> query) {
+    public <T> Id<? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
       return Id.of(jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
@@ -230,7 +230,7 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Try<Iterable<T>> visit(DSL.QueryIterable<T> query) {
+    public <T> Try<? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
       return Try.of(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
@@ -264,7 +264,7 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> UIO<Iterable<T>> visit(DSL.QueryIterable<T> query) {
+    public <T> UIO<? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
       return UIO.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
@@ -298,7 +298,7 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Task<Iterable<T>> visit(DSL.QueryIterable<T> query) {
+    public <T> Task<? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
       return Task.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
@@ -332,7 +332,7 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Future<Iterable<T>> visit(DSL.QueryIterable<T> query) {
+    public <T> Future<? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
       return Future.async(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
@@ -376,10 +376,9 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<PublisherK.µ, Iterable<T>> visit(DSL.QueryIterable<T> query) {
+    public <T> Higher1<PublisherK.µ, ? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
       return PublisherK.from(r2dbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()))
-          .map(ImmutableList::from)
-          .map(list -> (Iterable<T>) list).kind1();
+          .map(ImmutableList::from).kind1();
     }
 
     @Override
@@ -397,8 +396,9 @@ public final class PureDBC<T>  {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> Higher1<F, T> apply(Higher1<DSL.µ, T> from) {
-      return DSL.narrowK(from).accept(visitor);
+      return (Higher1<F, T>) DSL.narrowK(from).accept(visitor);
     }
   }
 }

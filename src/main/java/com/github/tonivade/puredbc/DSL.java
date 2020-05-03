@@ -20,13 +20,13 @@ import static java.util.Objects.requireNonNull;
 @HigherKind
 interface DSL<T> {
 
-  <F extends Kind> Higher1<F, T> accept(Visitor<F> visitor);
+  <F extends Kind> Higher1<F, ? extends T> accept(Visitor<F> visitor);
 
   interface Visitor<F extends Kind> {
     Higher1<F, Unit> visit(DSL.Update update);
     <T> Higher1<F, Option<T>> visit(DSL.UpdateWithKeys<T> update);
     <T> Higher1<F, Option<T>> visit(DSL.QueryMeta<T> query);
-    <T> Higher1<F, Iterable<T>> visit(QueryIterable<T> query);
+    <T> Higher1<F, ? extends Iterable<T>> visit(QueryIterable<T> query);
     <T> Higher1<F, Option<T>> visit(DSL.QueryOne<T> query);
   }
 
@@ -60,7 +60,7 @@ interface DSL<T> {
     }
 
     @Override
-    public <F extends Kind> Higher1<F, Iterable<T>> accept(Visitor<F> visitor) {
+    public <F extends Kind> Higher1<F, ? extends Iterable<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
 
@@ -84,7 +84,7 @@ interface DSL<T> {
     }
 
     @Override
-    public <F extends Kind> Higher1<F, Option<T>> accept(Visitor<F> visitor) {
+    public <F extends Kind> Higher1<F, ? extends Option<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
 
@@ -108,7 +108,7 @@ interface DSL<T> {
     }
 
     @Override
-    public <F extends Kind> Higher1<F, Option<T>> accept(Visitor<F> visitor) {
+    public <F extends Kind> Higher1<F, ? extends Option<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
 
@@ -132,7 +132,7 @@ interface DSL<T> {
     }
 
     @Override
-    public <F extends Kind> Higher1<F, Option<T>> accept(Visitor<F> visitor) {
+    public <F extends Kind> Higher1<F, ? extends Option<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
 
