@@ -448,10 +448,16 @@ class PublisherK<T> implements Publisher<T> {
   }
 
   public <R> PublisherK<R> map(Function1<T, R> mapper) {
+    if (value instanceof Mono) {
+      return new PublisherK<>(Mono.from(value).map(mapper::apply));
+    }
     return new PublisherK<>(Flux.from(value).map(mapper::apply));
   }
 
   public <R> PublisherK<R> flatMap(Function1<T, PublisherK<R>> mapper) {
+    if (value instanceof Mono) {
+      return new PublisherK<>(Mono.from(value).flatMap(mapper.andThen(Mono::from)::apply));
+    }
     return new PublisherK<>(Flux.from(value).flatMap(mapper.andThen(Flux::from)::apply));
   }
 
