@@ -59,7 +59,7 @@ public interface Condition<T> {
     return of(field.name() + " is not null");
   }
 
-  static Condition<Range> between(Field<Integer> field) {
+  static Condition<Range> between(Field<? extends Number> field) {
     return of(field.name() + " between ?");
   }
 

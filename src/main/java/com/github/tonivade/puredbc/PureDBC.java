@@ -4,7 +4,6 @@
  */
 package com.github.tonivade.puredbc;
 
-import com.github.tonivade.puredbc.sql.Row;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Higher1;
@@ -13,6 +12,7 @@ import com.github.tonivade.purefun.Instance;
 import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.concurrent.Future;
+import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.effect.Task;
 import com.github.tonivade.purefun.effect.UIO;
 import com.github.tonivade.purefun.free.Free;
@@ -26,9 +26,13 @@ import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
 import com.github.tonivade.purefun.typeclasses.Monad;
 import com.github.tonivade.purefun.typeclasses.FunctionK;
+import io.r2dbc.spi.ConnectionFactory;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static com.github.tonivade.purefun.Function1.cons;
@@ -83,6 +87,10 @@ public final class PureDBC<T>  {
     return asyncRun(value).apply(dataSource);
   }
 
+  public Publisher<T> reactorRun(ConnectionFactory connectionFactory) {
+    return reactorRun(value).apply(connectionFactory);
+  }
+
   public static <T> PureDBC<T> pure(T value) {
     return new PureDBC<>(value);
   }
@@ -92,19 +100,19 @@ public final class PureDBC<T>  {
   }
 
   public static <T> PureDBC<Option<T>> updateWithKeys(SQL query, Function1<Row, T> extractor) {
-    return new PureDBC<>(new DSL.UpdateWithKeys<>(query, extractor.compose(Row::new)));
+    return new PureDBC<>(new DSL.UpdateWithKeys<>(query, extractor));
   }
 
-  public static <T> PureDBC<T> query(SQL query, Function1<ResultSet, T> rowMapper) {
-    return new PureDBC<>(new DSL.Query<>(query, rowMapper));
+  public static <T> PureDBC<Option<T>> queryMeta(SQL query, Function1<RowMetaData, T> rowMapper) {
+    return new PureDBC<>(new DSL.QueryMeta<>(query, rowMapper));
   }
 
   public static <T> PureDBC<Option<T>> queryOne(SQL query, Function1<Row, T> rowMapper) {
-    return new PureDBC<>(new DSL.QueryOne<>(query, rowMapper.compose(Row::new)));
+    return new PureDBC<>(new DSL.QueryOne<>(query, rowMapper));
   }
 
   public static <T> PureDBC<Iterable<T>> queryIterable(SQL query, Function1<Row, T> rowMapper) {
-    return new PureDBC<>(new DSL.QueryIterable<>(query, rowMapper.compose(Row::new)));
+    return new PureDBC<>(new DSL.QueryIterable<>(query, rowMapper));
   }
 
   public static Monad<PureDBC.µ> monad() {
@@ -151,15 +159,27 @@ public final class PureDBC<T>  {
 
   private static <A> Function1<DataSource, Future<A>> asyncRun(Free<DSL.µ, A> free) {
     return dataSource ->
-      Future.bracket(Future.async(() -> newTemplate(dataSource)), jdbc -> {
-        DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
-        Higher1<Future.µ, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix1(Future::narrowK);
-      });
+        Future.bracket(Future.async(() -> newTemplate(dataSource)), jdbc -> {
+          DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
+          Higher1<Future.µ, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
+          return foldMap.fix1(Future::narrowK);
+        });
+  }
+
+  private static <A> Function1<ConnectionFactory, Publisher<A>> reactorRun(Free<DSL.µ, A> free) {
+    return connectionFactory -> {
+      R2dbcTemplate r2dbc = newTemplate(connectionFactory);
+      DSLReactVisitor visitor = new DSLReactVisitor(r2dbc);
+      return PublisherK.narrowK(free.foldMap(PublisherMonad.instance(), new DSLTransformer<>(visitor)));
+    };
   }
 
   private static JdbcTemplate newTemplate(DataSource dataSource) throws SQLException {
     return new JdbcTemplate(dataSource.getConnection());
+  }
+
+  private static R2dbcTemplate newTemplate(ConnectionFactory connectionFactory) {
+    return new R2dbcTemplate(connectionFactory);
   }
 
   private static class DSLIdVisitor implements DSL.Visitor<Id.µ> {
@@ -171,18 +191,18 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Id<T> visit(DSL.Query<T> query) {
-      return Id.of(jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> Id<Option<T>> visit(DSL.QueryMeta<T> query) {
+      return Id.of(jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
-    public <T> Id<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return Id.of(jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> Id<? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
+      return Id.of(jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
     public <T> Id<Option<T>> visit(DSL.QueryOne<T> query) {
-      return Id.of(jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
+      return Id.of(jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
@@ -192,7 +212,7 @@ public final class PureDBC<T>  {
 
     @Override
     public <T> Id<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Id.of(jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
+      return Id.of(jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper()));
     }
   }
 
@@ -205,18 +225,18 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Try<T> visit(DSL.Query<T> query) {
-      return Try.of(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> Try<Option<T>> visit(DSL.QueryMeta<T> query) {
+      return Try.of(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
-    public <T> Try<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return Try.of(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> Try<? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
+      return Try.of(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
     public <T> Try<Option<T>> visit(DSL.QueryOne<T> query) {
-      return Try.of(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
+      return Try.of(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
@@ -226,7 +246,7 @@ public final class PureDBC<T>  {
 
     @Override
     public <T> Try<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Try.of(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
+      return Try.of(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper()));
     }
   }
 
@@ -239,18 +259,18 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> UIO<T> visit(DSL.Query<T> query) {
-      return UIO.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> UIO<Option<T>> visit(DSL.QueryMeta<T> query) {
+      return UIO.task(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
-    public <T> UIO<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return UIO.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> UIO<? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
+      return UIO.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
     public <T> UIO<Option<T>> visit(DSL.QueryOne<T> query) {
-      return UIO.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
+      return UIO.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
@@ -260,7 +280,7 @@ public final class PureDBC<T>  {
 
     @Override
     public <T> UIO<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return UIO.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
+      return UIO.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper()));
     }
   }
 
@@ -273,18 +293,18 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Task<T> visit(DSL.Query<T> query) {
-      return Task.task(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> Task<Option<T>> visit(DSL.QueryMeta<T> query) {
+      return Task.task(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
-    public <T> Task<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return Task.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> Task<? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
+      return Task.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
     public <T> Task<Option<T>> visit(DSL.QueryOne<T> query) {
-      return Task.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
+      return Task.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
@@ -294,7 +314,7 @@ public final class PureDBC<T>  {
 
     @Override
     public <T> Task<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Task.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
+      return Task.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper()));
     }
   }
 
@@ -307,18 +327,18 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Future<T> visit(DSL.Query<T> query) {
-      return Future.async(() -> jdbc.query(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> Future<Option<T>> visit(DSL.QueryMeta<T> query) {
+      return Future.async(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
-    public <T> Future<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return Future.async(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getExtractor()));
+    public <T> Future<? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
+      return Future.async(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
     public <T> Future<Option<T>> visit(DSL.QueryOne<T> query) {
-      return Future.async(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getExtractor()));
+      return Future.async(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
@@ -328,7 +348,42 @@ public final class PureDBC<T>  {
 
     @Override
     public <T> Future<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Future.async(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getExtractor()));
+      return Future.async(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper()));
+    }
+  }
+
+  private static class DSLReactVisitor implements DSL.Visitor<PublisherK.µ> {
+
+    private final R2dbcTemplate r2dbc;
+
+    private DSLReactVisitor(R2dbcTemplate r2dbc) {
+      this.r2dbc = requireNonNull(r2dbc);
+    }
+
+    @Override
+    public <T> Higher1<PublisherK.µ, Option<T>> visit(DSL.QueryMeta<T> query) {
+      return PublisherK.from(r2dbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper())).kind1();
+    }
+
+    @Override
+    public Higher1<PublisherK.µ, Unit> visit(DSL.Update update) {
+      return PublisherK.from(r2dbc.update(update.getQuery(), update.getParams())).kind1();
+    }
+
+    @Override
+    public <T> Higher1<PublisherK.µ, Option<T>> visit(DSL.UpdateWithKeys<T> update) {
+      return PublisherK.from(r2dbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper())).kind1();
+    }
+
+    @Override
+    public <T> Higher1<PublisherK.µ, ? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
+      return PublisherK.from(r2dbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()))
+          .map(ImmutableList::from).kind1();
+    }
+
+    @Override
+    public <T> Higher1<PublisherK.µ, Option<T>> visit(DSL.QueryOne<T> query) {
+      return PublisherK.from(r2dbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper())).kind1();
     }
   }
 
@@ -341,8 +396,9 @@ public final class PureDBC<T>  {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> Higher1<F, T> apply(Higher1<DSL.µ, T> from) {
-      return DSL.narrowK(from).accept(visitor);
+      return (Higher1<F, T>) DSL.narrowK(from).accept(visitor);
     }
   }
 }
@@ -364,5 +420,57 @@ interface PureDBCMonad extends Monad<PureDBC.µ> {
   default <T, R> Higher1<PureDBC.µ, R> flatMap(
       Higher1<PureDBC.µ, T> value, Function1<T, ? extends Higher1<PureDBC.µ, R>> mapper) {
     return value.fix1(PureDBC::narrowK).flatMap(mapper.andThen(PureDBC::narrowK)).kind1();
+  }
+}
+
+@Instance
+class PublisherMonad implements Monad<PublisherK.µ> {
+
+  @Override
+  public <T, R> Higher1<PublisherK.µ, R> flatMap(
+      Higher1<PublisherK.µ, T> value, Function1<T, ? extends Higher1<PublisherK.µ, R>> map) {
+    return value.fix1(PublisherK::narrowK).flatMap(map.andThen(PublisherK::narrowK)).kind1();
+  }
+
+  @Override
+  public <T> Higher1<PublisherK.µ, T> pure(T value) {
+    return PublisherK.pure(value).kind1();
+  }
+}
+
+@HigherKind
+class PublisherK<T> implements Publisher<T> {
+
+  private final Publisher<T> value;
+
+  private PublisherK(Publisher<T> value) {
+    this.value = requireNonNull(value);
+  }
+
+  public <R> PublisherK<R> map(Function1<T, R> mapper) {
+    if (value instanceof Mono) {
+      return new PublisherK<>(Mono.from(value).map(mapper::apply));
+    }
+    return new PublisherK<>(Flux.from(value).map(mapper::apply));
+  }
+
+  public <R> PublisherK<R> flatMap(Function1<T, PublisherK<R>> mapper) {
+    if (value instanceof Mono) {
+      return new PublisherK<>(Mono.from(value).flatMap(mapper.andThen(Mono::from)::apply));
+    }
+    return new PublisherK<>(Flux.from(value).flatMap(mapper.andThen(Flux::from)::apply));
+  }
+
+  public static <T> PublisherK<T> from(Publisher<T> value) {
+    return new PublisherK<>(value);
+  }
+
+  public static <T> PublisherK<T> pure(T value) {
+    return new PublisherK<>(Mono.just(value));
+  }
+
+  @Override
+  public void subscribe(Subscriber<? super T> s) {
+    value.subscribe(s);
   }
 }

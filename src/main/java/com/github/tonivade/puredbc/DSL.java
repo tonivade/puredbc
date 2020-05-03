@@ -14,71 +14,53 @@ import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Option;
 
-import java.sql.ResultSet;
-
-import static com.github.tonivade.purefun.Function1.cons;
-import static com.github.tonivade.purefun.Unit.unit;
 import static java.util.Objects.requireNonNull;
 
 @Sealed
 @HigherKind
 interface DSL<T> {
 
-  <F extends Kind> Higher1<F, T> accept(Visitor<F> visitor);
+  <F extends Kind> Higher1<F, ? extends T> accept(Visitor<F> visitor);
 
   interface Visitor<F extends Kind> {
     Higher1<F, Unit> visit(DSL.Update update);
     <T> Higher1<F, Option<T>> visit(DSL.UpdateWithKeys<T> update);
-    <T> Higher1<F, T> visit(Query<T> query);
-    <T> Higher1<F, Iterable<T>> visit(QueryIterable<T> query);
+    <T> Higher1<F, Option<T>> visit(DSL.QueryMeta<T> query);
+    <T> Higher1<F, ? extends Iterable<T>> visit(QueryIterable<T> query);
     <T> Higher1<F, Option<T>> visit(DSL.QueryOne<T> query);
   }
 
-  abstract class AbstractQuery<T> {
+  abstract class AbstractQuery {
 
     private final SQL query;
-    private final Function1<ResultSet, T> extractor;
 
-    private AbstractQuery(SQL query, Function1<ResultSet, T> extractor) {
+    private AbstractQuery(SQL query) {
       this.query = requireNonNull(query);
-      this.extractor = requireNonNull(extractor);
     }
 
     public String getQuery() { return query.getQuery(); }
 
     public Sequence<?> getParams() { return query.getParams(); }
 
-    public Function1<ResultSet, T> getExtractor() { return extractor; }
-
     @Override
     public String toString() { return query.toString(); }
   }
 
-  final class Query<T> extends AbstractQuery<T> implements DSL<T> {
+  final class QueryIterable<T> extends AbstractQuery implements DSL<Iterable<T>> {
 
-    protected Query(SQL query, Function1<ResultSet, T> extractor) {
-      super(query, extractor);
+    private final Function1<Row, T> rowMapper;
+
+    protected QueryIterable(SQL query, Function1<Row, T> rowMapper) {
+      super(query);
+      this.rowMapper = requireNonNull(rowMapper);
+    }
+
+    public Function1<Row, T> getRowMapper() {
+      return rowMapper;
     }
 
     @Override
-    public <F extends Kind> Higher1<F, T> accept(Visitor<F> visitor) {
-      return visitor.visit(this);
-    }
-
-    @Override
-    public String toString() {
-      return String.format("Query{query=%s}", super.toString());
-    }
-  }
-
-  final class QueryIterable<T> extends AbstractQuery<T> implements DSL<Iterable<T>> {
-
-    protected QueryIterable(SQL query, Function1<ResultSet, T> rowMapper) {
-      super(query, rowMapper);
-    }
-
-    @Override
-    public <F extends Kind> Higher1<F, Iterable<T>> accept(Visitor<F> visitor) {
+    public <F extends Kind> Higher1<F, ? extends Iterable<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
 
@@ -88,14 +70,21 @@ interface DSL<T> {
     }
   }
 
-  final class QueryOne<T> extends AbstractQuery<T> implements DSL<Option<T>> {
+  final class QueryMeta<T> extends AbstractQuery implements DSL<Option<T>> {
 
-    protected QueryOne(SQL query, Function1<ResultSet, T> rowMapper) {
-      super(query, rowMapper);
+    private final Function1<RowMetaData, T> rowMapper;
+
+    protected QueryMeta(SQL query, Function1<RowMetaData, T> rowMapper) {
+      super(query);
+      this.rowMapper = requireNonNull(rowMapper);
+    }
+
+    public Function1<RowMetaData, T> getRowMapper() {
+      return rowMapper;
     }
 
     @Override
-    public <F extends Kind> Higher1<F, Option<T>> accept(Visitor<F> visitor) {
+    public <F extends Kind> Higher1<F, ? extends Option<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
 
@@ -105,14 +94,45 @@ interface DSL<T> {
     }
   }
 
-  final class UpdateWithKeys<T> extends AbstractQuery<T> implements DSL<Option<T>> {
+  final class QueryOne<T> extends AbstractQuery implements DSL<Option<T>> {
 
-    protected UpdateWithKeys(SQL query, Function1<ResultSet, T> extractor) {
-      super(query, extractor);
+    private final Function1<Row, T> rowMapper;
+
+    protected QueryOne(SQL query, Function1<Row, T> rowMapper) {
+      super(query);
+      this.rowMapper = requireNonNull(rowMapper);
+    }
+
+    public Function1<Row, T> getRowMapper() {
+      return rowMapper;
     }
 
     @Override
-    public <F extends Kind> Higher1<F, Option<T>> accept(Visitor<F> visitor) {
+    public <F extends Kind> Higher1<F, ? extends Option<T>> accept(Visitor<F> visitor) {
+      return visitor.visit(this);
+    }
+
+    @Override
+    public String toString() {
+      return String.format("QueryOne{query=%s}", super.toString());
+    }
+  }
+
+  final class UpdateWithKeys<T> extends AbstractQuery implements DSL<Option<T>> {
+
+    private final Function1<Row, T> rowMapper;
+
+    protected UpdateWithKeys(SQL query, Function1<Row, T> rowMapper) {
+      super(query);
+      this.rowMapper = requireNonNull(rowMapper);
+    }
+
+    public Function1<Row, T> getRowMapper() {
+      return rowMapper;
+    }
+
+    @Override
+    public <F extends Kind> Higher1<F, ? extends Option<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
 
@@ -122,10 +142,10 @@ interface DSL<T> {
     }
   }
 
-  final class Update extends AbstractQuery<Unit> implements DSL<Unit> {
+  final class Update extends AbstractQuery implements DSL<Unit> {
 
     protected Update(SQL query) {
-      super(query, cons(unit()));
+      super(query);
     }
 
     @Override
