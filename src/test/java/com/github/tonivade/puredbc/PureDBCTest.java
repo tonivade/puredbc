@@ -78,12 +78,12 @@ class PureDBCTest {
   @Test
   void getAllUpdateWithKeys() {
     PureDBC<Iterable<Tuple2<Long, String>>> program = For.with(PureDBC.monad())
-        .andThen(() -> update(dropTable).kind1())
-        .andThen(() -> update(createTable).kind1())
-        .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), row -> row.getLong(TEST.ID)).kind1())
-        .andThen(() -> updateWithKeys(insertRowWithKey.bind("pepe"), row -> row.getLong(TEST.ID)).kind1())
-        .andThen(() -> queryIterable(findAll, TEST::asTuple).kind1())
-        .fix(PureDBC::narrowK);
+        .andThen(() -> update(dropTable))
+        .andThen(() -> update(createTable))
+        .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), row -> row.getLong(TEST.ID)))
+        .andThen(() -> updateWithKeys(insertRowWithKey.bind("pepe"), row -> row.getLong(TEST.ID)))
+        .andThen(() -> queryIterable(findAll, TEST::asTuple))
+        .fix(PureDBC_::narrowK);
 
     ImmutableList<Tuple2<Long, String>> expected =
         listOf(Tuple.of(1L, "toni"), Tuple.of(2L, "pepe"));

@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
 
 @Sealed
 @HigherKind
-interface DSL<T> {
+interface DSL<T> extends Higher1<DSL_, T> {
 
   <F extends Kind> Higher1<F, ? extends T> accept(Visitor<F> visitor);
 

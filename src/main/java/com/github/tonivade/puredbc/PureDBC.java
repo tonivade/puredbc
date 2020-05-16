@@ -12,9 +12,12 @@ import com.github.tonivade.purefun.Instance;
 import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.concurrent.Future;
+import com.github.tonivade.purefun.concurrent.Future_;
 import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.effect.Task;
+import com.github.tonivade.purefun.effect.Task_;
 import com.github.tonivade.purefun.effect.UIO;
+import com.github.tonivade.purefun.effect.UIO_;
 import com.github.tonivade.purefun.free.Free;
 import com.github.tonivade.purefun.instances.FutureInstances;
 import com.github.tonivade.purefun.instances.IdInstances;
@@ -22,8 +25,10 @@ import com.github.tonivade.purefun.instances.TaskInstances;
 import com.github.tonivade.purefun.instances.TryInstances;
 import com.github.tonivade.purefun.instances.UIOInstances;
 import com.github.tonivade.purefun.type.Id;
+import com.github.tonivade.purefun.type.Id_;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
+import com.github.tonivade.purefun.type.Try_;
 import com.github.tonivade.purefun.typeclasses.Monad;
 import com.github.tonivade.purefun.typeclasses.FunctionK;
 import io.r2dbc.spi.ConnectionFactory;
@@ -39,19 +44,19 @@ import static com.github.tonivade.purefun.Function1.cons;
 import static java.util.Objects.requireNonNull;
 
 @HigherKind
-public final class PureDBC<T>  {
+public final class PureDBC<T> implements Higher1<PureDBC_, T> {
 
-  private final Free<DSL.µ, T> value;
+  private final Free<DSL_, T> value;
 
   private PureDBC(T value) {
     this(Free.pure(value));
   }
 
   private PureDBC(DSL<T> value) {
-    this(Free.liftF(value.kind1()));
+    this(Free.liftF(value));
   }
 
-  private PureDBC(Free<DSL.µ, T> value) {
+  private PureDBC(Free<DSL_, T> value) {
     this.value = requireNonNull(value);
   }
 
@@ -115,62 +120,62 @@ public final class PureDBC<T>  {
     return new PureDBC<>(new DSL.QueryIterable<>(query, rowMapper));
   }
 
-  public static Monad<PureDBC.µ> monad() {
+  public static Monad<PureDBC_> monad() {
     return PureDBCMonad.instance();
   }
 
-  private static <A> Function1<DataSource, A> unsafeRun(Free<DSL.µ, A> free) {
+  private static <A> Function1<DataSource, A> unsafeRun(Free<DSL_, A> free) {
     return dataSource -> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLIdVisitor visitor = new DSLIdVisitor(jdbc);
-        Higher1<Id.µ, A> foldMap = free.foldMap(IdInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix1(Id::narrowK).get();
+        Higher1<Id_, A> foldMap = free.foldMap(IdInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix1(Id_::narrowK).get();
       }
     };
   }
 
-  private static <A> Function1<DataSource, Try<A>> safeRun(Free<DSL.µ, A> free) {
+  private static <A> Function1<DataSource, Try<A>> safeRun(Free<DSL_, A> free) {
     return dataSource -> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLTryVisitor visitor = new DSLTryVisitor(jdbc);
-        Higher1<Try.µ, A> foldMap = free.foldMap(TryInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix1(Try::narrowK);
+        Higher1<Try_, A> foldMap = free.foldMap(TryInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix1(Try_::narrowK);
       }
     };
   }
 
-  private static <A> Function1<DataSource, UIO<A>> unsafeRunIO(Free<DSL.µ, A> free) {
+  private static <A> Function1<DataSource, UIO<A>> unsafeRunIO(Free<DSL_, A> free) {
     return dataSource ->
       UIO.bracket(UIO.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
-        Higher1<UIO.µ, A> foldMap = free.foldMap(UIOInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix1(UIO::narrowK);
+        Higher1<UIO_, A> foldMap = free.foldMap(UIOInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix1(UIO_::narrowK);
       });
   }
 
-  private static <A> Function1<DataSource, Task<A>> safeRunIO(Free<DSL.µ, A> free) {
+  private static <A> Function1<DataSource, Task<A>> safeRunIO(Free<DSL_, A> free) {
     return dataSource ->
       Task.bracket(Task.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLTaskVisitor visitor = new DSLTaskVisitor(jdbc);
-        Higher1<Task.µ, A> foldMap = free.foldMap(TaskInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix1(Task::narrowK);
+        Higher1<Task_, A> foldMap = free.foldMap(TaskInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix1(Task_::narrowK);
       });
   }
 
-  private static <A> Function1<DataSource, Future<A>> asyncRun(Free<DSL.µ, A> free) {
+  private static <A> Function1<DataSource, Future<A>> asyncRun(Free<DSL_, A> free) {
     return dataSource ->
         Future.bracket(Future.async(() -> newTemplate(dataSource)), jdbc -> {
           DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
-          Higher1<Future.µ, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
-          return foldMap.fix1(Future::narrowK);
+          Higher1<Future_, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
+          return foldMap.fix1(Future_::narrowK);
         });
   }
 
-  private static <A> Function1<ConnectionFactory, Publisher<A>> reactorRun(Free<DSL.µ, A> free) {
+  private static <A> Function1<ConnectionFactory, Publisher<A>> reactorRun(Free<DSL_, A> free) {
     return connectionFactory -> {
       R2dbcTemplate r2dbc = newTemplate(connectionFactory);
       DSLReactVisitor visitor = new DSLReactVisitor(r2dbc);
-      return PublisherK.narrowK(free.foldMap(PublisherMonad.instance(), new DSLTransformer<>(visitor)));
+      return PublisherK_.narrowK(free.foldMap(PublisherMonad.instance(), new DSLTransformer<>(visitor)));
     };
   }
 
@@ -182,7 +187,7 @@ public final class PureDBC<T>  {
     return new R2dbcTemplate(connectionFactory);
   }
 
-  private static class DSLIdVisitor implements DSL.Visitor<Id.µ> {
+  private static class DSLIdVisitor implements DSL.Visitor<Id_> {
 
     private final JdbcTemplate jdbc;
 
@@ -216,7 +221,7 @@ public final class PureDBC<T>  {
     }
   }
 
-  private static class DSLTryVisitor implements DSL.Visitor<Try.µ> {
+  private static class DSLTryVisitor implements DSL.Visitor<Try_> {
 
     private final JdbcTemplate jdbc;
 
@@ -250,7 +255,7 @@ public final class PureDBC<T>  {
     }
   }
 
-  private static class DSLUIOVisitor implements DSL.Visitor<UIO.µ> {
+  private static class DSLUIOVisitor implements DSL.Visitor<UIO_> {
 
     private final JdbcTemplate jdbc;
 
@@ -284,7 +289,7 @@ public final class PureDBC<T>  {
     }
   }
 
-  private static class DSLTaskVisitor implements DSL.Visitor<Task.µ> {
+  private static class DSLTaskVisitor implements DSL.Visitor<Task_> {
 
     private final JdbcTemplate jdbc;
 
@@ -318,7 +323,7 @@ public final class PureDBC<T>  {
     }
   }
 
-  private static class DSLFutureVisitor implements DSL.Visitor<Future.µ> {
+  private static class DSLFutureVisitor implements DSL.Visitor<Future_> {
 
     private final JdbcTemplate jdbc;
 
@@ -352,7 +357,7 @@ public final class PureDBC<T>  {
     }
   }
 
-  private static class DSLReactVisitor implements DSL.Visitor<PublisherK.µ> {
+  private static class DSLReactVisitor implements DSL.Visitor<PublisherK_> {
 
     private final R2dbcTemplate r2dbc;
 
@@ -361,33 +366,33 @@ public final class PureDBC<T>  {
     }
 
     @Override
-    public <T> Higher1<PublisherK.µ, Option<T>> visit(DSL.QueryMeta<T> query) {
-      return PublisherK.from(r2dbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper())).kind1();
+    public <T> PublisherK<Option<T>> visit(DSL.QueryMeta<T> query) {
+      return PublisherK.from(r2dbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
-    public Higher1<PublisherK.µ, Unit> visit(DSL.Update update) {
-      return PublisherK.from(r2dbc.update(update.getQuery(), update.getParams())).kind1();
+    public PublisherK<Unit> visit(DSL.Update update) {
+      return PublisherK.from(r2dbc.update(update.getQuery(), update.getParams()));
     }
 
     @Override
-    public <T> Higher1<PublisherK.µ, Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return PublisherK.from(r2dbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper())).kind1();
+    public <T> PublisherK<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
+      return PublisherK.from(r2dbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper()));
     }
 
     @Override
-    public <T> Higher1<PublisherK.µ, ? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
+    public <T> PublisherK<? extends Iterable<T>> visit(DSL.QueryIterable<T> query) {
       return PublisherK.from(r2dbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()))
-          .map(ImmutableList::from).kind1();
+          .map(ImmutableList::from);
     }
 
     @Override
-    public <T> Higher1<PublisherK.µ, Option<T>> visit(DSL.QueryOne<T> query) {
-      return PublisherK.from(r2dbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper())).kind1();
+    public <T> PublisherK<Option<T>> visit(DSL.QueryOne<T> query) {
+      return PublisherK.from(r2dbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
   }
 
-  private static class DSLTransformer<F extends Kind> implements FunctionK<DSL.µ, F> {
+  private static class DSLTransformer<F extends Kind> implements FunctionK<DSL_, F> {
 
     private final DSL.Visitor<F> visitor;
 
@@ -397,49 +402,49 @@ public final class PureDBC<T>  {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Higher1<F, T> apply(Higher1<DSL.µ, T> from) {
-      return (Higher1<F, T>) DSL.narrowK(from).accept(visitor);
+    public <T> Higher1<F, T> apply(Higher1<DSL_, T> from) {
+      return (Higher1<F, T>) DSL_.narrowK(from).accept(visitor);
     }
   }
 }
 
 @Instance
-interface PureDBCMonad extends Monad<PureDBC.µ> {
+interface PureDBCMonad extends Monad<PureDBC_> {
 
   @Override
-  default <T> Higher1<PureDBC.µ, T> pure(T value) {
-    return PureDBC.pure(value).kind1();
+  default <T> PureDBC<T> pure(T value) {
+    return PureDBC.pure(value);
   }
 
   @Override
-  default <T, R> Higher1<PureDBC.µ, R> map(Higher1<PureDBC.µ, T> value, Function1<T, R> mapper) {
-    return value.fix1(PureDBC::narrowK).map(mapper).kind1();
+  default <T, R> PureDBC<R> map(Higher1<PureDBC_, T> value, Function1<T, R> mapper) {
+    return value.fix1(PureDBC_::narrowK).map(mapper);
   }
 
   @Override
-  default <T, R> Higher1<PureDBC.µ, R> flatMap(
-      Higher1<PureDBC.µ, T> value, Function1<T, ? extends Higher1<PureDBC.µ, R>> mapper) {
-    return value.fix1(PureDBC::narrowK).flatMap(mapper.andThen(PureDBC::narrowK)).kind1();
+  default <T, R> PureDBC<R> flatMap(
+      Higher1<PureDBC_, T> value, Function1<T, ? extends Higher1<PureDBC_, R>> mapper) {
+    return value.fix1(PureDBC_::narrowK).flatMap(mapper.andThen(PureDBC_::narrowK));
   }
 }
 
 @Instance
-class PublisherMonad implements Monad<PublisherK.µ> {
+class PublisherMonad implements Monad<PublisherK_> {
 
   @Override
-  public <T, R> Higher1<PublisherK.µ, R> flatMap(
-      Higher1<PublisherK.µ, T> value, Function1<T, ? extends Higher1<PublisherK.µ, R>> map) {
-    return value.fix1(PublisherK::narrowK).flatMap(map.andThen(PublisherK::narrowK)).kind1();
+  public <T, R> PublisherK<R> flatMap(
+      Higher1<PublisherK_, T> value, Function1<T, ? extends Higher1<PublisherK_, R>> map) {
+    return value.fix1(PublisherK_::narrowK).flatMap(map.andThen(PublisherK_::narrowK));
   }
 
   @Override
-  public <T> Higher1<PublisherK.µ, T> pure(T value) {
-    return PublisherK.pure(value).kind1();
+  public <T> PublisherK<T> pure(T value) {
+    return PublisherK.pure(value);
   }
 }
 
 @HigherKind
-class PublisherK<T> implements Publisher<T> {
+class PublisherK<T> implements Higher1<PublisherK_, T>, Publisher<T> {
 
   private final Publisher<T> value;
 
@@ -470,7 +475,7 @@ class PublisherK<T> implements Publisher<T> {
   }
 
   @Override
-  public void subscribe(Subscriber<? super T> s) {
-    value.subscribe(s);
+  public void subscribe(Subscriber<? super T> subscriber) {
+    value.subscribe(subscriber);
   }
 }
