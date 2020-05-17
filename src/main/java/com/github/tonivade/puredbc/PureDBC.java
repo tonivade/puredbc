@@ -121,7 +121,7 @@ public final class PureDBC<T> implements Higher1<PureDBC_, T> {
   }
 
   public static Monad<PureDBC_> monad() {
-    return PureDBCMonad.instance();
+    return PureDBCMonad.INSTANCE;
   }
 
   private static <A> Function1<DataSource, A> unsafeRun(Free<DSL_, A> free) {
@@ -175,7 +175,7 @@ public final class PureDBC<T> implements Higher1<PureDBC_, T> {
     return connectionFactory -> {
       R2dbcTemplate r2dbc = newTemplate(connectionFactory);
       DSLReactVisitor visitor = new DSLReactVisitor(r2dbc);
-      return PublisherK_.narrowK(free.foldMap(PublisherMonad.instance(), new DSLTransformer<>(visitor)));
+      return PublisherK_.narrowK(free.foldMap(PublisherKMonad.INSTANCE, new DSLTransformer<>(visitor)));
     };
   }
 
@@ -410,6 +410,8 @@ public final class PureDBC<T> implements Higher1<PureDBC_, T> {
 
 @Instance
 interface PureDBCMonad extends Monad<PureDBC_> {
+  
+  PureDBCMonad INSTANCE = new PureDBCMonad() { };
 
   @Override
   default <T> PureDBC<T> pure(T value) {
@@ -428,17 +430,18 @@ interface PureDBCMonad extends Monad<PureDBC_> {
   }
 }
 
-@Instance
-class PublisherMonad implements Monad<PublisherK_> {
+interface PublisherKMonad extends Monad<PublisherK_> {
+  
+  PublisherKMonad INSTANCE = new PublisherKMonad() {};
 
   @Override
-  public <T, R> PublisherK<R> flatMap(
+  default <T, R> PublisherK<R> flatMap(
       Higher1<PublisherK_, T> value, Function1<T, ? extends Higher1<PublisherK_, R>> map) {
     return value.fix1(PublisherK_::narrowK).flatMap(map.andThen(PublisherK_::narrowK));
   }
 
   @Override
-  public <T> PublisherK<T> pure(T value) {
+  default <T> PublisherK<T> pure(T value) {
     return PublisherK.pure(value);
   }
 }

@@ -49,10 +49,6 @@ public final class SQL {
     return sql(query + " from (" + other.getQuery() + ")");
   }
 
-  public SQL1 from(SQL1 other) {
-    return other.from(this);
-  }
-
   public SQL from(Table table, Table... tables) {
     return sql(query + " from " + NonEmptyList.of(table, tables).map(Table::name).join(","));
   }
