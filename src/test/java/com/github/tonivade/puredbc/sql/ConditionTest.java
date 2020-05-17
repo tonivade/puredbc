@@ -4,7 +4,6 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import com.github.tonivade.purefun.data.NonEmptyList;
 import org.junit.jupiter.api.Test;
 
 import static com.github.tonivade.puredbc.sql.Condition.eq;
