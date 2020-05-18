@@ -4,11 +4,16 @@
  */
 package com.github.tonivade.puredbc;
 
+import static com.github.tonivade.purefun.Function1.cons;
+import static java.util.Objects.requireNonNull;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Higher1;
 import com.github.tonivade.purefun.HigherKind;
-import com.github.tonivade.purefun.Instance;
 import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.concurrent.Future;
@@ -29,19 +34,11 @@ import com.github.tonivade.purefun.type.Id_;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
 import com.github.tonivade.purefun.type.Try_;
-import com.github.tonivade.purefun.typeclasses.Monad;
 import com.github.tonivade.purefun.typeclasses.FunctionK;
+import com.github.tonivade.purefun.typeclasses.Monad;
 import io.r2dbc.spi.ConnectionFactory;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import javax.sql.DataSource;
-import java.sql.SQLException;
-
-import static com.github.tonivade.purefun.Function1.cons;
-import static java.util.Objects.requireNonNull;
 
 @HigherKind
 public final class PureDBC<T> implements Higher1<PureDBC_, T> {
@@ -408,9 +405,8 @@ public final class PureDBC<T> implements Higher1<PureDBC_, T> {
   }
 }
 
-@Instance
 interface PureDBCMonad extends Monad<PureDBC_> {
-  
+
   PureDBCMonad INSTANCE = new PureDBCMonad() { };
 
   @Override
@@ -431,7 +427,7 @@ interface PureDBCMonad extends Monad<PureDBC_> {
 }
 
 interface PublisherKMonad extends Monad<PublisherK_> {
-  
+
   PublisherKMonad INSTANCE = new PublisherKMonad() {};
 
   @Override
