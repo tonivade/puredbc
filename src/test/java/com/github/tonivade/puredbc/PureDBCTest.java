@@ -83,7 +83,7 @@ class PureDBCTest {
         .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), row -> row.getLong(TEST.ID)))
         .andThen(() -> updateWithKeys(insertRowWithKey.bind("pepe"), row -> row.getLong(TEST.ID)))
         .andThen(() -> queryIterable(findAll, TEST::asTuple))
-        .fix(PureDBC_::narrowK);
+        .fix(PureDBCOf::narrowK);
 
     ImmutableList<Tuple2<Long, String>> expected =
         listOf(Tuple.of(1L, "toni"), Tuple.of(2L, "pepe"));
