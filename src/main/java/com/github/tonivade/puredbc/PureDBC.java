@@ -12,10 +12,10 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
-import com.github.tonivade.purefun.Higher1;
 import com.github.tonivade.purefun.HigherKind;
 import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.Unit;
+import com.github.tonivade.purefun.Witness;
 import com.github.tonivade.purefun.concurrent.Future;
 import com.github.tonivade.purefun.concurrent.FutureOf;
 import com.github.tonivade.purefun.concurrent.Future_;
@@ -130,8 +130,8 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return dataSource -> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLIdVisitor visitor = new DSLIdVisitor(jdbc);
-        Higher1<Id_, A> foldMap = free.foldMap(IdInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix1(IdOf::narrowK).get();
+        Kind<Id_, A> foldMap = free.foldMap(IdInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix(IdOf::narrowK).get();
       }
     };
   }
@@ -140,8 +140,8 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return dataSource -> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLTryVisitor visitor = new DSLTryVisitor(jdbc);
-        Higher1<Try_, A> foldMap = free.foldMap(TryInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix1(TryOf::narrowK);
+        Kind<Try_, A> foldMap = free.foldMap(TryInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix(TryOf::narrowK);
       }
     };
   }
@@ -150,8 +150,8 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return dataSource ->
       UIO.bracket(UIO.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
-        Higher1<UIO_, A> foldMap = free.foldMap(UIOInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix1(UIOOf::narrowK);
+        Kind<UIO_, A> foldMap = free.foldMap(UIOInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix(UIOOf::narrowK);
       });
   }
 
@@ -159,8 +159,8 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return dataSource ->
       Task.bracket(Task.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLTaskVisitor visitor = new DSLTaskVisitor(jdbc);
-        Higher1<Task_, A> foldMap = free.foldMap(TaskInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix1(TaskOf::narrowK);
+        Kind<Task_, A> foldMap = free.foldMap(TaskInstances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix(TaskOf::narrowK);
       });
   }
 
@@ -168,8 +168,8 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return dataSource ->
         Future.bracket(Future.async(() -> newTemplate(dataSource)), jdbc -> {
           DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
-          Higher1<Future_, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
-          return foldMap.fix1(FutureOf::narrowK);
+          Kind<Future_, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
+          return foldMap.fix(FutureOf::narrowK);
         });
   }
 
@@ -394,7 +394,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     }
   }
 
-  private static class DSLTransformer<F extends Kind> implements FunctionK<DSL_, F> {
+  private static class DSLTransformer<F extends Witness> implements FunctionK<DSL_, F> {
 
     private final DSL.Visitor<F> visitor;
 
@@ -403,7 +403,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     }
 
     @Override
-    public <T> Higher1<F, T> apply(Higher1<DSL_, T> from) {
+    public <T> Kind<F, T> apply(Kind<DSL_, T> from) {
       return DSLOf.narrowK(from).accept(visitor);
     }
   }
@@ -419,14 +419,14 @@ interface PureDBCMonad extends Monad<PureDBC_> {
   }
 
   @Override
-  default <T, R> PureDBC<R> map(Higher1<PureDBC_, T> value, Function1<T, R> mapper) {
-    return value.fix1(PureDBCOf::narrowK).map(mapper);
+  default <T, R> PureDBC<R> map(Kind<PureDBC_, T> value, Function1<T, R> mapper) {
+    return value.fix(PureDBCOf::narrowK).map(mapper);
   }
 
   @Override
   default <T, R> PureDBC<R> flatMap(
-      Higher1<PureDBC_, T> value, Function1<T, ? extends Higher1<PureDBC_, R>> mapper) {
-    return value.fix1(PureDBCOf::narrowK).flatMap(mapper.andThen(PureDBCOf::narrowK));
+      Kind<PureDBC_, T> value, Function1<T, ? extends Kind<PureDBC_, R>> mapper) {
+    return value.fix(PureDBCOf::narrowK).flatMap(mapper.andThen(PureDBCOf::narrowK));
   }
 }
 
@@ -436,8 +436,8 @@ interface PublisherKMonad extends Monad<PublisherK_> {
 
   @Override
   default <T, R> PublisherK<R> flatMap(
-      Higher1<PublisherK_, T> value, Function1<T, ? extends Higher1<PublisherK_, R>> map) {
-    return value.fix1(PublisherKOf::narrowK).flatMap(map.andThen(PublisherKOf::narrowK));
+      Kind<PublisherK_, T> value, Function1<T, ? extends Kind<PublisherK_, R>> map) {
+    return value.fix(PublisherKOf::narrowK).flatMap(map.andThen(PublisherKOf::narrowK));
   }
 
   @Override
@@ -447,7 +447,7 @@ interface PublisherKMonad extends Monad<PublisherK_> {
 }
 
 @HigherKind
-class PublisherK<T> implements Higher1<PublisherK_, T>, Publisher<T> {
+class PublisherK<T> implements PublisherKOf<T>, Publisher<T> {
 
   private final Publisher<T> value;
 
