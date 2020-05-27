@@ -21,6 +21,12 @@ final class JdbcRow implements Row, Recoverable {
   protected JdbcRow(ResultSet resultSet) {
     this.resultSet = requireNonNull(resultSet);
   }
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T get(Field<T> field) {
+    return (T) run(() -> resultSet.getObject(field.name()));
+  }
 
   @Override
   public String getString(Field<String> field) {

@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
+
+import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.HigherKind;
@@ -106,8 +108,8 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return new PureDBC<>(new DSL.Update(query));
   }
 
-  public static <T> PureDBC<Option<T>> updateWithKeys(SQL query, Function1<Row, T> extractor) {
-    return new PureDBC<>(new DSL.UpdateWithKeys<>(query, extractor));
+  public static <T> PureDBC<Option<T>> updateWithKeys(SQL query, Field<T> field) {
+    return new PureDBC<>(new DSL.UpdateWithKeys<>(query, field));
   }
 
   public static <T> PureDBC<Option<T>> queryMeta(SQL query, Function1<RowMetaData, T> rowMapper) {
@@ -219,7 +221,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
 
     @Override
     public <T> Id<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Id.of(jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper()));
+      return Id.of(jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
     }
   }
 
@@ -253,7 +255,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
 
     @Override
     public <T> Try<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Try.of(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper()));
+      return Try.of(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
     }
   }
 
@@ -287,7 +289,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
 
     @Override
     public <T> UIO<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return UIO.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper()));
+      return UIO.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
     }
   }
 
@@ -321,7 +323,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
 
     @Override
     public <T> Task<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Task.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper()));
+      return Task.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
     }
   }
 
@@ -355,7 +357,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
 
     @Override
     public <T> Future<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Future.async(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper()));
+      return Future.async(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
     }
   }
 
@@ -379,7 +381,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
 
     @Override
     public <T> PublisherK<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return PublisherK.from(r2dbc.updateWithKeys(update.getQuery(), update.getParams(), update.getRowMapper()));
+      return PublisherK.from(r2dbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
     }
 
     @Override

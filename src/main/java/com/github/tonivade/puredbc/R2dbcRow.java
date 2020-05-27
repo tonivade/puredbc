@@ -20,6 +20,12 @@ final class R2dbcRow implements Row {
   protected R2dbcRow(io.r2dbc.spi.Row impl) {
     this.impl = requireNonNull(impl);
   }
+  
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T get(Field<T> field) {
+    return (T) impl.get(field.name());
+  }
 
   @Override
   public String getString(Field<String> field) {

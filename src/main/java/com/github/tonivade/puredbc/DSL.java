@@ -5,6 +5,8 @@
 package com.github.tonivade.puredbc;
 
 import static java.util.Objects.requireNonNull;
+
+import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.HigherKind;
@@ -122,15 +124,15 @@ interface DSL<T> extends DSLOf<T> {
 
   final class UpdateWithKeys<T> extends AbstractQuery implements DSL<Option<T>> {
 
-    private final Function1<Row, T> rowMapper;
+    private final Field<T> field;
 
-    protected UpdateWithKeys(SQL query, Function1<Row, T> rowMapper) {
+    protected UpdateWithKeys(SQL query, Field<T> field) {
       super(query);
-      this.rowMapper = requireNonNull(rowMapper);
+      this.field = requireNonNull(field);
     }
 
-    public Function1<Row, T> getRowMapper() {
-      return rowMapper;
+    public Field<T> getField() {
+      return field;
     }
 
     @Override

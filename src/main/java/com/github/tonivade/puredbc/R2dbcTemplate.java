@@ -4,6 +4,7 @@
  */
 package com.github.tonivade.puredbc;
 
+import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.data.Range;
@@ -36,10 +37,10 @@ public final class R2dbcTemplate {
         .thenReturn(unit());
   }
 
-  public <T> Mono<Option<T>> updateWithKeys(String query, Sequence<?> params, Function1<Row, T> rowMapper) {
+  public <T> Mono<Option<T>> updateWithKeys(String query, Sequence<?> params, Field<T> field) {
     return Mono.from(connectionFactory.create())
-        .flatMap(conn -> _update(query, params, conn)
-            .flatMap(result -> Mono.from(applyToRow(rowMapper, result)))
+        .flatMap(conn -> _updateWithKeys(query, params, conn, field)
+            .flatMap(result -> Mono.from(applyToRow(row -> row.get(field), result)))
             .delayUntil(result -> conn.commitTransaction())
             .doFinally(stmt -> conn.close()))
         .map(Option::some).defaultIfEmpty(Option.none());
@@ -63,18 +64,27 @@ public final class R2dbcTemplate {
   }
 
   private Mono<io.r2dbc.spi.Result> _update(String query, Sequence<?> params, Connection conn) {
-    return Mono.from(conn.beginTransaction()).then(createStatement(query, params, conn));
+    return Mono.from(conn.beginTransaction())
+        .then(createStatement(query, params, conn)
+        .flatMap(stmt -> Mono.from(stmt.execute())));
+  }
+
+  private Mono<io.r2dbc.spi.Result> _updateWithKeys(String query, Sequence<?> params, Connection conn, Field<?> field) {
+    return Mono.from(conn.beginTransaction())
+        .then(createStatement(query, params, conn).map(stmt -> stmt.returnGeneratedValues(field.name()))
+        .flatMap(stmt -> Mono.from(stmt.execute())));
   }
 
   private Mono<io.r2dbc.spi.Result> _query(String query, Sequence<?> params) {
     return Mono.from(connectionFactory.create())
         .flatMap(conn -> createStatement(query, params, conn)
-            .doFinally(stmt -> Mono.from(conn.close()).then(Mono.empty())));
+        .flatMap(stmt -> Mono.from(stmt.execute()))
+        .doFinally(stmt -> Mono.from(conn.close()).then(Mono.empty())));
   }
 
-  private Mono<io.r2dbc.spi.Result> createStatement(String query, Sequence<?> params, Connection conn) {
+  private Mono<io.r2dbc.spi.Statement> createStatement(String query, Sequence<?> params, Connection conn) {
     return Mono.just(conn.createStatement(query))
-        .flatMap(stmt -> {
+        .map(stmt -> {
           int i = 0;
           for (Object param : params) {
             if (param instanceof Range) {
@@ -89,7 +99,7 @@ public final class R2dbcTemplate {
               stmt.bind(i++, param);
             }
           }
-          return Mono.from(stmt.execute());
+          return stmt;
         });
   }
 

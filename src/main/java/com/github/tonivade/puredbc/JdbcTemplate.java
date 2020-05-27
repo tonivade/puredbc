@@ -4,6 +4,7 @@
  */
 package com.github.tonivade.puredbc;
 
+import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.purefun.Consumer1;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Recoverable;
@@ -37,8 +38,8 @@ public class JdbcTemplate implements Recoverable, AutoCloseable {
     return _update(query, populateWith(params), cons(unit()));
   }
 
-  public <T> Option<T> updateWithKeys(String query, Sequence<?> params, Function1<Row, T> rowMapper) {
-    return _update(query, populateWith(params), optionExtractor(rowMapper.compose(JdbcRow::new)));
+  public <T> Option<T> updateWithKeys(String query, Sequence<?> params, Field<T> field) {
+    return _update(query, populateWith(params), optionExtractor(getField(field).compose(JdbcRow::new)));
   }
 
   public <T> Option<T> queryMeta(String query, Sequence<?> params, Function1<RowMetaData, T> rowMapper) {
@@ -118,5 +119,9 @@ public class JdbcTemplate implements Recoverable, AutoCloseable {
         }
       }
     };
+  }
+  
+  private static <T> Function1<Row, T> getField(Field<T> field) {
+    return row -> row.get(field);
   }
 }

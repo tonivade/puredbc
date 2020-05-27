@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 public interface Row {
+  
+  <T> T get(Field<T> field);
 
   String getString(Field<String> field);
 

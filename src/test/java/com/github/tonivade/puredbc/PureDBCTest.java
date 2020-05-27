@@ -12,7 +12,6 @@ import com.github.tonivade.puredbc.sql.Table2;
 import com.github.tonivade.purefun.Tuple;
 import com.github.tonivade.purefun.Tuple2;
 import com.github.tonivade.purefun.Unit;
-import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.type.Option;
@@ -80,21 +79,12 @@ class PureDBCTest {
     PureDBC<Iterable<Tuple2<Long, String>>> program = For.with(PureDBC.monad())
         .andThen(() -> update(dropTable))
         .andThen(() -> update(createTable))
-        .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), row -> row.getLong(TEST.ID)))
-        .andThen(() -> updateWithKeys(insertRowWithKey.bind("pepe"), row -> row.getLong(TEST.ID)))
+        .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), TEST.ID))
+        .andThen(() -> updateWithKeys(insertRowWithKey.bind("pepe"), TEST.ID))
         .andThen(() -> queryIterable(findAll, TEST::asTuple))
         .fix(PureDBCOf::narrowK);
 
-    ImmutableList<Tuple2<Long, String>> expected =
-        listOf(Tuple.of(1L, "toni"), Tuple.of(2L, "pepe"));
-
-    assertEquals(expected, program.unsafeRun(dataSource));
-    assertEquals(Try.success(expected), program.safeRun(dataSource));
-    assertEquals(expected, program.unsafeRunIO(dataSource).unsafeRunSync());
-    assertEquals(Try.success(expected), program.safeRunIO(dataSource).safeRunSync());
-    assertEquals(Try.success(expected), program.asyncRun(dataSource).await());
-    // updateWithKeys, doesn't work with r2dbc
-    //assertEquals(expected, Mono.from(program.reactorRun(connectionFactory)).block());
+    assertProgram(program, listOf(Tuple.of(1L, "toni"), Tuple.of(2L, "pepe")));
   }
 
   @Test
