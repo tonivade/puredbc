@@ -35,8 +35,8 @@ import static com.github.tonivade.puredbc.PureDBC.queryOne;
 import static com.github.tonivade.puredbc.PureDBC.update;
 import static com.github.tonivade.puredbc.PureDBC.updateWithKeys;
 import static com.github.tonivade.puredbc.sql.Condition.between;
-import static com.github.tonivade.puredbc.sql.SQL.delete;
-import static com.github.tonivade.puredbc.sql.SQL.insert;
+import static com.github.tonivade.puredbc.sql.SQL.deleteFrom;
+import static com.github.tonivade.puredbc.sql.SQL.insertInto;
 import static com.github.tonivade.puredbc.sql.SQL.select;
 import static com.github.tonivade.puredbc.sql.SQL.update;
 import static com.github.tonivade.puredbc.sql.SQL.sql;
@@ -63,10 +63,10 @@ class PureDBCTest {
         "name varchar(100)",
       ")");
   private final SQL dropTable = sql("drop table if exists test");
-  private final SQL deleteAll = delete(TEST);
-  private final SQL1<Long> deleteOne = delete(TEST).where(TEST.ID.eq());
-  private final SQL1<String> insertRowWithKey = insert(TEST).values(TEST.NAME);
-  private final SQL2<Long, String> insertRow = insert(TEST).values(TEST.ID, TEST.NAME);
+  private final SQL deleteAll = deleteFrom(TEST);
+  private final SQL1<Long> deleteOne = deleteFrom(TEST).where(TEST.ID.eq());
+  private final SQL1<String> insertRowWithKey = insertInto(TEST).values(TEST.NAME);
+  private final SQL2<Long, String> insertRow = insertInto(TEST).values(TEST.ID, TEST.NAME);
   private final SQL2<String, Long> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
   private final SQL findAll = select(ALIAS.all()).from(ALIAS);
   private final SQL1<Iterable<Long>> findIn = select(ALIAS.all()).from(ALIAS).where(ALIAS.ID.in());

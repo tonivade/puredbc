@@ -137,7 +137,7 @@ public final class SQL {
     return sql(fields.map(Field::name).join(", ", "select ", ""));
   }
 
-  public static SQL insert(Table table) {
+  public static SQL insertInto(Table table) {
     return sql("insert into " + table.name());
   }
 
@@ -145,7 +145,7 @@ public final class SQL {
     return sql("update " + table.name());
   }
 
-  public static SQL delete(Table table) {
+  public static SQL deleteFrom(Table table) {
     return sql("delete from " + table.name());
   }
 
