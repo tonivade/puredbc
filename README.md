@@ -28,10 +28,10 @@ Develop a comprehensible and easy to use API:
       "id identity primary key,",
       "name varchar(100))");
   SQL dropTable = sql("drop table if exists test");
-  SQL deleteAll = delete(TEST);
-  SQL1<Integer> deleteOne = delete(TEST).where(TEST.ID.eq());
-  SQL1<String> insertRowWithKey = insert(TEST).values(TEST.NAME);
-  SQL2<Integer, String> insertRow = insert(TEST).values(TEST.ID, TEST.NAME);
+  SQL deleteAll = deleteFrom(TEST);
+  SQL1<Integer> deleteOne = deleteFrom(TEST).where(TEST.ID.eq());
+  SQL1<String> insertRowWithKey = insertInto(TEST).values(TEST.NAME);
+  SQL2<Integer, String> insertRow = insertInto(TEST).values(TEST.ID, TEST.NAME);
   SQL2<String, Integer> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
   SQL findAll = select(TEST.ID, TEST.NAME).from(TEST);
   SQL count = select(TEST.ID.count().as("elements")).from(TEST);
