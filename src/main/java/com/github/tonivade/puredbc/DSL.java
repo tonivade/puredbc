@@ -5,7 +5,6 @@
 package com.github.tonivade.puredbc;
 
 import static java.util.Objects.requireNonNull;
-
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
@@ -16,7 +15,7 @@ import com.github.tonivade.purefun.Witness;
 import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Option;
 
-@HigherKind
+@HigherKind(sealed = true)
 interface DSL<T> extends DSLOf<T> {
 
   <F extends Witness> Kind<F, T> accept(Visitor<F> visitor);
@@ -50,7 +49,7 @@ interface DSL<T> extends DSLOf<T> {
     public String toString() { return query.toString(); }
   }
 
-  final class QueryIterable<T> extends AbstractQuery implements DSL<Iterable<T>> {
+  final class QueryIterable<T> extends AbstractQuery implements SealedDSL<Iterable<T>> {
 
     private final Function1<Row, T> rowMapper;
 
@@ -74,7 +73,7 @@ interface DSL<T> extends DSLOf<T> {
     }
   }
 
-  final class QueryMeta<T> extends AbstractQuery implements DSL<Option<T>> {
+  final class QueryMeta<T> extends AbstractQuery implements SealedDSL<Option<T>> {
 
     private final Function1<RowMetaData, T> rowMapper;
 
@@ -98,7 +97,7 @@ interface DSL<T> extends DSLOf<T> {
     }
   }
 
-  final class QueryOne<T> extends AbstractQuery implements DSL<Option<T>> {
+  final class QueryOne<T> extends AbstractQuery implements SealedDSL<Option<T>> {
 
     private final Function1<Row, T> rowMapper;
 
@@ -122,7 +121,7 @@ interface DSL<T> extends DSLOf<T> {
     }
   }
 
-  final class UpdateWithKeys<T> extends AbstractQuery implements DSL<Option<T>> {
+  final class UpdateWithKeys<T> extends AbstractQuery implements SealedDSL<Option<T>> {
 
     private final Field<T> field;
 
@@ -146,7 +145,7 @@ interface DSL<T> extends DSLOf<T> {
     }
   }
 
-  final class Update extends AbstractQuery implements DSL<Unit> {
+  final class Update extends AbstractQuery implements SealedDSL<Unit> {
 
     protected Update(SQL query) {
       super(query);
