@@ -38,6 +38,14 @@ repositories {
 test {
   useJUnitPlatform()
 }
+  
+compileJava {
+  options.release = 8
+}
+
+compileTestJava {
+  options.release = 8
+}
 
 dependencies {
   annotationProcessor 'com.github.tonivade:purefun-processor:2.1-SNAPSHOT'
