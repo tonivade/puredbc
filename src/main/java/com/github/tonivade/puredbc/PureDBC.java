@@ -4,13 +4,20 @@
  */
 package com.github.tonivade.puredbc;
 
+import static com.github.tonivade.puredbc.DSLOf.toDSL;
+import static com.github.tonivade.puredbc.PublisherKOf.toPublisherK;
+import static com.github.tonivade.puredbc.PureDBCOf.toPureDBC;
 import static com.github.tonivade.purefun.Function1.cons;
+import static com.github.tonivade.purefun.concurrent.FutureOf.toFuture;
+import static com.github.tonivade.purefun.effect.TaskOf.toTask;
+import static com.github.tonivade.purefun.effect.UIOOf.toUIO;
+import static com.github.tonivade.purefun.type.IdOf.toId;
+import static com.github.tonivade.purefun.type.TryOf.toTry;
 import static java.util.Objects.requireNonNull;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
-
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
@@ -19,14 +26,11 @@ import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.Witness;
 import com.github.tonivade.purefun.concurrent.Future;
-import com.github.tonivade.purefun.concurrent.FutureOf;
 import com.github.tonivade.purefun.concurrent.Future_;
 import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.effect.Task;
-import com.github.tonivade.purefun.effect.TaskOf;
 import com.github.tonivade.purefun.effect.Task_;
 import com.github.tonivade.purefun.effect.UIO;
-import com.github.tonivade.purefun.effect.UIOOf;
 import com.github.tonivade.purefun.effect.UIO_;
 import com.github.tonivade.purefun.free.Free;
 import com.github.tonivade.purefun.instances.FutureInstances;
@@ -35,11 +39,9 @@ import com.github.tonivade.purefun.instances.TaskInstances;
 import com.github.tonivade.purefun.instances.TryInstances;
 import com.github.tonivade.purefun.instances.UIOInstances;
 import com.github.tonivade.purefun.type.Id;
-import com.github.tonivade.purefun.type.IdOf;
 import com.github.tonivade.purefun.type.Id_;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
-import com.github.tonivade.purefun.type.TryOf;
 import com.github.tonivade.purefun.type.Try_;
 import com.github.tonivade.purefun.typeclasses.FunctionK;
 import com.github.tonivade.purefun.typeclasses.Monad;
@@ -133,7 +135,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLIdVisitor visitor = new DSLIdVisitor(jdbc);
         Kind<Id_, A> foldMap = free.foldMap(IdInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix(IdOf::narrowK).get();
+        return foldMap.fix(toId()).get();
       }
     };
   }
@@ -143,7 +145,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLTryVisitor visitor = new DSLTryVisitor(jdbc);
         Kind<Try_, A> foldMap = free.foldMap(TryInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix(TryOf::narrowK);
+        return foldMap.fix(toTry());
       }
     };
   }
@@ -153,7 +155,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
       UIO.bracket(UIO.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
         Kind<UIO_, A> foldMap = free.foldMap(UIOInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix(UIOOf::narrowK);
+        return foldMap.fix(toUIO());
       });
   }
 
@@ -162,7 +164,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
       Task.bracket(Task.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLTaskVisitor visitor = new DSLTaskVisitor(jdbc);
         Kind<Task_, A> foldMap = free.foldMap(TaskInstances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix(TaskOf::narrowK);
+        return foldMap.fix(toTask());
       });
   }
 
@@ -171,7 +173,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
         Future.bracket(Future.task(() -> newTemplate(dataSource)), jdbc -> {
           DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
           Kind<Future_, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
-          return foldMap.fix(FutureOf::narrowK);
+          return foldMap.fix(toFuture());
         });
   }
 
@@ -179,7 +181,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return connectionFactory -> {
       R2dbcTemplate r2dbc = newTemplate(connectionFactory);
       DSLReactVisitor visitor = new DSLReactVisitor(r2dbc);
-      return PublisherKOf.narrowK(free.foldMap(PublisherKMonad.INSTANCE, new DSLTransformer<>(visitor)));
+      return free.foldMap(PublisherKMonad.INSTANCE, new DSLTransformer<>(visitor)).fix(toPublisherK());
     };
   }
 
@@ -406,7 +408,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
 
     @Override
     public <T> Kind<F, T> apply(Kind<DSL_, T> from) {
-      return DSLOf.narrowK(from).accept(visitor);
+      return from.fix(toDSL()).accept(visitor);
     }
   }
 }
@@ -422,13 +424,13 @@ interface PureDBCMonad extends Monad<PureDBC_> {
 
   @Override
   default <T, R> PureDBC<R> map(Kind<PureDBC_, T> value, Function1<T, R> mapper) {
-    return value.fix(PureDBCOf::narrowK).map(mapper);
+    return value.fix(toPureDBC()).map(mapper);
   }
 
   @Override
   default <T, R> PureDBC<R> flatMap(
       Kind<PureDBC_, T> value, Function1<T, ? extends Kind<PureDBC_, R>> mapper) {
-    return value.fix(PureDBCOf::narrowK).flatMap(mapper.andThen(PureDBCOf::narrowK));
+    return value.fix(toPureDBC()).flatMap(mapper.andThen(PureDBCOf::narrowK));
   }
 }
 
@@ -439,7 +441,7 @@ interface PublisherKMonad extends Monad<PublisherK_> {
   @Override
   default <T, R> PublisherK<R> flatMap(
       Kind<PublisherK_, T> value, Function1<T, ? extends Kind<PublisherK_, R>> map) {
-    return value.fix(PublisherKOf::narrowK).flatMap(map.andThen(PublisherKOf::narrowK));
+    return value.fix(toPublisherK()).flatMap(map.andThen(PublisherKOf::narrowK));
   }
 
   @Override
