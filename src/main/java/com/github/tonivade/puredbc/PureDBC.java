@@ -168,7 +168,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
 
   private static <A> Function1<DataSource, Future<A>> asyncRun(Free<DSL_, A> free) {
     return dataSource ->
-        Future.bracket(Future.async(() -> newTemplate(dataSource)), jdbc -> {
+        Future.bracket(Future.task(() -> newTemplate(dataSource)), jdbc -> {
           DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
           Kind<Future_, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
           return foldMap.fix(FutureOf::narrowK);
@@ -337,27 +337,27 @@ public final class PureDBC<T> implements PureDBCOf<T> {
 
     @Override
     public <T> Future<Option<T>> visit(DSL.QueryMeta<T> query) {
-      return Future.async(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Future.task(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
     public <T> Future<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return Future.async(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Future.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
     public <T> Future<Option<T>> visit(DSL.QueryOne<T> query) {
-      return Future.async(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Future.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
     }
 
     @Override
     public Future<Unit> visit(DSL.Update update) {
-      return Future.async(() -> jdbc.update(update.getQuery(), update.getParams()));
+      return Future.task(() -> jdbc.update(update.getQuery(), update.getParams()));
     }
 
     @Override
     public <T> Future<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Future.async(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
+      return Future.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
     }
   }
 
