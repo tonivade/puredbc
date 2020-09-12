@@ -4,21 +4,21 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import com.github.tonivade.purefun.Equal;
-import com.github.tonivade.purefun.type.Validation;
-import com.github.tonivade.purefun.type.Validation.Result;
+import static com.github.tonivade.purefun.type.Validation.mapN;
+import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
+import static com.github.tonivade.purefun.type.Validation.requireNonNull;
 
 import java.util.Objects;
 
-import static com.github.tonivade.purefun.type.Validation.map2;
-import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
-import static com.github.tonivade.purefun.type.Validation.requireNonNull;
+import com.github.tonivade.purefun.Equal;
+import com.github.tonivade.purefun.type.Validation;
+import com.github.tonivade.purefun.type.Validation.Result;
 
 public interface Alias<T> extends Field<T> {
 
   static <T> Alias<T> of(String alias, Field<T> field) {
     Validation<Result<String>, AliasImpl<T>> validation =
-        map2(requireNonEmpty(alias), requireNonNull(field), AliasImpl::new);
+        mapN(requireNonEmpty(alias), requireNonNull(field), AliasImpl::new);
     return validation.getOrElseThrow();
   }
 }

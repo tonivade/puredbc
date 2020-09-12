@@ -149,12 +149,12 @@ public final class SQL {
     return sql("delete from " + table.name());
   }
 
-  private String values(Sequence<Field<?>> values) {
+  private static String values(Sequence<Field<?>> values) {
     String suffix = values.map(cons("?")).join(", ", ") values (", ")");
     return values.map(Field::name).join(", ", " (", suffix);
   }
 
-  private String set(Sequence<Field<?>> values) {
+  private static String set(Sequence<Field<?>> values) {
     return values.map(field -> field.name() + " = ?").join(",", " set ", "");
   }
 }

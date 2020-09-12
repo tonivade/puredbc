@@ -4,20 +4,20 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import com.github.tonivade.purefun.Equal;
-import com.github.tonivade.purefun.type.Validation;
-import com.github.tonivade.purefun.type.Validation.Result;
+import static com.github.tonivade.purefun.type.Validation.mapN;
+import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
 
 import java.util.Objects;
 
-import static com.github.tonivade.purefun.type.Validation.map2;
-import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
+import com.github.tonivade.purefun.Equal;
+import com.github.tonivade.purefun.type.Validation;
+import com.github.tonivade.purefun.type.Validation.Result;
 
 public interface TableField<T> extends Field<T> {
 
   static <T> TableField<T> of(String alias, String name) {
     Validation<Result<String>, TableField<T>> validation =
-        map2(requireNonEmpty(alias), requireNonEmpty(name), TableFieldImpl::new);
+        mapN(requireNonEmpty(alias), requireNonEmpty(name), TableFieldImpl::new);
     return validation.getOrElseThrow();
   }
 }
