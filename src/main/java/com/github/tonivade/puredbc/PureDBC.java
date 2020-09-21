@@ -66,12 +66,12 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     this.value = requireNonNull(value);
   }
 
-  public <R> PureDBC<R> map(Function1<T, R> map) {
+  public <R> PureDBC<R> map(Function1<? super T, ? extends R> map) {
     return new PureDBC<>(value.map(map));
   }
 
-  public <R> PureDBC<R> flatMap(Function1<T, PureDBC<R>> map) {
-    return new PureDBC<>(value.flatMap(t -> map.apply(t).value));
+  public <R> PureDBC<R> flatMap(Function1<? super T, ? extends PureDBC<? extends R>> map) {
+    return new PureDBC<>(value.flatMap(t -> map.andThen(PureDBCOf::narrowK).apply(t).value));
   }
 
   public <R> PureDBC<R> andThen(PureDBC<R> next) {
@@ -423,13 +423,8 @@ interface PureDBCMonad extends Monad<PureDBC_> {
   }
 
   @Override
-  default <T, R> PureDBC<R> map(Kind<PureDBC_, T> value, Function1<T, R> mapper) {
-    return value.fix(toPureDBC()).map(mapper);
-  }
-
-  @Override
   default <T, R> PureDBC<R> flatMap(
-      Kind<PureDBC_, T> value, Function1<T, ? extends Kind<PureDBC_, R>> mapper) {
+      Kind<PureDBC_, T> value, Function1<? super T, ? extends Kind<PureDBC_, ? extends R>> mapper) {
     return value.fix(toPureDBC()).flatMap(mapper.andThen(PureDBCOf::narrowK));
   }
 }
@@ -440,7 +435,7 @@ interface PublisherKMonad extends Monad<PublisherK_> {
 
   @Override
   default <T, R> PublisherK<R> flatMap(
-      Kind<PublisherK_, T> value, Function1<T, ? extends Kind<PublisherK_, R>> map) {
+      Kind<PublisherK_, T> value, Function1<? super T, ? extends Kind<PublisherK_, ? extends R>> map) {
     return value.fix(toPublisherK()).flatMap(map.andThen(PublisherKOf::narrowK));
   }
 
@@ -459,14 +454,14 @@ class PublisherK<T> implements PublisherKOf<T>, Publisher<T> {
     this.value = requireNonNull(value);
   }
 
-  public <R> PublisherK<R> map(Function1<T, R> mapper) {
+  public <R> PublisherK<R> map(Function1<? super T, ? extends R> mapper) {
     if (value instanceof Mono) {
       return new PublisherK<>(Mono.from(value).map(mapper::apply));
     }
     return new PublisherK<>(Flux.from(value).map(mapper::apply));
   }
 
-  public <R> PublisherK<R> flatMap(Function1<T, PublisherK<R>> mapper) {
+  public <R> PublisherK<R> flatMap(Function1<? super T, ? extends PublisherK<? extends R>> mapper) {
     if (value instanceof Mono) {
       return new PublisherK<>(Mono.from(value).flatMap(mapper.andThen(Mono::from)::apply));
     }
