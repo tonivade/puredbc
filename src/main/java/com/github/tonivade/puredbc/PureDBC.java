@@ -424,7 +424,7 @@ interface PureDBCMonad extends Monad<PureDBC_> {
 
   @Override
   default <T, R> PureDBC<R> flatMap(
-      Kind<PureDBC_, T> value, Function1<? super T, ? extends Kind<PureDBC_, ? extends R>> mapper) {
+      Kind<PureDBC_, ? extends T> value, Function1<? super T, ? extends Kind<PureDBC_, ? extends R>> mapper) {
     return value.fix(toPureDBC()).flatMap(mapper.andThen(PureDBCOf::narrowK));
   }
 }
@@ -432,10 +432,15 @@ interface PureDBCMonad extends Monad<PureDBC_> {
 interface PublisherKMonad extends Monad<PublisherK_> {
 
   PublisherKMonad INSTANCE = new PublisherKMonad() {};
+  
+  @Override
+  default <T, R> PublisherK<R> map(Kind<PublisherK_, ? extends T> value, Function1<? super T, ? extends R> map) {
+    return value.fix(toPublisherK()).map(map);
+  }
 
   @Override
   default <T, R> PublisherK<R> flatMap(
-      Kind<PublisherK_, T> value, Function1<? super T, ? extends Kind<PublisherK_, ? extends R>> map) {
+      Kind<PublisherK_, ? extends T> value, Function1<? super T, ? extends Kind<PublisherK_, ? extends R>> map) {
     return value.fix(toPublisherK()).flatMap(map.andThen(PublisherKOf::narrowK));
   }
 
@@ -448,9 +453,9 @@ interface PublisherKMonad extends Monad<PublisherK_> {
 @HigherKind
 class PublisherK<T> implements PublisherKOf<T>, Publisher<T> {
 
-  private final Publisher<T> value;
+  private final Publisher<? extends T> value;
 
-  private PublisherK(Publisher<T> value) {
+  private PublisherK(Publisher<? extends T> value) {
     this.value = requireNonNull(value);
   }
 
@@ -468,12 +473,12 @@ class PublisherK<T> implements PublisherKOf<T>, Publisher<T> {
     return new PublisherK<>(Flux.from(value).flatMap(mapper.andThen(Flux::from)::apply));
   }
 
-  public static <T> PublisherK<T> from(Publisher<T> value) {
+  public static <T> PublisherK<T> from(Publisher<? extends T> value) {
     return new PublisherK<>(value);
   }
 
   public static <T> PublisherK<T> pure(T value) {
-    return new PublisherK<>(Mono.just(value));
+    return from(Mono.just(value));
   }
 
   @Override
