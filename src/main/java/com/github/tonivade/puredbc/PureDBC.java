@@ -74,7 +74,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return new PureDBC<>(value.flatMap(t -> map.andThen(PureDBCOf::narrowK).apply(t).value));
   }
 
-  public <R> PureDBC<R> andThen(PureDBC<R> next) {
+  public <R> PureDBC<R> andThen(PureDBC<? extends R> next) {
     return flatMap(cons(next));
   }
 
