@@ -4,7 +4,6 @@
  */
 package com.github.tonivade.puredbc;
 
-import static com.github.tonivade.puredbc.DSLOf.toDSL;
 import static com.github.tonivade.puredbc.PublisherKOf.toPublisherK;
 import static com.github.tonivade.puredbc.PureDBCOf.toPureDBC;
 import static com.github.tonivade.purefun.Function1.cons;
@@ -14,10 +13,14 @@ import static com.github.tonivade.purefun.effect.UIOOf.toUIO;
 import static com.github.tonivade.purefun.type.IdOf.toId;
 import static com.github.tonivade.purefun.type.TryOf.toTry;
 import static java.util.Objects.requireNonNull;
+
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
+
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
@@ -45,6 +48,7 @@ import com.github.tonivade.purefun.type.Try;
 import com.github.tonivade.purefun.type.Try_;
 import com.github.tonivade.purefun.typeclasses.FunctionK;
 import com.github.tonivade.purefun.typeclasses.Monad;
+
 import io.r2dbc.spi.ConnectionFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -407,8 +411,8 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     }
 
     @Override
-    public <T> Kind<F, T> apply(Kind<DSL_, T> from) {
-      return from.fix(toDSL()).accept(visitor);
+    public <T> Kind<F, T> apply(Kind<DSL_, ? extends T> from) {
+      return from.fix(DSLOf::<T>narrowK).accept(visitor);
     }
   }
 }
