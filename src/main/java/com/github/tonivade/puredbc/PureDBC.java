@@ -36,17 +36,13 @@ import com.github.tonivade.purefun.effect.Task_;
 import com.github.tonivade.purefun.effect.UIO;
 import com.github.tonivade.purefun.effect.UIO_;
 import com.github.tonivade.purefun.free.Free;
-import com.github.tonivade.purefun.instances.FutureInstances;
-import com.github.tonivade.purefun.instances.IdInstances;
-import com.github.tonivade.purefun.instances.TaskInstances;
-import com.github.tonivade.purefun.instances.TryInstances;
-import com.github.tonivade.purefun.instances.UIOInstances;
 import com.github.tonivade.purefun.type.Id;
 import com.github.tonivade.purefun.type.Id_;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
 import com.github.tonivade.purefun.type.Try_;
 import com.github.tonivade.purefun.typeclasses.FunctionK;
+import com.github.tonivade.purefun.typeclasses.Instance;
 import com.github.tonivade.purefun.typeclasses.Monad;
 
 import io.r2dbc.spi.ConnectionFactory;
@@ -138,7 +134,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return dataSource -> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLIdVisitor visitor = new DSLIdVisitor(jdbc);
-        Kind<Id_, A> foldMap = free.foldMap(IdInstances.monad(), new DSLTransformer<>(visitor));
+        Kind<Id_, A> foldMap = free.foldMap(Instance.monad(Id_.class), new DSLTransformer<>(visitor));
         return foldMap.fix(toId()).get();
       }
     };
@@ -148,7 +144,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return dataSource -> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLTryVisitor visitor = new DSLTryVisitor(jdbc);
-        Kind<Try_, A> foldMap = free.foldMap(TryInstances.monad(), new DSLTransformer<>(visitor));
+        Kind<Try_, A> foldMap = free.foldMap(Instance.monad(Try_.class), new DSLTransformer<>(visitor));
         return foldMap.fix(toTry());
       }
     };
@@ -158,7 +154,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return dataSource ->
       UIO.bracket(UIO.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
-        Kind<UIO_, A> foldMap = free.foldMap(UIOInstances.monad(), new DSLTransformer<>(visitor));
+        Kind<UIO_, A> foldMap = free.foldMap(Instance.monad(UIO_.class), new DSLTransformer<>(visitor));
         return foldMap.fix(toUIO());
       });
   }
@@ -167,7 +163,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return dataSource ->
       Task.bracket(Task.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLTaskVisitor visitor = new DSLTaskVisitor(jdbc);
-        Kind<Task_, A> foldMap = free.foldMap(TaskInstances.monad(), new DSLTransformer<>(visitor));
+        Kind<Task_, A> foldMap = free.foldMap(Instance.monad(Task_.class), new DSLTransformer<>(visitor));
         return foldMap.fix(toTask());
       });
   }
@@ -176,7 +172,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     return dataSource ->
         Future.bracket(Future.task(() -> newTemplate(dataSource)), jdbc -> {
           DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
-          Kind<Future_, A> foldMap = free.foldMap(FutureInstances.monad(), new DSLTransformer<>(visitor));
+          Kind<Future_, A> foldMap = free.foldMap(Instance.monad(Future_.class), new DSLTransformer<>(visitor));
           return foldMap.fix(toFuture());
         });
   }
