@@ -19,7 +19,7 @@ buildscript {
 
   dependencies {
     classpath 'com.bmuschko:gradle-nexus-plugin:2.3.1'
-    classpath 'com.diffplug.gradle:goomph:3.25.0'
+    classpath 'com.diffplug.gradle:goomph:3.26.0'
   }
 }
 
