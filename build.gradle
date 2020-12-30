@@ -8,8 +8,8 @@ group = 'com.github.tonivade'
 archivesBaseName = 'puredbc'
 version = '0.3-SNAPSHOT'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 buildscript {
   repositories {
@@ -37,14 +37,6 @@ repositories {
 
 test {
   useJUnitPlatform()
-}
-  
-compileJava {
-  options.release = 8
-}
-
-compileTestJava {
-  options.release = 8
 }
 
 dependencies {
