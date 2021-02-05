@@ -51,7 +51,7 @@ dependencies {
   testImplementation 'com.zaxxer:HikariCP:4.0.1'
   testImplementation 'com.github.tonivade:purecheck:0.2-SNAPSHOT'
   testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.1'
-  testImplementation 'org.junit.platform:junit-platform-runner:1.7.0'
+  testImplementation 'org.junit.platform:junit-platform-runner:1.7.1'
 }
 
 modifyPom {
