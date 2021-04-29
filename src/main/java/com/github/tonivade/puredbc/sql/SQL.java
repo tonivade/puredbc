@@ -4,19 +4,19 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import com.github.tonivade.purefun.data.ImmutableArray;
-import com.github.tonivade.purefun.data.NonEmptyList;
-import com.github.tonivade.purefun.data.Range;
-import com.github.tonivade.purefun.data.Sequence;
-
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
 import static com.github.tonivade.purefun.Function1.cons;
+import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
 import static com.github.tonivade.purefun.data.ImmutableArray.empty;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
 import static com.github.tonivade.purefun.data.Sequence.interleave;
 import static java.util.stream.Collectors.joining;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+import com.github.tonivade.purefun.data.ImmutableArray;
+import com.github.tonivade.purefun.data.NonEmptyList;
+import com.github.tonivade.purefun.data.Range;
+import com.github.tonivade.purefun.data.Sequence;
 
 public final class SQL {
 
@@ -161,6 +161,8 @@ public final class SQL {
 
 interface SQLModule {
   static String process(String query, Sequence<?> values) {
+    checkNonEmpty(query);
+    checkNonNull(values);
     if (values.isEmpty()) return query;
     Stream<String> split = Pattern.compile("\\?").splitAsStream(query);
     Stream<String> replacements = values.stream().map(SQLModule::replacement);

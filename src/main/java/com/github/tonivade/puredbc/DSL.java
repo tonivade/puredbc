@@ -4,7 +4,7 @@
  */
 package com.github.tonivade.puredbc;
 
-import static java.util.Objects.requireNonNull;
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
@@ -38,7 +38,7 @@ interface DSL<T> extends DSLOf<T> {
     private final SQL query;
 
     private AbstractQuery(SQL query) {
-      this.query = requireNonNull(query);
+      this.query = checkNonNull(query);
     }
 
     public String getQuery() { return query.getQuery(); }
@@ -55,7 +55,7 @@ interface DSL<T> extends DSLOf<T> {
 
     protected QueryIterable(SQL query, Function1<Row, T> rowMapper) {
       super(query);
-      this.rowMapper = requireNonNull(rowMapper);
+      this.rowMapper = checkNonNull(rowMapper);
     }
 
     public Function1<Row, T> getRowMapper() {
@@ -79,7 +79,7 @@ interface DSL<T> extends DSLOf<T> {
 
     protected QueryMeta(SQL query, Function1<RowMetaData, T> rowMapper) {
       super(query);
-      this.rowMapper = requireNonNull(rowMapper);
+      this.rowMapper = checkNonNull(rowMapper);
     }
 
     public Function1<RowMetaData, T> getRowMapper() {
@@ -103,7 +103,7 @@ interface DSL<T> extends DSLOf<T> {
 
     protected QueryOne(SQL query, Function1<Row, T> rowMapper) {
       super(query);
-      this.rowMapper = requireNonNull(rowMapper);
+      this.rowMapper = checkNonNull(rowMapper);
     }
 
     public Function1<Row, T> getRowMapper() {
@@ -127,7 +127,7 @@ interface DSL<T> extends DSLOf<T> {
 
     protected UpdateWithKeys(SQL query, Field<T> field) {
       super(query);
-      this.field = requireNonNull(field);
+      this.field = checkNonNull(field);
     }
 
     public Field<T> getField() {

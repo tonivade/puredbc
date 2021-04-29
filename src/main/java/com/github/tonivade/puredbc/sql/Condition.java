@@ -4,12 +4,10 @@
  */
 package com.github.tonivade.puredbc.sql;
 
+import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
+import java.util.Objects;
 import com.github.tonivade.purefun.Equal;
 import com.github.tonivade.purefun.data.Range;
-
-import java.util.Objects;
-
-import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
 
 public interface Condition<T> {
 
@@ -68,7 +66,7 @@ public interface Condition<T> {
   }
 
   static <T> Condition<T> of(String condition) {
-    return requireNonEmpty(condition).<Condition<T>>map(ConditionImpl::new).getOrElseThrow();
+    return new ConditionImpl<>(condition);
   }
 }
 
@@ -79,7 +77,7 @@ final class ConditionImpl<T> implements Condition<T> {
   private final String expression;
 
   ConditionImpl(String expression) {
-    this.expression = expression;
+    this.expression = checkNonEmpty(expression);
   }
 
   @Override

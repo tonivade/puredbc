@@ -4,9 +4,8 @@
  */
 package com.github.tonivade.puredbc;
 
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
 import com.github.tonivade.purefun.type.Option;
-
-import static java.util.Objects.requireNonNull;
 
 public interface RowMetaData {
 
@@ -23,8 +22,8 @@ public interface RowMetaData {
     private final Boolean nullable;
 
     protected ColumnMetaData(String name, Class<?> type, Boolean nullable) {
-      this.name = requireNonNull(name);
-      this.type = requireNonNull(type);
+      this.name = checkNonNull(name);
+      this.type = checkNonNull(type);
       this.nullable = nullable;
     }
 

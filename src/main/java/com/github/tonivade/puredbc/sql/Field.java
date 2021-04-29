@@ -4,12 +4,10 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import com.github.tonivade.purefun.Equal;
-
-import java.util.Objects;
-
+import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
-import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
+import java.util.Objects;
+import com.github.tonivade.purefun.Equal;
 
 public interface Field<T> {
 
@@ -92,7 +90,7 @@ public interface Field<T> {
   }
 
   static <T> Field<T> of(String name) {
-    return requireNonEmpty(name).<Field<T>>map(FieldImpl::new).getOrElseThrow();
+    return new FieldImpl<>(name);
   }
 }
 
@@ -103,7 +101,7 @@ final class FieldImpl<T> implements Field<T> {
   private final String name;
 
   FieldImpl(String name) {
-    this.name = name;
+    this.name = checkNonEmpty(name);
   }
 
   @Override

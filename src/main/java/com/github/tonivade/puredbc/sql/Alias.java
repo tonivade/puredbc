@@ -4,22 +4,15 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import static com.github.tonivade.purefun.type.Validation.mapN;
-import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
-import static com.github.tonivade.purefun.type.Validation.requireNonNull;
-
+import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
 import java.util.Objects;
-
 import com.github.tonivade.purefun.Equal;
-import com.github.tonivade.purefun.type.Validation;
-import com.github.tonivade.purefun.type.Validation.Result;
 
 public interface Alias<T> extends Field<T> {
 
   static <T> Alias<T> of(String alias, Field<T> field) {
-    Validation<Result<String>, AliasImpl<T>> validation =
-        mapN(requireNonEmpty(alias), requireNonNull(field), AliasImpl::new);
-    return validation.getOrElseThrow();
+    return new AliasImpl<>(alias, field);
   }
 }
 
@@ -32,8 +25,8 @@ class AliasImpl<T> implements Alias<T> {
   private final Field<T> field;
 
   AliasImpl(String alias, Field<T> field) {
-    this.alias = alias;
-    this.field = field;
+    this.alias = checkNonEmpty(alias);
+    this.field = checkNonNull(field);
   }
 
   @Override

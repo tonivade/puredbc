@@ -4,6 +4,9 @@
  */
 package com.github.tonivade.puredbc;
 
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
+import java.util.ArrayList;
+import java.util.List;
 import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
@@ -11,17 +14,12 @@ import io.r2dbc.spi.ColumnMetadata;
 import io.r2dbc.spi.Nullability;
 import io.r2dbc.spi.RowMetadata;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Objects.requireNonNull;
-
 final class R2dbcRowMetaData implements RowMetaData {
 
   private final RowMetadata impl;
 
   protected R2dbcRowMetaData(RowMetadata impl) {
-    this.impl = requireNonNull(impl);
+    this.impl = checkNonNull(impl);
   }
 
   @Override

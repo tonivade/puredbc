@@ -4,6 +4,10 @@
  */
 package com.github.tonivade.puredbc;
 
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
+import static com.github.tonivade.purefun.Unit.unit;
+import java.util.List;
+import org.reactivestreams.Publisher;
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.Unit;
@@ -12,21 +16,15 @@ import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Option;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
-
-import static com.github.tonivade.purefun.Unit.unit;
-import static java.util.Objects.requireNonNull;
 
 public final class R2dbcTemplate {
 
   private final ConnectionFactory connectionFactory;
 
   public R2dbcTemplate(ConnectionFactory connectionFactory) {
-    this.connectionFactory = requireNonNull(connectionFactory);
+    this.connectionFactory = checkNonNull(connectionFactory);
   }
 
   public Mono<Unit> update(String query, Sequence<?> params) {

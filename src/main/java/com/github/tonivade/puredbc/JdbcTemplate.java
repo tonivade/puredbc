@@ -4,6 +4,16 @@
  */
 package com.github.tonivade.puredbc;
 
+import static com.github.tonivade.purefun.Function1.cons;
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
+import static com.github.tonivade.purefun.Unit.unit;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.purefun.Consumer1;
 import com.github.tonivade.purefun.Function1;
@@ -14,24 +24,12 @@ import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Option;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.github.tonivade.purefun.Function1.cons;
-import static com.github.tonivade.purefun.Unit.unit;
-import static java.util.Objects.requireNonNull;
-
 public class JdbcTemplate implements Recoverable, AutoCloseable {
 
   public final Connection conn;
 
   public JdbcTemplate(Connection conn) {
-    this.conn = requireNonNull(conn);
+    this.conn = checkNonNull(conn);
   }
 
   public Unit update(String query, Sequence<?> params) {
@@ -120,7 +118,7 @@ public class JdbcTemplate implements Recoverable, AutoCloseable {
       }
     };
   }
-  
+
   private static <T> Function1<Row, T> getField(Field<T> field) {
     return row -> row.get(field);
   }

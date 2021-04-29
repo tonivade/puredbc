@@ -4,30 +4,21 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import static com.github.tonivade.purefun.data.ImmutableArray.empty;
-import static com.github.tonivade.purefun.type.Validation.mapN;
-import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
-import static com.github.tonivade.purefun.type.Validation.requireNonNull;
-
+import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
+import static com.github.tonivade.purefun.data.Sequence.emptyList;
 import java.util.Objects;
-
 import com.github.tonivade.purefun.Equal;
-import com.github.tonivade.purefun.data.ImmutableArray;
 import com.github.tonivade.purefun.data.Sequence;
-import com.github.tonivade.purefun.type.Validation;
-import com.github.tonivade.purefun.type.Validation.Result;
 
 public interface Function<T> extends Field<T> {
 
   static <T> Function<T> of(String name, Field<T> field) {
-    return of(name, field, empty());
+    return of(name, field, emptyList());
   }
 
   static <T> Function<T> of(String name, Field<T> field, Sequence<Object> params) {
-    Validation<Result<String>, Function<T>> validation =
-        mapN(requireNonEmpty(name), requireNonNull(field), requireNonNull(params),
-            (n, f, p) -> new FunctionImpl<>(n, ImmutableArray.<Object>of(f.name()).appendAll(p)));
-    return validation.getOrElseThrow();
+    return new FunctionImpl<>(name, field, params);
   }
 }
 
@@ -39,9 +30,9 @@ class FunctionImpl<T> implements Function<T> {
   private final String name;
   private final Sequence<?> params;
 
-  FunctionImpl(String name, Sequence<?> params) {
-    this.name = name;
-    this.params = params;
+  FunctionImpl(String name, Field<T> field, Sequence<?> params) {
+    this.name = checkNonEmpty(name);
+    this.params = Sequence.<Object>listOf(checkNonNull(field).name()).appendAll(checkNonNull(params));
   }
 
   @Override

@@ -4,23 +4,21 @@
  */
 package com.github.tonivade.puredbc;
 
-import com.github.tonivade.puredbc.sql.Field;
-
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.sql.Date;
-
-import static java.util.Objects.requireNonNull;
+import com.github.tonivade.puredbc.sql.Field;
 
 final class R2dbcRow implements Row {
 
   private final io.r2dbc.spi.Row impl;
 
   protected R2dbcRow(io.r2dbc.spi.Row impl) {
-    this.impl = requireNonNull(impl);
+    this.impl = checkNonNull(impl);
   }
-  
+
   @SuppressWarnings("unchecked")
   @Override
   public <T> T get(Field<T> field) {

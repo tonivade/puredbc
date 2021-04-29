@@ -4,21 +4,14 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import static com.github.tonivade.purefun.type.Validation.mapN;
-import static com.github.tonivade.purefun.type.Validation.requireNonEmpty;
-
+import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
 import java.util.Objects;
-
 import com.github.tonivade.purefun.Equal;
-import com.github.tonivade.purefun.type.Validation;
-import com.github.tonivade.purefun.type.Validation.Result;
 
 public interface TableField<T> extends Field<T> {
 
   static <T> TableField<T> of(String alias, String name) {
-    Validation<Result<String>, TableField<T>> validation =
-        mapN(requireNonEmpty(alias), requireNonEmpty(name), TableFieldImpl::new);
-    return validation.getOrElseThrow();
+    return new TableFieldImpl<>(alias, name);
   }
 }
 
@@ -31,8 +24,8 @@ final class TableFieldImpl<T> implements TableField<T> {
   private final String name;
 
   TableFieldImpl(String table, String name) {
-    this.table = table;
-    this.name = name;
+    this.table = checkNonEmpty(table);
+    this.name = checkNonEmpty(name);
   }
 
   @Override

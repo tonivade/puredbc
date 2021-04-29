@@ -7,20 +7,16 @@ package com.github.tonivade.puredbc;
 import static com.github.tonivade.puredbc.PublisherKOf.toPublisherK;
 import static com.github.tonivade.puredbc.PureDBCOf.toPureDBC;
 import static com.github.tonivade.purefun.Function1.cons;
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
 import static com.github.tonivade.purefun.concurrent.FutureOf.toFuture;
 import static com.github.tonivade.purefun.effect.TaskOf.toTask;
 import static com.github.tonivade.purefun.effect.UIOOf.toUIO;
 import static com.github.tonivade.purefun.type.IdOf.toId;
 import static com.github.tonivade.purefun.type.TryOf.toTry;
-import static java.util.Objects.requireNonNull;
-
 import java.sql.SQLException;
-
 import javax.sql.DataSource;
-
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
-
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Function1;
@@ -44,7 +40,6 @@ import com.github.tonivade.purefun.type.Try_;
 import com.github.tonivade.purefun.typeclasses.FunctionK;
 import com.github.tonivade.purefun.typeclasses.Instance;
 import com.github.tonivade.purefun.typeclasses.Monad;
-
 import io.r2dbc.spi.ConnectionFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -63,7 +58,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
   }
 
   private PureDBC(Free<DSL_, T> value) {
-    this.value = requireNonNull(value);
+    this.value = checkNonNull(value);
   }
 
   public <R> PureDBC<R> map(Function1<? super T, ? extends R> map) {
@@ -198,7 +193,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     private final JdbcTemplate jdbc;
 
     public DSLIdVisitor(JdbcTemplate jdbc) {
-      this.jdbc = requireNonNull(jdbc);
+      this.jdbc = checkNonNull(jdbc);
     }
 
     @Override
@@ -232,7 +227,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     private final JdbcTemplate jdbc;
 
     public DSLTryVisitor(JdbcTemplate jdbc) {
-      this.jdbc = requireNonNull(jdbc);
+      this.jdbc = checkNonNull(jdbc);
     }
 
     @Override
@@ -266,7 +261,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     private final JdbcTemplate jdbc;
 
     public DSLUIOVisitor(JdbcTemplate jdbc) {
-      this.jdbc = requireNonNull(jdbc);
+      this.jdbc = checkNonNull(jdbc);
     }
 
     @Override
@@ -300,7 +295,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     private final JdbcTemplate jdbc;
 
     public DSLTaskVisitor(JdbcTemplate jdbc) {
-      this.jdbc = requireNonNull(jdbc);
+      this.jdbc = checkNonNull(jdbc);
     }
 
     @Override
@@ -334,7 +329,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     private final JdbcTemplate jdbc;
 
     public DSLFutureVisitor(JdbcTemplate jdbc) {
-      this.jdbc = requireNonNull(jdbc);
+      this.jdbc = checkNonNull(jdbc);
     }
 
     @Override
@@ -368,7 +363,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     private final R2dbcTemplate r2dbc;
 
     private DSLReactVisitor(R2dbcTemplate r2dbc) {
-      this.r2dbc = requireNonNull(r2dbc);
+      this.r2dbc = checkNonNull(r2dbc);
     }
 
     @Override
@@ -403,7 +398,7 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     private final DSL.Visitor<F> visitor;
 
     public DSLTransformer(DSL.Visitor<F> visitor) {
-      this.visitor = requireNonNull(visitor);
+      this.visitor = checkNonNull(visitor);
     }
 
     @Override
@@ -432,7 +427,7 @@ interface PureDBCMonad extends Monad<PureDBC_> {
 interface PublisherKMonad extends Monad<PublisherK_> {
 
   PublisherKMonad INSTANCE = new PublisherKMonad() {};
-  
+
   @Override
   default <T, R> PublisherK<R> map(Kind<PublisherK_, ? extends T> value, Function1<? super T, ? extends R> map) {
     return value.fix(toPublisherK()).map(map);
@@ -456,7 +451,7 @@ class PublisherK<T> implements PublisherKOf<T>, Publisher<T> {
   private final Publisher<? extends T> value;
 
   private PublisherK(Publisher<? extends T> value) {
-    this.value = requireNonNull(value);
+    this.value = checkNonNull(value);
   }
 
   public <R> PublisherK<R> map(Function1<? super T, ? extends R> mapper) {

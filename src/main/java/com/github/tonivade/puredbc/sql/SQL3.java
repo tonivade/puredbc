@@ -4,15 +4,15 @@
  */
 package com.github.tonivade.puredbc.sql;
 
+import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
-import static java.util.Objects.requireNonNull;
 
 public final class SQL3<A, B, C> {
 
   private final String query;
 
   protected SQL3(String query) {
-    this.query = requireNonNull(query);
+    this.query = checkNonEmpty(query);
   }
 
   public SQL bind(A a, B b, C c) {
