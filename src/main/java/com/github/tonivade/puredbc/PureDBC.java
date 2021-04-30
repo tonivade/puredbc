@@ -19,6 +19,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.SQL;
+import com.github.tonivade.purefun.Bindable;
 import com.github.tonivade.purefun.Function1;
 import com.github.tonivade.purefun.HigherKind;
 import com.github.tonivade.purefun.Kind;
@@ -45,7 +46,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @HigherKind
-public final class PureDBC<T> implements PureDBCOf<T> {
+public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
 
   private final Free<DSL_, T> value;
 
@@ -61,15 +62,18 @@ public final class PureDBC<T> implements PureDBCOf<T> {
     this.value = checkNonNull(value);
   }
 
+  @Override
   public <R> PureDBC<R> map(Function1<? super T, ? extends R> map) {
     return new PureDBC<>(value.map(map));
   }
 
-  public <R> PureDBC<R> flatMap(Function1<? super T, ? extends PureDBC<? extends R>> map) {
+  @Override
+  public <R> PureDBC<R> flatMap(Function1<? super T, ? extends Kind<PureDBC_, ? extends R>> map) {
     return new PureDBC<>(value.flatMap(t -> map.andThen(PureDBCOf::narrowK).apply(t).value));
   }
 
-  public <R> PureDBC<R> andThen(PureDBC<? extends R> next) {
+  @Override
+  public <R> PureDBC<R> andThen(Kind<PureDBC_, ? extends R> next) {
     return flatMap(cons(next));
   }
 
