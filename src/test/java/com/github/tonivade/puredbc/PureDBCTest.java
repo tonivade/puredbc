@@ -4,6 +4,27 @@
  */
 package com.github.tonivade.puredbc;
 
+import static com.github.tonivade.puredbc.PureDBC.queryIterable;
+import static com.github.tonivade.puredbc.PureDBC.queryOne;
+import static com.github.tonivade.puredbc.PureDBC.update;
+import static com.github.tonivade.puredbc.PureDBC.updateWithKeys;
+import static com.github.tonivade.puredbc.sql.Condition.between;
+import static com.github.tonivade.puredbc.sql.SQL.deleteFrom;
+import static com.github.tonivade.puredbc.sql.SQL.insertInto;
+import static com.github.tonivade.puredbc.sql.SQL.select;
+import static com.github.tonivade.puredbc.sql.SQL.sql;
+import static com.github.tonivade.puredbc.sql.SQL.update;
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
+import static com.github.tonivade.purefun.Unit.unit;
+import static com.github.tonivade.purefun.data.Sequence.arrayOf;
+import static com.github.tonivade.purefun.data.Sequence.listOf;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import org.junit.jupiter.api.Test;
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.puredbc.sql.SQL1;
@@ -24,30 +45,7 @@ import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import io.r2dbc.spi.R2dbcBadGrammarException;
-import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
-
-import javax.sql.DataSource;
-import java.sql.SQLException;
-
-import static com.github.tonivade.puredbc.PureDBC.queryIterable;
-import static com.github.tonivade.puredbc.PureDBC.queryOne;
-import static com.github.tonivade.puredbc.PureDBC.update;
-import static com.github.tonivade.puredbc.PureDBC.updateWithKeys;
-import static com.github.tonivade.puredbc.sql.Condition.between;
-import static com.github.tonivade.puredbc.sql.SQL.deleteFrom;
-import static com.github.tonivade.puredbc.sql.SQL.insertInto;
-import static com.github.tonivade.puredbc.sql.SQL.select;
-import static com.github.tonivade.puredbc.sql.SQL.update;
-import static com.github.tonivade.puredbc.sql.SQL.sql;
-import static com.github.tonivade.purefun.Unit.unit;
-import static com.github.tonivade.purefun.data.Sequence.arrayOf;
-import static com.github.tonivade.purefun.data.Sequence.listOf;
-import static java.util.Objects.requireNonNull;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PureDBCTest {
 
@@ -228,15 +226,15 @@ final class TestTable implements Table2<Long, String> {
   private final String name;
 
   TestTable() {
-    this.name = "test";
-    this.ID = Field.of("id");
-    this.NAME = Field.of("name");
+    name = "test";
+    ID = Field.of("id");
+    NAME = Field.of("name");
   }
 
   private TestTable(TestTable other, String alias) {
-    this.name = "test as " + alias;
-    this.ID = other.ID.alias(alias);
-    this.NAME = other.NAME.alias(alias);
+    name = "test as " + alias;
+    ID = other.ID.alias(alias);
+    NAME = other.NAME.alias(alias);
   }
 
   @Override
@@ -250,9 +248,10 @@ final class TestTable implements Table2<Long, String> {
   }
 
   public TestTable as(String alias) {
-    return new TestTable(this, requireNonNull(alias));
+    return new TestTable(this, checkNonNull(alias));
   }
 
+  @Override
   public Tuple2<Long, String> asTuple(Row row) {
     return Tuple2.of(row.getLong(ID), row.getString(NAME));
   }

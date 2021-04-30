@@ -4,24 +4,22 @@
  */
 package com.github.tonivade.puredbc;
 
-import com.github.tonivade.puredbc.sql.Field;
-import com.github.tonivade.purefun.Producer;
-import com.github.tonivade.purefun.Recoverable;
-
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.Date;
-
-import static java.util.Objects.requireNonNull;
+import com.github.tonivade.puredbc.sql.Field;
+import com.github.tonivade.purefun.Producer;
+import com.github.tonivade.purefun.Recoverable;
 
 final class JdbcRow implements Row, Recoverable {
 
   private final ResultSet resultSet;
 
   protected JdbcRow(ResultSet resultSet) {
-    this.resultSet = requireNonNull(resultSet);
+    this.resultSet = checkNonNull(resultSet);
   }
-  
+
   @SuppressWarnings("unchecked")
   @Override
   public <T> T get(Field<T> field) {
