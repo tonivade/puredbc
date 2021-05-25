@@ -44,7 +44,7 @@ dependencies {
   implementation 'com.github.tonivade:purefun-effect:2.3-SNAPSHOT'
   runtimeOnly 'com.github.tonivade:purefun-instances:2.3-SNAPSHOT'
   implementation 'io.r2dbc:r2dbc-spi:0.8.5.RELEASE'
-  implementation 'io.r2dbc:r2dbc-pool:0.8.6.RELEASE'
+  implementation 'io.r2dbc:r2dbc-pool:0.8.7.RELEASE'
   testRuntimeOnly 'com.h2database:h2:1.4.200'
   testRuntimeOnly 'io.r2dbc:r2dbc-h2:0.8.4.RELEASE'
   testImplementation 'com.zaxxer:HikariCP:4.0.3'
