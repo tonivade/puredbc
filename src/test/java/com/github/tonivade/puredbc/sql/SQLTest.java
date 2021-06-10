@@ -11,9 +11,6 @@ import static com.github.tonivade.puredbc.sql.SQL.update;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
-import com.github.tonivade.puredbc.Row;
-import com.github.tonivade.purefun.Tuple2;
-import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.typeclasses.TupleK2;
 
 class SQLTest {
@@ -27,25 +24,10 @@ class SQLTest {
     public String name() {
       return "example";
     }
-
-    @Override
-    public NonEmptyList<Field<?>> all() {
-      return NonEmptyList.of(ID, NAME);
-    }
-    
-    @Override
-    public Tuple2<Integer, String> asTuple(Row row) {
-      return Tuple2.of(row.getInteger(ID), row.getString(NAME));
-    }
     
     @Override
     public TupleK2<Field_, Integer, String> fields() {
       return new TupleK2<>(ID, NAME);
-    }
-    
-    @Override
-    public Example as(String alias) {
-      return this;
     }
   }
 

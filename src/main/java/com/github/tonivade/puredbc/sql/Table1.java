@@ -11,7 +11,7 @@ import com.github.tonivade.purefun.Tuple1;
 import com.github.tonivade.purefun.typeclasses.TupleK1;
 
 public interface Table1<A> extends Table<Tuple1<A>, TupleK1<Field_, A>> {
-
+  
   @Override
   default Tuple1<A> asTuple(Row row) {
     TupleK1<Field_, A> fields = fields();

@@ -246,11 +246,6 @@ final class TestTable implements Table2<Long, String> {
   }
 
   @Override
-  public NonEmptyList<Field<?>> all() {
-    return NonEmptyList.of(ID, NAME);
-  }
-
-  @Override
   public TestTable as(String alias) {
     return new TestTable(this, checkNonNull(alias));
   }
@@ -258,10 +253,5 @@ final class TestTable implements Table2<Long, String> {
   @Override
   public TupleK2<Field_, Long, String> fields() {
     return TupleK.of(ID, NAME);
-  }
-
-  @Override
-  public Tuple2<Long, String> asTuple(Row row) {
-    return Tuple2.of(row.getLong(ID), row.getString(NAME));
   }
 }

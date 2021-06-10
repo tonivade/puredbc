@@ -14,19 +14,25 @@ import com.github.tonivade.puredbc.RowMetaData;
 import com.github.tonivade.purefun.Tuple;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.data.NonEmptyList;
+import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Validation;
 import com.github.tonivade.purefun.typeclasses.TupleK;
 
 public interface Table<T extends Tuple, F extends TupleK<Field_>> {
 
-  NonEmptyList<Field<?>> all();
-
   String name();
-  
-  Table<T, F> as(String alias);
   
   F fields();
   T asTuple(Row row);
+  
+  default Table<T, F> as(String alias) {
+    return this;
+  }
+
+  default NonEmptyList<Field<?>> all() {
+    Sequence<Field<?>> sequence = fields().toSequence().map(FieldOf::narrowK);
+    return NonEmptyList.of(sequence.asList());
+  }
 
   default Validation<Iterable<String>, Unit> validate(RowMetaData metaData) {
     NonEmptyList<Field<?>> all = all();
