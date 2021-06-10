@@ -11,13 +11,13 @@ import java.util.Objects;
 import com.github.tonivade.purefun.Equal;
 import com.github.tonivade.purefun.data.Sequence;
 
-public interface Function<T> extends Field<T> {
+public interface Function<T> extends SealedField<T> {
 
   static <T> Function<T> of(String name, Field<T> field) {
     return of(name, field, emptyList());
   }
 
-  static <T> Function<T> of(String name, Field<T> field, Sequence<Object> params) {
+  static <T> Function<T> of(String name, Field<T> field, Sequence<?> params) {
     return new FunctionImpl<>(name, field, params);
   }
 }

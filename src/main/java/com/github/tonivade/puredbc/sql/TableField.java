@@ -8,7 +8,7 @@ import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
 import java.util.Objects;
 import com.github.tonivade.purefun.Equal;
 
-public interface TableField<T> extends Field<T> {
+public interface TableField<T> extends SealedField<T> {
 
   static <T> TableField<T> of(String alias, String name) {
     return new TableFieldImpl<>(alias, name);

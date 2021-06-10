@@ -10,7 +10,7 @@ import java.util.Objects;
 import com.github.tonivade.purefun.Equal;
 import com.github.tonivade.purefun.HigherKind;
 
-@HigherKind
+@HigherKind(sealed = true)
 public interface Field<T> extends FieldOf<T> {
 
   String name();
@@ -96,7 +96,7 @@ public interface Field<T> extends FieldOf<T> {
   }
 }
 
-final class FieldImpl<T> implements Field<T> {
+final class FieldImpl<T> implements SealedField<T> {
 
   private static final Equal<Field<?>> EQUAL = Equal.<Field<?>>of().comparing(Field::name);
 

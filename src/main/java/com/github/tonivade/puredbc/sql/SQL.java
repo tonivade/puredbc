@@ -13,10 +13,12 @@ import static com.github.tonivade.purefun.data.Sequence.interleave;
 import static java.util.stream.Collectors.joining;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import com.github.tonivade.purefun.Tuple;
 import com.github.tonivade.purefun.data.ImmutableArray;
 import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.data.Sequence;
+import com.github.tonivade.purefun.typeclasses.TupleK;
 
 public final class SQL {
 
@@ -49,23 +51,23 @@ public final class SQL {
     return sql(query + " from (" + other.getQuery() + ")");
   }
 
-  public SQL from(Table table, Table... tables) {
+  public SQL from(Table<?, ?> table, Table<?, ?>... tables) {
     return sql(query + " from " + NonEmptyList.of(table, tables).map(Table::name).join(","));
   }
 
-  public SQL innerJoin(Table table) {
+  public <T extends Tuple, F extends TupleK<Field_>> SQL innerJoin(Table<T, F> table) {
     return sql(query + " inner join " + table.name());
   }
 
-  public SQL leftJoin(Table table) {
+  public <T extends Tuple, F extends TupleK<Field_>> SQL leftJoin(Table<T, F> table) {
     return sql(query + " left join " + table.name());
   }
 
-  public SQL rightJoin(Table table) {
+  public <T extends Tuple, F extends TupleK<Field_>> SQL rightJoin(Table<T, F> table) {
     return sql(query + " right join " + table.name());
   }
 
-  public SQL fullJoin(Table table) {
+  public <T extends Tuple, F extends TupleK<Field_>> SQL fullJoin(Table<T, F> table) {
     return sql(query + " full join " + table.name());
   }
 
@@ -137,15 +139,15 @@ public final class SQL {
     return sql(fields.map(Field::name).join(", ", "select ", ""));
   }
 
-  public static SQL insertInto(Table table) {
+  public static <T extends Tuple, F extends TupleK<Field_>> SQL insertInto(Table<T, F> table) {
     return sql("insert into " + table.name());
   }
 
-  public static SQL update(Table table) {
+  public static <T extends Tuple, F extends TupleK<Field_>> SQL update(Table<T, F> table) {
     return sql("update " + table.name());
   }
 
-  public static SQL deleteFrom(Table table) {
+  public static <T extends Tuple, F extends TupleK<Field_>> SQL deleteFrom(Table<T, F> table) {
     return sql("delete from " + table.name());
   }
 
@@ -160,6 +162,7 @@ public final class SQL {
 }
 
 interface SQLModule {
+  
   static String process(String query, Sequence<?> values) {
     checkNonEmpty(query);
     checkNonNull(values);

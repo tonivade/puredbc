@@ -9,7 +9,7 @@ import static com.github.tonivade.purefun.Precondition.checkNonNull;
 import java.util.Objects;
 import com.github.tonivade.purefun.Equal;
 
-public interface Alias<T> extends Field<T> {
+public interface Alias<T> extends SealedField<T> {
 
   static <T> Alias<T> of(String alias, Field<T> field) {
     return new AliasImpl<>(alias, field);

@@ -7,9 +7,11 @@ package com.github.tonivade.puredbc.sql;
 import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
 import java.util.Objects;
 import com.github.tonivade.purefun.Equal;
+import com.github.tonivade.purefun.HigherKind;
 import com.github.tonivade.purefun.data.Range;
 
-public interface Condition<T> {
+@HigherKind(sealed = true)
+public interface Condition<T> extends ConditionOf<T> {
 
   String expression();
 
@@ -70,7 +72,7 @@ public interface Condition<T> {
   }
 }
 
-final class ConditionImpl<T> implements Condition<T> {
+final class ConditionImpl<T> implements SealedCondition<T> {
 
   private static final Equal<Condition<?>> EQUAL = Equal.<Condition<?>>of().comparing(Condition::expression);
 
