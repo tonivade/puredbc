@@ -4,21 +4,29 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import com.github.tonivade.puredbc.RowMetaData;
-import com.github.tonivade.purefun.Unit;
-import com.github.tonivade.purefun.data.NonEmptyList;
-import com.github.tonivade.purefun.type.Validation;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.github.tonivade.purefun.Unit.unit;
 import static com.github.tonivade.purefun.type.Validation.invalid;
 import static com.github.tonivade.purefun.type.Validation.valid;
+import java.util.ArrayList;
+import java.util.List;
+import com.github.tonivade.puredbc.Row;
+import com.github.tonivade.puredbc.RowMetaData;
+import com.github.tonivade.purefun.Tuple;
+import com.github.tonivade.purefun.Unit;
+import com.github.tonivade.purefun.data.NonEmptyList;
+import com.github.tonivade.purefun.type.Validation;
+import com.github.tonivade.purefun.typeclasses.TupleK;
 
-public interface Table {
+public interface Table<T extends Tuple, F extends TupleK<Field_>> {
+
   NonEmptyList<Field<?>> all();
+
   String name();
+  
+  Table<T, F> as(String alias);
+  
+  F fields();
+  T asTuple(Row row);
 
   default Validation<Iterable<String>, Unit> validate(RowMetaData metaData) {
     NonEmptyList<Field<?>> all = all();

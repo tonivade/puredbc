@@ -4,19 +4,21 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import com.github.tonivade.purefun.data.NonEmptyList;
-import org.junit.jupiter.api.Test;
-
 import static com.github.tonivade.puredbc.sql.SQL.deleteFrom;
 import static com.github.tonivade.puredbc.sql.SQL.insertInto;
 import static com.github.tonivade.puredbc.sql.SQL.select;
 import static com.github.tonivade.puredbc.sql.SQL.update;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+import com.github.tonivade.puredbc.Row;
+import com.github.tonivade.purefun.Tuple2;
+import com.github.tonivade.purefun.data.NonEmptyList;
+import com.github.tonivade.purefun.typeclasses.TupleK2;
 
 class SQLTest {
 
-  private static final class Example implements Table {
+  private static final class Example implements Table2<Integer, String> {
 
     final Field<Integer> ID = Field.of("id");
     final Field<String> NAME = Field.of("name");
@@ -29,6 +31,21 @@ class SQLTest {
     @Override
     public NonEmptyList<Field<?>> all() {
       return NonEmptyList.of(ID, NAME);
+    }
+    
+    @Override
+    public Tuple2<Integer, String> asTuple(Row row) {
+      return Tuple2.of(row.getInteger(ID), row.getString(NAME));
+    }
+    
+    @Override
+    public TupleK2<Field_, Integer, String> fields() {
+      return new TupleK2<>(ID, NAME);
+    }
+    
+    @Override
+    public Example as(String alias) {
+      return this;
     }
   }
 

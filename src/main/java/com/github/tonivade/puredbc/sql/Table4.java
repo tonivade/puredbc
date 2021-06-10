@@ -4,9 +4,9 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import com.github.tonivade.puredbc.Row;
 import com.github.tonivade.purefun.Tuple4;
+import com.github.tonivade.purefun.typeclasses.TupleK4;
 
-public interface Table4<A, B, C, D> extends Table {
-  Tuple4<A, B, C, D> asTuple(Row row);
+public interface Table4<A, B, C, D> extends Table<Tuple4<A, B, C, D>, TupleK4<Field_, A, B, C, D>> {
+
 }

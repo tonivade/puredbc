@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import com.github.tonivade.puredbc.sql.Field;
+import com.github.tonivade.puredbc.sql.Field_;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.puredbc.sql.SQL1;
 import com.github.tonivade.puredbc.sql.SQL2;
@@ -39,6 +40,8 @@ import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
 import com.github.tonivade.purefun.type.Validation;
 import com.github.tonivade.purefun.typeclasses.For;
+import com.github.tonivade.purefun.typeclasses.TupleK;
+import com.github.tonivade.purefun.typeclasses.TupleK2;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.r2dbc.spi.ConnectionFactories;
@@ -232,7 +235,7 @@ final class TestTable implements Table2<Long, String> {
   }
 
   private TestTable(TestTable other, String alias) {
-    name = "test as " + alias;
+    name = other.name + " as " + alias;
     ID = other.ID.alias(alias);
     NAME = other.NAME.alias(alias);
   }
@@ -247,8 +250,14 @@ final class TestTable implements Table2<Long, String> {
     return NonEmptyList.of(ID, NAME);
   }
 
+  @Override
   public TestTable as(String alias) {
     return new TestTable(this, checkNonNull(alias));
+  }
+  
+  @Override
+  public TupleK2<Field_, Long, String> fields() {
+    return TupleK.of(ID, NAME);
   }
 
   @Override

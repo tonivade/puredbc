@@ -8,8 +8,10 @@ import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
 import java.util.Objects;
 import com.github.tonivade.purefun.Equal;
+import com.github.tonivade.purefun.HigherKind;
 
-public interface Field<T> {
+@HigherKind
+public interface Field<T> extends FieldOf<T> {
 
   String name();
 
