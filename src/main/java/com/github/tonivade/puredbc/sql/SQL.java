@@ -31,7 +31,7 @@ public final class SQL {
 
   protected SQL(String query, Sequence<?> values) {
     this.query = SQLModule.process(query, values);
-    this.values = values;
+    this.values = checkNonNull(values);
   }
 
   public String getQuery() {
@@ -140,7 +140,7 @@ public final class SQL {
   }
   
   public static <T extends Tuple, F extends TupleK<Field_>> SQL selectFrom(Table<T, F> table) {
-    return select(table.all());
+    return select(table.all()).from(table);
   }
 
   public static <T extends Tuple, F extends TupleK<Field_>> SQL insertInto(Table<T, F> table) {
