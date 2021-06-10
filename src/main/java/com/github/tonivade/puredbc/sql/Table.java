@@ -13,6 +13,7 @@ import com.github.tonivade.puredbc.Row;
 import com.github.tonivade.puredbc.RowMetaData;
 import com.github.tonivade.purefun.Tuple;
 import com.github.tonivade.purefun.Unit;
+import com.github.tonivade.purefun.data.ImmutableMap;
 import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Validation;
@@ -23,22 +24,30 @@ public interface Table<T extends Tuple, F extends TupleK<Field_>> {
   String name();
   
   F fields();
+  
   T asTuple(Row row);
   
   default Table<T, F> as(String alias) {
-    return this;
+    throw new UnsupportedOperationException();
   }
 
   default NonEmptyList<Field<?>> all() {
     Sequence<Field<?>> sequence = fields().toSequence().map(FieldOf::narrowK);
     return NonEmptyList.of(sequence.asList());
   }
+  
+  default ImmutableMap<String, Field<?>> map() {
+    return ImmutableMap.from(all().map(x -> Tuple.of(x.name().toUpperCase(), x)));
+  }
 
   default Validation<Iterable<String>, Unit> validate(RowMetaData metaData) {
-    NonEmptyList<Field<?>> all = all();
     List<String> result = new ArrayList<>(metaData.columnCount());
-    for (Field<?> field : all) {
+    for (Field<?> field : all()) {
       metaData.column(field.name()).ifEmpty(() -> result.add(field.name() + " not found"));
+    }
+    ImmutableMap<String, Field<?>> map = map();
+    for (var column : metaData.allColumns()) {
+      map.get(column.name().toUpperCase()).ifEmpty(() -> result.add(column.name() + " not mapped"));
     }
     return result.isEmpty() ? valid(unit()) : invalid(result);
   }

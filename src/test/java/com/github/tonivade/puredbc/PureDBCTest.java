@@ -14,6 +14,7 @@ import static com.github.tonivade.puredbc.sql.SQL.insertInto;
 import static com.github.tonivade.puredbc.sql.SQL.select;
 import static com.github.tonivade.puredbc.sql.SQL.sql;
 import static com.github.tonivade.puredbc.sql.SQL.update;
+import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
 import static com.github.tonivade.purefun.Precondition.checkNonNull;
 import static com.github.tonivade.purefun.Unit.unit;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
@@ -34,7 +35,6 @@ import com.github.tonivade.puredbc.sql.Table2;
 import com.github.tonivade.purefun.Tuple;
 import com.github.tonivade.purefun.Tuple2;
 import com.github.tonivade.purefun.Unit;
-import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
@@ -228,16 +228,18 @@ final class TestTable implements Table2<Long, String> {
 
   private final String name;
 
-  TestTable() {
-    name = "test";
-    ID = Field.of("id");
-    NAME = Field.of("name");
+  public TestTable() {
+    this("test", Field.of("id"), Field.of("name"));
   }
 
   private TestTable(TestTable other, String alias) {
-    name = other.name + " as " + alias;
-    ID = other.ID.alias(alias);
-    NAME = other.NAME.alias(alias);
+    this(other.name + " as " + checkNonEmpty(alias), other.ID.alias(alias), other.NAME.alias(alias));
+  }
+
+  private TestTable(String name, Field<Long> ID, Field<String> NAME) {
+    this.name = checkNonEmpty(name);
+    this.ID = checkNonNull(ID);
+    this.NAME = checkNonNull(NAME);
   }
 
   @Override
@@ -247,7 +249,7 @@ final class TestTable implements Table2<Long, String> {
 
   @Override
   public TestTable as(String alias) {
-    return new TestTable(this, checkNonNull(alias));
+    return new TestTable(this, alias);
   }
   
   @Override

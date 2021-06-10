@@ -12,10 +12,12 @@ import com.github.tonivade.purefun.typeclasses.TupleK1;
 
 public interface Table1<A> extends Table<Tuple1<A>, TupleK1<Field_, A>> {
   
+  default Field<A> field1() {
+    return fields().get1().fix(toField());
+  }
+  
   @Override
   default Tuple1<A> asTuple(Row row) {
-    TupleK1<Field_, A> fields = fields();
-    Field<A> field1 = fields.get1().fix(toField());
-    return Tuple.of(row.get(field1));
+    return Tuple.of(row.get(field1()));
   }
 }

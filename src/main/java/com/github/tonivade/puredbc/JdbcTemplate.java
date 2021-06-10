@@ -105,7 +105,7 @@ public class JdbcTemplate implements Recoverable, AutoCloseable {
       int i = 1;
       for (Object param : params) {
         if (param instanceof Range) {
-          Range range = (Range) param;
+          var range = (Range) param;
           stmt.setObject(i++, range.begin());
           stmt.setObject(i++, range.end());
         } else if (param instanceof Iterable) {

@@ -6,7 +6,7 @@ package com.github.tonivade.puredbc.sql;
 
 import static com.github.tonivade.puredbc.sql.SQL.deleteFrom;
 import static com.github.tonivade.puredbc.sql.SQL.insertInto;
-import static com.github.tonivade.puredbc.sql.SQL.select;
+import static com.github.tonivade.puredbc.sql.SQL.selectFrom;
 import static com.github.tonivade.puredbc.sql.SQL.update;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -37,7 +37,7 @@ class SQLTest {
   void test() {
     assertAll(
         () -> assertEquals("select id, name from example",
-            select(EXAMPLE.all()).from(EXAMPLE).getQuery()),
+            selectFrom(EXAMPLE).getQuery()),
         () -> assertEquals("insert into example (id, name) values (?, ?)",
             insertInto(EXAMPLE).values(EXAMPLE.ID, EXAMPLE.NAME).bind(1, "name").getQuery()),
         () -> assertEquals("delete from example where id = ?",

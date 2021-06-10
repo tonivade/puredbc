@@ -22,9 +22,9 @@ final class JdbcRowMetaData implements RowMetaData, Recoverable {
     columnsByIndex = new HashMap<>();
     try {
       for (int i = 1; i <= impl.getColumnCount(); i++) {
-        ColumnMetaData columnMetadata = createColumn(impl, i);
+        var columnMetadata = createColumn(impl, i);
         columnsByIndex.put(i, columnMetadata);
-        columnsByName.put(columnMetadata.getName().toUpperCase(), columnMetadata);
+        columnsByName.put(columnMetadata.name().toUpperCase(), columnMetadata);
       }
     } catch (SQLException | ClassNotFoundException e) {
       sneakyThrow(e);

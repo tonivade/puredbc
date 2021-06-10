@@ -138,6 +138,10 @@ public final class SQL {
   public static SQL select(NonEmptyList<Field<?>> fields) {
     return sql(fields.map(Field::name).join(", ", "select ", ""));
   }
+  
+  public static <T extends Tuple, F extends TupleK<Field_>> SQL selectFrom(Table<T, F> table) {
+    return select(table.all());
+  }
 
   public static <T extends Tuple, F extends TupleK<Field_>> SQL insertInto(Table<T, F> table) {
     return sql("insert into " + table.name());

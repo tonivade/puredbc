@@ -4,20 +4,32 @@
  */
 package com.github.tonivade.puredbc.sql;
 
+import static com.github.tonivade.puredbc.sql.FieldOf.toField;
 import com.github.tonivade.puredbc.Row;
 import com.github.tonivade.purefun.Tuple;
 import com.github.tonivade.purefun.Tuple4;
 import com.github.tonivade.purefun.typeclasses.TupleK4;
 
 public interface Table4<A, B, C, D> extends Table<Tuple4<A, B, C, D>, TupleK4<Field_, A, B, C, D>> {
+  
+  default Field<A> field1() {
+    return fields().get1().fix(toField());
+  }
+  
+  default Field<B> field2() {
+    return fields().get2().fix(toField());
+  }
+  
+  default Field<C> field3() {
+    return fields().get3().fix(toField());
+  }
+  
+  default Field<D> field4() {
+    return fields().get4().fix(toField());
+  }
 
   @Override
   default Tuple4<A, B, C, D> asTuple(Row row) {
-    TupleK4<Field_, A, B, C, D> fields = fields();
-    Field<A> field1 = fields.get1().fix(FieldOf.toField());
-    Field<B> field2 = fields.get2().fix(FieldOf.toField());
-    Field<C> field3 = fields.get3().fix(FieldOf.toField());
-    Field<D> field4 = fields.get4().fix(FieldOf.toField());
-    return Tuple.of(row.get(field1), row.get(field2), row.get(field3), row.get(field4));
+    return Tuple.of(row.get(field1()), row.get(field2()), row.get(field3()), row.get(field4()));
   }
 }
