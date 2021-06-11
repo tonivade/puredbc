@@ -12,6 +12,7 @@ import static com.github.tonivade.puredbc.sql.Condition.between;
 import static com.github.tonivade.puredbc.sql.SQL.deleteFrom;
 import static com.github.tonivade.puredbc.sql.SQL.insertInto;
 import static com.github.tonivade.puredbc.sql.SQL.select;
+import static com.github.tonivade.puredbc.sql.SQL.selectFrom;
 import static com.github.tonivade.puredbc.sql.SQL.sql;
 import static com.github.tonivade.puredbc.sql.SQL.update;
 import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
@@ -69,11 +70,11 @@ class PureDBCTest {
   private final SQL1<String> insertRowWithKey = insertInto(TEST).values(TEST.NAME);
   private final SQL2<Long, String> insertRow = insertInto(TEST).values(TEST.ID, TEST.NAME);
   private final SQL2<String, Long> updateRow = update(TEST).set(TEST.NAME).where(TEST.ID.eq());
-  private final SQL findAll = select(ALIAS.all()).from(ALIAS);
-  private final SQL1<Iterable<Long>> findIn = select(ALIAS.all()).from(ALIAS).where(ALIAS.ID.in());
-  private final SQL1<Range> findBetween = select(ALIAS.all()).from(ALIAS).where(between(ALIAS.ID));
+  private final SQL findAll = selectFrom(ALIAS);
+  private final SQL1<Iterable<Long>> findIn = selectFrom(ALIAS).where(ALIAS.ID.in());
+  private final SQL1<Range> findBetween = selectFrom(ALIAS).where(between(ALIAS.ID));
   private final SQL count = select(TEST.ID.count().as("elements")).from(TEST);
-  private final SQL1<Long> findOne = select(TEST.ID, TEST.NAME).from(TEST).where(TEST.ID.eq());
+  private final SQL1<Long> findOne = selectFrom(ALIAS).where(TEST.ID.eq());
 
   @Test
   void getAllUpdateWithKeys() {

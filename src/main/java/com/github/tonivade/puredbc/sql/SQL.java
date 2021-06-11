@@ -30,7 +30,7 @@ public final class SQL {
   }
 
   protected SQL(String query, Sequence<?> values) {
-    this.query = SQLModule.process(query, values);
+    this.query = process(query, values);
     this.values = checkNonNull(values);
   }
 
@@ -163,20 +163,17 @@ public final class SQL {
   private static String set(Sequence<Field<?>> values) {
     return values.map(field -> field.name() + " = ?").join(",", " set ", "");
   }
-}
-
-interface SQLModule {
   
-  static String process(String query, Sequence<?> values) {
+  private static String process(String query, Sequence<?> values) {
     checkNonEmpty(query);
     checkNonNull(values);
     if (values.isEmpty()) return query;
     Stream<String> split = Pattern.compile("\\?").splitAsStream(query);
-    Stream<String> replacements = values.stream().map(SQLModule::replacement);
+    Stream<String> replacements = values.stream().map(SQL::replacement);
     return interleave(split, replacements).collect(joining());
   }
 
-  static String replacement(Object value) {
+  private static String replacement(Object value) {
     if (value instanceof Range) { // between
       return "? and ?";
     }

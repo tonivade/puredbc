@@ -28,16 +28,12 @@ public interface Table<T extends Tuple, F extends TupleK<Field_>> {
   T asTuple(Row row);
   
   default Table<T, F> as(String alias) {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException("not implemented");
   }
 
   default NonEmptyList<Field<?>> all() {
     Sequence<Field<?>> sequence = fields().toSequence().map(FieldOf::narrowK);
     return NonEmptyList.of(sequence.asList());
-  }
-  
-  default ImmutableMap<String, Field<?>> map() {
-    return ImmutableMap.from(all().map(x -> Tuple.of(x.name().toUpperCase(), x)));
   }
 
   default Validation<Iterable<String>, Unit> validate(RowMetaData metaData) {
@@ -50,5 +46,9 @@ public interface Table<T extends Tuple, F extends TupleK<Field_>> {
       map.get(column.name().toUpperCase()).ifEmpty(() -> result.add(column.name() + " not mapped"));
     }
     return result.isEmpty() ? valid(unit()) : invalid(result);
+  }
+  
+  private ImmutableMap<String, Field<?>> map() {
+    return ImmutableMap.from(all().map(x -> Tuple.of(x.name().toUpperCase(), x)));
   }
 }
