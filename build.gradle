@@ -10,7 +10,7 @@ plugins {
 apply plugin: 'com.diffplug.eclipse.apt'
 
 group = 'com.github.tonivade'
-version = '0.3'
+version = '0.4-SNAPSHOT'
 
 sourceCompatibility = 11
 targetCompatibility = 11
