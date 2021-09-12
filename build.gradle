@@ -10,17 +10,12 @@ plugins {
 apply plugin: 'com.diffplug.eclipse.apt'
 
 group = 'com.github.tonivade'
-version = '0.3-SNAPSHOT'
+version = '0.3'
 
 sourceCompatibility = 11
 targetCompatibility = 11
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-
-java {
-  withJavadocJar()
-  withSourcesJar()
-}
 
 jacoco {
   toolVersion = '0.8.6'
@@ -32,6 +27,11 @@ repositories {
   maven {
     url = 'https://oss.sonatype.org/content/repositories/snapshots'
   }
+}
+
+java {
+  withJavadocJar()
+  withSourcesJar()
 }
 
 test {
@@ -48,7 +48,7 @@ dependencies {
   testRuntimeOnly 'com.h2database:h2:1.4.200'
   testRuntimeOnly 'io.r2dbc:r2dbc-h2:0.8.4.RELEASE'
   testImplementation 'com.zaxxer:HikariCP:5.0.0'
-  testImplementation 'com.github.tonivade:purecheck:0.2-SNAPSHOT'
+  testImplementation 'com.github.tonivade:purecheck:0.2'
   testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
   testImplementation 'org.junit.platform:junit-platform-runner:1.7.2'
 }
