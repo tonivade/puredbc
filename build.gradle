@@ -50,7 +50,7 @@ dependencies {
   testImplementation 'com.zaxxer:HikariCP:5.0.0'
   testImplementation 'com.github.tonivade:purecheck:0.2'
   testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.0'
-  testImplementation 'org.junit.platform:junit-platform-runner:1.8.0'
+  testImplementation 'org.junit.platform:junit-platform-runner:1.8.1'
 }
 
 publishing {
