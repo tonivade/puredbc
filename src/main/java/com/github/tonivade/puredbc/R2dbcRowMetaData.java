@@ -5,9 +5,7 @@
 package com.github.tonivade.puredbc;
 
 import static com.github.tonivade.purefun.Precondition.checkNonNull;
-import java.util.ArrayList;
-import java.util.List;
-import com.github.tonivade.purefun.data.ImmutableList;
+import static com.github.tonivade.purefun.data.ImmutableList.toImmutableList;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
 import io.r2dbc.spi.ColumnMetadata;
@@ -24,21 +22,17 @@ final class R2dbcRowMetaData implements RowMetaData {
 
   @Override
   public int columnCount() {
-    return impl.getColumnNames().size();
+    return impl.getColumnMetadatas().size();
   }
 
   @Override
   public Iterable<String> columnNames() {
-    return impl.getColumnNames();
+    return impl.getColumnMetadatas().stream().map(ColumnMetadata::getName).collect(toImmutableList());
   }
 
   @Override
   public Iterable<ColumnMetaData> allColumns() {
-    List<ColumnMetaData> columns = new ArrayList<>();
-    for (ColumnMetadata meta : impl.getColumnMetadatas()) {
-      columns.add(createColumn(meta));
-    }
-    return ImmutableList.from(columns);
+    return impl.getColumnMetadatas().stream().map(R2dbcRowMetaData::createColumn).collect(toImmutableList());
   }
 
   @Override
