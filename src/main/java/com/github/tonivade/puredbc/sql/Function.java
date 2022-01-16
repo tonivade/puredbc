@@ -11,7 +11,7 @@ import java.util.Objects;
 import com.github.tonivade.purefun.Equal;
 import com.github.tonivade.purefun.data.Sequence;
 
-public interface Function<T> extends SealedField<T> {
+public sealed interface Function<T> extends Field<T> {
 
   static <T> Function<T> of(String name, Field<T> field) {
     return of(name, field, emptyList());
@@ -22,7 +22,7 @@ public interface Function<T> extends SealedField<T> {
   }
 }
 
-class FunctionImpl<T> implements Function<T> {
+final class FunctionImpl<T> implements Function<T> {
 
   private static final Equal<FunctionImpl<?>> EQUAL =
       Equal.<FunctionImpl<?>>of().comparing(x -> x.name).comparing(x -> x.params);

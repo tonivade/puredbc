@@ -10,8 +10,8 @@ import com.github.tonivade.purefun.Equal;
 import com.github.tonivade.purefun.HigherKind;
 import com.github.tonivade.purefun.data.Range;
 
-@HigherKind(sealed = true)
-public interface Condition<T> extends ConditionOf<T> {
+@HigherKind
+public sealed interface Condition<T> extends ConditionOf<T> {
 
   String expression();
 
@@ -72,7 +72,7 @@ public interface Condition<T> extends ConditionOf<T> {
   }
 }
 
-final class ConditionImpl<T> implements SealedCondition<T> {
+final class ConditionImpl<T> implements Condition<T> {
 
   private static final Equal<Condition<?>> EQUAL = Equal.<Condition<?>>of().comparing(Condition::expression);
 

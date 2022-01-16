@@ -9,14 +9,14 @@ import static com.github.tonivade.purefun.Precondition.checkNonNull;
 import java.util.Objects;
 import com.github.tonivade.purefun.Equal;
 
-public interface Alias<T> extends SealedField<T> {
+public sealed interface Alias<T> extends Field<T> {
 
   static <T> Alias<T> of(String alias, Field<T> field) {
     return new AliasImpl<>(alias, field);
   }
 }
 
-class AliasImpl<T> implements Alias<T> {
+final class AliasImpl<T> implements Alias<T> {
 
   private static final Equal<AliasImpl<?>> EQUAL =
       Equal.<AliasImpl<?>>of().comparing(x -> x.alias).comparing(x -> x.field);
