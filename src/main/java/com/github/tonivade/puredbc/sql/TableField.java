@@ -5,8 +5,6 @@
 package com.github.tonivade.puredbc.sql;
 
 import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
-import java.util.Objects;
-import com.github.tonivade.purefun.Equal;
 
 public sealed interface TableField<T> extends Field<T> {
 
@@ -15,36 +13,15 @@ public sealed interface TableField<T> extends Field<T> {
   }
 }
 
-final class TableFieldImpl<T> implements TableField<T> {
+record TableFieldImpl<T>(String table, String name) implements TableField<T> {
 
-  private static final Equal<TableFieldImpl<?>> EQUAL =
-      Equal.<TableFieldImpl<?>>of().comparing(x -> x.table).comparing(x -> x.name);
-
-  private final String table;
-  private final String name;
-
-  TableFieldImpl(String table, String name) {
-    this.table = checkNonEmpty(table);
-    this.name = checkNonEmpty(name);
+  TableFieldImpl {
+    checkNonEmpty(table);
+    checkNonEmpty(name);
   }
 
   @Override
   public String name() {
     return table + "." + name;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EQUAL.applyTo(this, obj);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(name);
-  }
-
-  @Override
-  public String toString() {
-    return String.format("TableField{table=%s, name='%s'}", table, name);
   }
 }

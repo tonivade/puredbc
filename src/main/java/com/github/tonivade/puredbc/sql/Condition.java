@@ -5,8 +5,6 @@
 package com.github.tonivade.puredbc.sql;
 
 import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
-import java.util.Objects;
-import com.github.tonivade.purefun.Equal;
 import com.github.tonivade.purefun.HigherKind;
 import com.github.tonivade.purefun.data.Range;
 
@@ -72,33 +70,9 @@ public sealed interface Condition<T> extends ConditionOf<T> {
   }
 }
 
-final class ConditionImpl<T> implements Condition<T> {
+record ConditionImpl<T>(String expression) implements Condition<T> {
 
-  private static final Equal<Condition<?>> EQUAL = Equal.<Condition<?>>of().comparing(Condition::expression);
-
-  private final String expression;
-
-  ConditionImpl(String expression) {
-    this.expression = checkNonEmpty(expression);
-  }
-
-  @Override
-  public String expression() {
-    return expression;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EQUAL.applyTo(this, obj);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(expression);
-  }
-
-  @Override
-  public String toString() {
-    return String.format("Condition{expression='%s'}", expression);
+  ConditionImpl {
+    checkNonEmpty(expression);
   }
 }

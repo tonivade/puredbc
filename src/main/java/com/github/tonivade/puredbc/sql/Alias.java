@@ -6,8 +6,6 @@ package com.github.tonivade.puredbc.sql;
 
 import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
 import static com.github.tonivade.purefun.Precondition.checkNonNull;
-import java.util.Objects;
-import com.github.tonivade.purefun.Equal;
 
 public sealed interface Alias<T> extends Field<T> {
 
@@ -16,36 +14,15 @@ public sealed interface Alias<T> extends Field<T> {
   }
 }
 
-final class AliasImpl<T> implements Alias<T> {
+record AliasImpl<T>(String alias, Field<T> field) implements Alias<T> {
 
-  private static final Equal<AliasImpl<?>> EQUAL =
-      Equal.<AliasImpl<?>>of().comparing(x -> x.alias).comparing(x -> x.field);
-
-  private final String alias;
-  private final Field<T> field;
-
-  AliasImpl(String alias, Field<T> field) {
-    this.alias = checkNonEmpty(alias);
-    this.field = checkNonNull(field);
+  AliasImpl {
+    checkNonEmpty(alias);
+    checkNonNull(field);
   }
 
   @Override
   public String name() {
     return field.name() + " as " + alias;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EQUAL.applyTo(this, obj);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(alias, field);
-  }
-
-  @Override
-  public String toString() {
-    return String.format("Alias{alias='%s', field=%s}", alias, field);
   }
 }
