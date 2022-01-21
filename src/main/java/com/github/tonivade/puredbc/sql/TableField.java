@@ -21,7 +21,7 @@ record TableFieldImpl<T>(String table, String name) implements TableField<T> {
   }
 
   @Override
-  public String name() {
+  public String render() {
     return table + "." + name;
   }
 }

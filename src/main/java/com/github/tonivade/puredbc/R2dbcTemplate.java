@@ -69,7 +69,7 @@ public final class R2dbcTemplate {
 
   private Mono<io.r2dbc.spi.Result> _updateWithKeys(String query, Sequence<?> params, Connection conn, Field<?> field) {
     return Mono.from(conn.beginTransaction())
-        .then(createStatement(query, params, conn).map(stmt -> stmt.returnGeneratedValues(field.name()))
+        .then(createStatement(query, params, conn).map(stmt -> stmt.returnGeneratedValues(field.render()))
         .flatMap(stmt -> Mono.from(stmt.execute())));
   }
 

@@ -11,14 +11,14 @@ import com.github.tonivade.purefun.HigherKind;
 @HigherKind
 public sealed interface Field<T> extends FieldOf<T> permits FieldImpl, Function, Alias, TableField {
 
-  String name();
+  String render();
 
   default Alias<T> as(String alias) {
     return Alias.of(alias, this);
   }
 
   default TableField<T> alias(String alias) {
-    return TableField.of(alias, name());
+    return TableField.of(alias, render());
   }
 
   default Function<T> count() {
@@ -98,5 +98,10 @@ record FieldImpl<T>(String name) implements Field<T> {
 
   FieldImpl {
     checkNonEmpty(name);
+  }
+  
+  @Override
+  public String render() {
+    return name;
   }
 }

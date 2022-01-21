@@ -29,8 +29,8 @@ class ConditionTest {
     assertAll(
         () -> assertThrows(IllegalArgumentException.class, () -> Condition.of(null)),
         () -> assertThrows(IllegalArgumentException.class, () -> Condition.of("")),
-        () -> assertEquals("name as a", name.as("a").name()),
-        () -> assertEquals("a.name", name.alias("a").name()),
+        () -> assertEquals("name as a", name.as("a").render()),
+        () -> assertEquals("a.name", name.alias("a").render()),
         () -> assertEquals("name = ?", eq(name).expression()),
         () -> assertEquals("not name = ?", eq(name).not().expression()),
         () -> assertEquals("name = other", eq(name, other).expression()),

@@ -32,11 +32,11 @@ public final class SQL1<A> {
   }
 
   public <B> SQL1<A> groupBy(Field<B> field) {
-    return new SQL1<>(query + " group by " + field.name());
+    return new SQL1<>(query + " group by " + field.render());
   }
 
   public <B> SQL1<A> orderBy(Field<B> field) {
-    return new SQL1<>(query + " order by " + field.name());
+    return new SQL1<>(query + " order by " + field.render());
   }
 
   public SQL1<A> asc() {

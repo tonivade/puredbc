@@ -38,8 +38,8 @@ public interface Table<T extends Tuple, F extends TupleK<Field_>> {
 
   default Validation<Iterable<String>, Unit> validate(RowMetaData metaData) {
     List<String> result = new ArrayList<>(metaData.columnCount());
-    for (Field<?> field : all()) {
-      metaData.column(field.name()).ifEmpty(() -> result.add(field.name() + " not found"));
+    for (var field : all()) {
+      metaData.column(field.render()).ifEmpty(() -> result.add(field.render() + " not found"));
     }
     ImmutableMap<String, Field<?>> map = map();
     for (var column : metaData.allColumns()) {
@@ -49,6 +49,6 @@ public interface Table<T extends Tuple, F extends TupleK<Field_>> {
   }
   
   private ImmutableMap<String, Field<?>> map() {
-    return ImmutableMap.from(all().map(x -> Tuple.of(x.name().toUpperCase(), x)));
+    return ImmutableMap.from(all().map(x -> Tuple.of(x.render().toUpperCase(), x)));
   }
 }

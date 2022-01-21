@@ -16,7 +16,7 @@ public sealed interface Function<T> extends Field<T> {
   }
 
   static <T> Function<T> of(String name, Field<T> field, Sequence<?> params) {
-    return new FunctionImpl<>(name, Sequence.<Object>listOf(checkNonNull(field).name()).appendAll(checkNonNull(params)));
+    return new FunctionImpl<>(name, Sequence.<Object>listOf(checkNonNull(field).render()).appendAll(checkNonNull(params)));
   }
 }
 
@@ -28,7 +28,7 @@ record FunctionImpl<T>(String name, Sequence<?> params) implements Function<T> {
   }
 
   @Override
-  public String name() {
+  public String render() {
     return name + params.join(", ", "(", ")");
   }
 }

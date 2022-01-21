@@ -22,66 +22,66 @@ final class R2dbcRow implements Row {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T get(Field<T> field) {
-    return (T) impl.get(field.name());
+    return (T) impl.get(field.render());
   }
 
   @Override
   public String getString(Field<String> field) {
-    return impl.get(field.name(), String.class);
+    return impl.get(field.render(), String.class);
   }
 
   @Override
   public Integer getInteger(Field<Integer> field) {
-    return impl.get(field.name(), Integer.class);
+    return impl.get(field.render(), Integer.class);
   }
 
   @Override
   public Long getLong(Field<Long> field) {
-    return impl.get(field.name(), Long.class);
+    return impl.get(field.render(), Long.class);
   }
 
   @Override
   public Short getShort(Field<Short> field) {
-    return impl.get(field.name(), Short.class);
+    return impl.get(field.render(), Short.class);
   }
 
   @Override
   public Byte getByte(Field<Byte> field) {
-    return impl.get(field.name(), Byte.class);
+    return impl.get(field.render(), Byte.class);
   }
 
   @Override
   public Float getFloat(Field<Float> field) {
-    return impl.get(field.name(), Float.class);
+    return impl.get(field.render(), Float.class);
   }
 
   @Override
   public Double getDouble(Field<Double> field) {
-    return impl.get(field.name(), Double.class);
+    return impl.get(field.render(), Double.class);
   }
 
   @Override
   public BigDecimal getBigDecimal(Field<BigDecimal> field) {
-    return impl.get(field.name(), BigDecimal.class);
+    return impl.get(field.render(), BigDecimal.class);
   }
 
   @Override
   public Boolean getBoolean(Field<Boolean> field) {
-    return impl.get(field.name(), Boolean.class);
+    return impl.get(field.render(), Boolean.class);
   }
 
   @Override
   public java.util.Date getTimestamp(Field<java.util.Date> field) {
-    return impl.get(field.name(), Timestamp.class);
+    return impl.get(field.render(), Timestamp.class);
   }
 
   @Override
   public java.util.Date getDate(Field<java.util.Date> field) {
-    return impl.get(field.name(), Date.class);
+    return impl.get(field.render(), Date.class);
   }
 
   @Override
   public java.util.Date getTime(Field<java.util.Date> field) {
-    return impl.get(field.name(), Time.class);
+    return impl.get(field.render(), Time.class);
   }
 }

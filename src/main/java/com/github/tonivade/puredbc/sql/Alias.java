@@ -14,15 +14,15 @@ public sealed interface Alias<T> extends Field<T> {
   }
 }
 
-record AliasImpl<T>(String alias, Field<T> field) implements Alias<T> {
+record AliasImpl<T>(String name, Field<T> field) implements Alias<T> {
 
   AliasImpl {
-    checkNonEmpty(alias);
+    checkNonEmpty(name);
     checkNonNull(field);
   }
 
   @Override
-  public String name() {
-    return field.name() + " as " + alias;
+  public String render() {
+    return field.render() + " as " + name;
   }
 }
