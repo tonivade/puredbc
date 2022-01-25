@@ -10,6 +10,9 @@ import static com.github.tonivade.purefun.data.Sequence.emptyList;
 import com.github.tonivade.purefun.data.Sequence;
 
 public sealed interface Function<T> extends Field<T> {
+  
+  String name();
+  Sequence<?> params();
 
   static <T> Function<T> of(String name, Field<T> field) {
     return of(name, field, emptyList());
@@ -25,11 +28,6 @@ record FunctionImpl<T>(String name, Sequence<?> params) implements Function<T> {
   FunctionImpl {
     checkNonEmpty(name);
     checkNonNull(params);
-  }
-
-  @Override
-  public String render() {
-    return name + params.join(", ", "(", ")");
   }
 }
 

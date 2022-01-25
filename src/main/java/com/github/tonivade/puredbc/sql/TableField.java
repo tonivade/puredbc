@@ -5,23 +5,27 @@
 package com.github.tonivade.puredbc.sql;
 
 import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
 
 public sealed interface TableField<T> extends Field<T> {
+  
+  @Override
+  default String name() {
+    return field().name();
+  }
+  
+  String table();
+  Field<T> field();
 
-  static <T> TableField<T> of(String alias, String name) {
+  static <T> TableField<T> of(String alias, Field<T> name) {
     return new TableFieldImpl<>(alias, name);
   }
 }
 
-record TableFieldImpl<T>(String table, String name) implements TableField<T> {
+record TableFieldImpl<T>(String table, Field<T> field) implements TableField<T> {
 
   TableFieldImpl {
     checkNonEmpty(table);
-    checkNonEmpty(name);
-  }
-
-  @Override
-  public String render() {
-    return table + "." + name;
+    checkNonNull(field);
   }
 }

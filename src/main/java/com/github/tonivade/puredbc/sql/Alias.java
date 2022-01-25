@@ -8,7 +8,10 @@ import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
 import static com.github.tonivade.purefun.Precondition.checkNonNull;
 
 public sealed interface Alias<T> extends Field<T> {
-
+  
+  String name();
+  Field<T> field();
+  
   static <T> Alias<T> of(String alias, Field<T> field) {
     return new AliasImpl<>(alias, field);
   }
@@ -19,10 +22,5 @@ record AliasImpl<T>(String name, Field<T> field) implements Alias<T> {
   AliasImpl {
     checkNonEmpty(name);
     checkNonNull(field);
-  }
-
-  @Override
-  public String render() {
-    return field.render() + " as " + name;
   }
 }
