@@ -29,7 +29,7 @@ public final class R2dbcTemplate {
 
   public Mono<Unit> update(String query, Sequence<?> params) {
     return Mono.from(connectionFactory.create())
-        .flatMap(conn -> _update(query, params, conn)
+        .flatMap(conn -> doUpdate(query, params, conn)
             .delayUntil(result -> conn.commitTransaction())
             .doFinally(stmt -> conn.close()))
         .thenReturn(unit());
@@ -37,7 +37,7 @@ public final class R2dbcTemplate {
 
   public <T> Mono<Option<T>> updateWithKeys(String query, Sequence<?> params, Field<T> field) {
     return Mono.from(connectionFactory.create())
-        .flatMap(conn -> _updateWithKeys(query, params, conn, field)
+        .flatMap(conn -> doUpdateWithKeys(query, params, conn, field)
             .flatMap(result -> Mono.from(applyToRow(row -> row.get(field), result)))
             .delayUntil(result -> conn.commitTransaction())
             .doFinally(stmt -> conn.close()))
@@ -45,35 +45,35 @@ public final class R2dbcTemplate {
   }
 
   public <T> Mono<Option<T>> queryMeta(String query, Sequence<?> params, Function1<RowMetaData, T> rowMapper) {
-    return _query(query, params)
+    return doQuery(query, params)
         .flatMap(result -> Mono.from(applyToMeta(rowMapper, result)))
         .map(Option::some).defaultIfEmpty(Option.none());
   }
 
   public <T> Mono<Option<T>> queryOne(String query, Sequence<?> params, Function1<Row, T> rowMapper) {
-    return _query(query, params)
+    return doQuery(query, params)
         .flatMap(result -> Mono.from(applyToRow(rowMapper, result)))
         .map(Option::some).defaultIfEmpty(Option.none());
   }
 
   public <T> Flux<List<T>> queryIterable(String query, Sequence<?> params, Function1<Row, T> rowMapper) {
-    return _query(query, params)
+    return doQuery(query, params)
         .flatMapMany(result -> Flux.from(applyToRow(rowMapper, result))).buffer(10);
   }
 
-  private Mono<io.r2dbc.spi.Result> _update(String query, Sequence<?> params, Connection conn) {
+  private Mono<io.r2dbc.spi.Result> doUpdate(String query, Sequence<?> params, Connection conn) {
     return Mono.from(conn.beginTransaction())
         .then(createStatement(query, params, conn)
         .flatMap(stmt -> Mono.from(stmt.execute())));
   }
 
-  private Mono<io.r2dbc.spi.Result> _updateWithKeys(String query, Sequence<?> params, Connection conn, Field<?> field) {
+  private Mono<io.r2dbc.spi.Result> doUpdateWithKeys(String query, Sequence<?> params, Connection conn, Field<?> field) {
     return Mono.from(conn.beginTransaction())
         .then(createStatement(query, params, conn).map(stmt -> stmt.returnGeneratedValues(field.name()))
         .flatMap(stmt -> Mono.from(stmt.execute())));
   }
 
-  private Mono<io.r2dbc.spi.Result> _query(String query, Sequence<?> params) {
+  private Mono<io.r2dbc.spi.Result> doQuery(String query, Sequence<?> params) {
     return Mono.from(connectionFactory.create())
         .flatMap(conn -> createStatement(query, params, conn)
         .flatMap(stmt -> Mono.from(stmt.execute()))
@@ -85,12 +85,11 @@ public final class R2dbcTemplate {
         .map(stmt -> {
           int i = 0;
           for (Object param : params) {
-            if (param instanceof Range) {
-              Range range = (Range) param;
+            if (param instanceof Range range) {
               stmt.bind(i++, range.begin());
               stmt.bind(i++, range.end());
-            } else if (param instanceof Iterable) {
-              for (Object p : (Iterable<?>) param) {
+            } else if (param instanceof Iterable<?> iterable) {
+              for (Object p : iterable) {
                 stmt.bind(i++, p);
               }
             } else {
