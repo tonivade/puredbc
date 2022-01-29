@@ -1,11 +1,5 @@
 [
   {
-    "name": "org.h2.mvstore.db.MVTableEngine",
-    "allDeclaredFields": true,
-    "allPublicMethods": true,
-    "allDeclaredConstructors": true
-  },
-  {
     "name": "com.zaxxer.hikari.HikariConfig",
     "allDeclaredFields": true,
     "allDeclaredMethods": true
