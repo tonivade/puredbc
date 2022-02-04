@@ -43,7 +43,7 @@ dependencies {
   api 'com.github.tonivade:purefun-free:3.0'
   implementation 'com.github.tonivade:purefun-effect:3.0'
   runtimeOnly 'com.github.tonivade:purefun-instances:3.0'
-  implementation 'io.r2dbc:r2dbc-spi:0.9.0.RELEASE'
+  implementation 'io.r2dbc:r2dbc-spi:0.9.1.RELEASE'
   implementation 'io.r2dbc:r2dbc-pool:0.9.0.RELEASE'
   testRuntimeOnly 'com.h2database:h2:2.1.210'
   testRuntimeOnly 'io.r2dbc:r2dbc-h2:0.9.1.RELEASE'
