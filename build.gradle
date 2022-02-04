@@ -46,7 +46,7 @@ dependencies {
   implementation 'io.r2dbc:r2dbc-spi:0.9.0.RELEASE'
   implementation 'io.r2dbc:r2dbc-pool:0.9.0.RELEASE'
   testRuntimeOnly 'com.h2database:h2:2.0.206'
-  testRuntimeOnly 'io.r2dbc:r2dbc-h2:0.9.0.RELEASE'
+  testRuntimeOnly 'io.r2dbc:r2dbc-h2:0.9.1.RELEASE'
   testImplementation 'com.zaxxer:HikariCP:5.0.1'
   testImplementation 'com.github.tonivade:purecheck:0.2'
   testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
