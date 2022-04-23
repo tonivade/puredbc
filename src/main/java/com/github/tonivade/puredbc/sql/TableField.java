@@ -5,46 +5,27 @@
 package com.github.tonivade.puredbc.sql;
 
 import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
-import java.util.Objects;
-import com.github.tonivade.purefun.Equal;
+import static com.github.tonivade.purefun.Precondition.checkNonNull;
 
-public interface TableField<T> extends SealedField<T> {
+public sealed interface TableField<T> extends Field<T> {
+  
+  @Override
+  default String name() {
+    return field().name();
+  }
+  
+  String table();
+  Field<T> field();
 
-  static <T> TableField<T> of(String alias, String name) {
+  static <T> TableField<T> of(String alias, Field<T> name) {
     return new TableFieldImpl<>(alias, name);
   }
 }
 
-final class TableFieldImpl<T> implements TableField<T> {
+record TableFieldImpl<T>(String table, Field<T> field) implements TableField<T> {
 
-  private static final Equal<TableFieldImpl<?>> EQUAL =
-      Equal.<TableFieldImpl<?>>of().comparing(x -> x.table).comparing(x -> x.name);
-
-  private final String table;
-  private final String name;
-
-  TableFieldImpl(String table, String name) {
-    this.table = checkNonEmpty(table);
-    this.name = checkNonEmpty(name);
-  }
-
-  @Override
-  public String name() {
-    return table + "." + name;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EQUAL.applyTo(this, obj);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(name);
-  }
-
-  @Override
-  public String toString() {
-    return String.format("TableField{table=%s, name='%s'}", table, name);
+  TableFieldImpl {
+    checkNonEmpty(table);
+    checkNonNull(field);
   }
 }

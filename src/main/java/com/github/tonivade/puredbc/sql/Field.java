@@ -6,12 +6,10 @@ package com.github.tonivade.puredbc.sql;
 
 import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
-import java.util.Objects;
-import com.github.tonivade.purefun.Equal;
 import com.github.tonivade.purefun.HigherKind;
 
-@HigherKind(sealed = true)
-public interface Field<T> extends FieldOf<T> {
+@HigherKind
+public sealed interface Field<T> extends FieldOf<T>, Renderable permits FieldImpl, Function, Alias, TableField {
 
   String name();
 
@@ -20,7 +18,7 @@ public interface Field<T> extends FieldOf<T> {
   }
 
   default TableField<T> alias(String alias) {
-    return TableField.of(alias, name());
+    return TableField.of(alias, this);
   }
 
   default Function<T> count() {
@@ -96,33 +94,9 @@ public interface Field<T> extends FieldOf<T> {
   }
 }
 
-final class FieldImpl<T> implements SealedField<T> {
+record FieldImpl<T>(String name) implements Field<T> {
 
-  private static final Equal<Field<?>> EQUAL = Equal.<Field<?>>of().comparing(Field::name);
-
-  private final String name;
-
-  FieldImpl(String name) {
-    this.name = checkNonEmpty(name);
-  }
-
-  @Override
-  public String name() {
-    return name;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EQUAL.applyTo(this, obj);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(name);
-  }
-
-  @Override
-  public String toString() {
-    return String.format("Field{name='%s'}", name);
+  FieldImpl {
+    checkNonEmpty(name);
   }
 }

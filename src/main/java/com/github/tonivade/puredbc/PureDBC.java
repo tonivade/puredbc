@@ -202,27 +202,27 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
 
     @Override
     public <T> Id<Option<T>> visit(DSL.QueryMeta<T> query) {
-      return Id.of(jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Id.of(jdbc.queryMeta(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public <T> Id<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return Id.of(jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Id.of(jdbc.queryIterable(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public <T> Id<Option<T>> visit(DSL.QueryOne<T> query) {
-      return Id.of(jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Id.of(jdbc.queryOne(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public Id<Unit> visit(DSL.Update update) {
-      return Id.of(jdbc.update(update.getQuery(), update.getParams()));
+      return Id.of(jdbc.update(update.query().getQuery(), update.query().getParams()));
     }
 
     @Override
     public <T> Id<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Id.of(jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
+      return Id.of(jdbc.updateWithKeys(update.query().getQuery(), update.query().getParams(), update.field()));
     }
   }
 
@@ -236,27 +236,27 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
 
     @Override
     public <T> Try<Option<T>> visit(DSL.QueryMeta<T> query) {
-      return Try.of(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Try.of(() -> jdbc.queryMeta(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public <T> Try<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return Try.of(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Try.of(() -> jdbc.queryIterable(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public <T> Try<Option<T>> visit(DSL.QueryOne<T> query) {
-      return Try.of(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Try.of(() -> jdbc.queryOne(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public Try<Unit> visit(DSL.Update update) {
-      return Try.of(() -> jdbc.update(update.getQuery(), update.getParams()));
+      return Try.of(() -> jdbc.update(update.query().getQuery(), update.query().getParams()));
     }
 
     @Override
     public <T> Try<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Try.of(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
+      return Try.of(() -> jdbc.updateWithKeys(update.query().getQuery(), update.query().getParams(), update.field()));
     }
   }
 
@@ -270,27 +270,27 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
 
     @Override
     public <T> UIO<Option<T>> visit(DSL.QueryMeta<T> query) {
-      return UIO.task(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return UIO.task(() -> jdbc.queryMeta(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public <T> UIO<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return UIO.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return UIO.task(() -> jdbc.queryIterable(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public <T> UIO<Option<T>> visit(DSL.QueryOne<T> query) {
-      return UIO.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return UIO.task(() -> jdbc.queryOne(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public UIO<Unit> visit(DSL.Update update) {
-      return UIO.task(() -> jdbc.update(update.getQuery(), update.getParams()));
+      return UIO.task(() -> jdbc.update(update.query().getQuery(), update.query().getParams()));
     }
 
     @Override
     public <T> UIO<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return UIO.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
+      return UIO.task(() -> jdbc.updateWithKeys(update.query().getQuery(), update.query().getParams(), update.field()));
     }
   }
 
@@ -304,27 +304,27 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
 
     @Override
     public <T> Task<Option<T>> visit(DSL.QueryMeta<T> query) {
-      return Task.task(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Task.task(() -> jdbc.queryMeta(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public <T> Task<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return Task.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Task.task(() -> jdbc.queryIterable(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public <T> Task<Option<T>> visit(DSL.QueryOne<T> query) {
-      return Task.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Task.task(() -> jdbc.queryOne(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public Task<Unit> visit(DSL.Update update) {
-      return Task.task(() -> jdbc.update(update.getQuery(), update.getParams()));
+      return Task.task(() -> jdbc.update(update.query().getQuery(), update.query().getParams()));
     }
 
     @Override
     public <T> Task<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Task.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
+      return Task.task(() -> jdbc.updateWithKeys(update.query().getQuery(), update.query().getParams(), update.field()));
     }
   }
 
@@ -338,27 +338,27 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
 
     @Override
     public <T> Future<Option<T>> visit(DSL.QueryMeta<T> query) {
-      return Future.task(() -> jdbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Future.task(() -> jdbc.queryMeta(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public <T> Future<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return Future.task(() -> jdbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Future.task(() -> jdbc.queryIterable(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public <T> Future<Option<T>> visit(DSL.QueryOne<T> query) {
-      return Future.task(() -> jdbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return Future.task(() -> jdbc.queryOne(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public Future<Unit> visit(DSL.Update update) {
-      return Future.task(() -> jdbc.update(update.getQuery(), update.getParams()));
+      return Future.task(() -> jdbc.update(update.query().getQuery(), update.query().getParams()));
     }
 
     @Override
     public <T> Future<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Future.task(() -> jdbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
+      return Future.task(() -> jdbc.updateWithKeys(update.query().getQuery(), update.query().getParams(), update.field()));
     }
   }
 
@@ -372,28 +372,28 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
 
     @Override
     public <T> PublisherK<Option<T>> visit(DSL.QueryMeta<T> query) {
-      return PublisherK.from(r2dbc.queryMeta(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return PublisherK.from(r2dbc.queryMeta(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
     public PublisherK<Unit> visit(DSL.Update update) {
-      return PublisherK.from(r2dbc.update(update.getQuery(), update.getParams()));
+      return PublisherK.from(r2dbc.update(update.query().getQuery(), update.query().getParams()));
     }
 
     @Override
     public <T> PublisherK<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return PublisherK.from(r2dbc.updateWithKeys(update.getQuery(), update.getParams(), update.getField()));
+      return PublisherK.from(r2dbc.updateWithKeys(update.query().getQuery(), update.query().getParams(), update.field()));
     }
 
     @Override
     public <T> PublisherK<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return PublisherK.from(r2dbc.queryIterable(query.getQuery(), query.getParams(), query.getRowMapper()))
+      return PublisherK.from(r2dbc.queryIterable(query.query().getQuery(), query.query().getParams(), query.rowMapper()))
           .map(ImmutableList::from);
     }
 
     @Override
     public <T> PublisherK<Option<T>> visit(DSL.QueryOne<T> query) {
-      return PublisherK.from(r2dbc.queryOne(query.getQuery(), query.getParams(), query.getRowMapper()));
+      return PublisherK.from(r2dbc.queryOne(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
   }
 
@@ -450,7 +450,7 @@ interface PublisherKMonad extends Monad<PublisherK_> {
 }
 
 @HigherKind
-class PublisherK<T> implements PublisherKOf<T>, Publisher<T> {
+final class PublisherK<T> implements PublisherKOf<T>, Publisher<T> {
 
   private final Publisher<? extends T> value;
 

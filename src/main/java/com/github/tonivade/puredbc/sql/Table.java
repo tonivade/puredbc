@@ -38,7 +38,7 @@ public interface Table<T extends Tuple, F extends TupleK<Field_>> {
 
   default Validation<Iterable<String>, Unit> validate(RowMetaData metaData) {
     List<String> result = new ArrayList<>(metaData.columnCount());
-    for (Field<?> field : all()) {
+    for (var field : all()) {
       metaData.column(field.name()).ifEmpty(() -> result.add(field.name() + " not found"));
     }
     ImmutableMap<String, Field<?>> map = map();

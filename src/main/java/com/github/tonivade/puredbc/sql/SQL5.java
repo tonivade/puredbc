@@ -20,11 +20,11 @@ public final class SQL5<A, B, C, D, E> {
   }
 
   public <F> SQL5<A, B, C, D, E> groupBy(Field<F> field) {
-    return new SQL5<>(query + " group by " + field.name());
+    return new SQL5<>(query + " group by " + field.render());
   }
 
   public <F> SQL5<A, B, C, D, E> orderBy(Field<F> field) {
-    return new SQL5<>(query + " order by " + field.name());
+    return new SQL5<>(query + " order by " + field.render());
   }
 
   public SQL5<A, B, C, D, E> asc() {

@@ -5,13 +5,11 @@
 package com.github.tonivade.puredbc.sql;
 
 import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
-import java.util.Objects;
-import com.github.tonivade.purefun.Equal;
 import com.github.tonivade.purefun.HigherKind;
 import com.github.tonivade.purefun.data.Range;
 
-@HigherKind(sealed = true)
-public interface Condition<T> extends ConditionOf<T> {
+@HigherKind
+public sealed interface Condition<T> extends ConditionOf<T> {
 
   String expression();
 
@@ -20,51 +18,51 @@ public interface Condition<T> extends ConditionOf<T> {
   }
 
   static <T> Condition<T> eq(Field<T> field) {
-    return of(field.name() + " = ?");
+    return of(field.render() + " = ?");
   }
 
   static <T> Condition<T> eq(Field<T> field1, Field<T> field2) {
-    return of(field1.name() + " = " + field2.name());
+    return of(field1.render() + " = " + field2.render());
   }
 
   static <T> Condition<T> like(Field<T> field) {
-    return of(field.name() + " like ?");
+    return of(field.render() + " like ?");
   }
 
   static <T> Condition<T> notEq(Field<T> field) {
-    return of(field.name() + " <> ?");
+    return of(field.render() + " <> ?");
   }
 
   static <T> Condition<T> lt(Field<T> field) {
-    return of(field.name() + " < ?");
+    return of(field.render() + " < ?");
   }
 
   static <T> Condition<T> lte(Field<T> field) {
-    return of(field.name() + " <= ?");
+    return of(field.render() + " <= ?");
   }
 
   static <T> Condition<T> gt(Field<T> field) {
-    return of(field.name() + " > ?");
+    return of(field.render() + " > ?");
   }
 
   static <T> Condition<T> gte(Field<T> field) {
-    return of(field.name() + " >= ?");
+    return of(field.render() + " >= ?");
   }
 
   static <T> Condition<T> isNull(Field<T> field) {
-    return of(field.name() + " is null");
+    return of(field.render() + " is null");
   }
 
   static <T> Condition<T> isNotNull(Field<T> field) {
-    return of(field.name() + " is not null");
+    return of(field.render() + " is not null");
   }
 
   static Condition<Range> between(Field<? extends Number> field) {
-    return of(field.name() + " between ?");
+    return of(field.render() + " between ?");
   }
 
   static <T> Condition<Iterable<T>> in(Field<T> field) {
-    return of(field.name() + " in (?)");
+    return of(field.render() + " in (?)");
   }
 
   static <T> Condition<T> of(String condition) {
@@ -72,33 +70,9 @@ public interface Condition<T> extends ConditionOf<T> {
   }
 }
 
-final class ConditionImpl<T> implements SealedCondition<T> {
+record ConditionImpl<T>(String expression) implements Condition<T> {
 
-  private static final Equal<Condition<?>> EQUAL = Equal.<Condition<?>>of().comparing(Condition::expression);
-
-  private final String expression;
-
-  ConditionImpl(String expression) {
-    this.expression = checkNonEmpty(expression);
-  }
-
-  @Override
-  public String expression() {
-    return expression;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    return EQUAL.applyTo(this, obj);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(expression);
-  }
-
-  @Override
-  public String toString() {
-    return String.format("Condition{expression='%s'}", expression);
+  ConditionImpl {
+    checkNonEmpty(expression);
   }
 }

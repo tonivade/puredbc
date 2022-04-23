@@ -4,6 +4,7 @@
  */
 package com.github.tonivade.puredbc;
 
+import static com.github.tonivade.puredbc.PureDBC.monad;
 import static com.github.tonivade.puredbc.PureDBC.queryIterable;
 import static com.github.tonivade.puredbc.PureDBC.queryOne;
 import static com.github.tonivade.puredbc.PureDBC.update;
@@ -40,7 +41,6 @@ import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
 import com.github.tonivade.purefun.type.Validation;
-import com.github.tonivade.purefun.typeclasses.For;
 import com.github.tonivade.purefun.typeclasses.TupleK;
 import com.github.tonivade.purefun.typeclasses.TupleK2;
 import com.zaxxer.hikari.HikariConfig;
@@ -78,12 +78,12 @@ class PureDBCTest {
 
   @Test
   void getAllUpdateWithKeys() {
-    PureDBC<Iterable<Tuple2<Long, String>>> program = For.with(PureDBC.monad())
-        .andThen(() -> update(dropTable))
-        .andThen(() -> update(createTable))
-        .andThen(() -> updateWithKeys(insertRowWithKey.bind("toni"), TEST.ID))
-        .andThen(() -> updateWithKeys(insertRowWithKey.bind("pepe"), TEST.ID))
-        .andThen(() -> queryIterable(findAll, TEST::asTuple))
+    var program = monad().use()
+        .then(update(dropTable))
+        .then(update(createTable))
+        .then(updateWithKeys(insertRowWithKey.bind("toni"), TEST.ID))
+        .then(updateWithKeys(insertRowWithKey.bind("pepe"), TEST.ID))
+        .then(queryIterable(findAll, TEST::asTuple))
         .fix(PureDBCOf::narrowK);
 
     assertProgram(program, listOf(Tuple.of(1L, "toni"), Tuple.of(2L, "pepe")));
@@ -91,8 +91,7 @@ class PureDBCTest {
 
   @Test
   void queryAll() {
-    PureDBC<Iterable<Tuple2<Long, String>>> program =
-        prepareTable()
+    var program = prepareTable()
             .andThen(update(insertRow.bind(1L, "toni")))
             .andThen(update(insertRow.bind(2L, "pepe")))
             .andThen(queryIterable(findAll, TEST::asTuple));
@@ -102,8 +101,7 @@ class PureDBCTest {
 
   @Test
   void queryIn() {
-    PureDBC<Iterable<Tuple2<Long, String>>> program =
-        prepareTable()
+    var program = prepareTable()
             .andThen(update(insertRow.bind(1L, "toni")))
             .andThen(update(insertRow.bind(2L, "pepe")))
             .andThen(queryIterable(findIn.bind(arrayOf(1L, 2L, 3L)), TEST::asTuple));
@@ -113,8 +111,7 @@ class PureDBCTest {
 
   @Test
   void queryBetween() {
-    PureDBC<Iterable<Tuple2<Long, String>>> program =
-        prepareTable()
+    var program = prepareTable()
             .andThen(update(insertRow.bind(1L, "toni")))
             .andThen(update(insertRow.bind(2L, "pepe")))
             .andThen(queryIterable(findBetween.bind(Range.of(1, 2)), TEST::asTuple));
@@ -124,8 +121,7 @@ class PureDBCTest {
 
   @Test
   void count() {
-    PureDBC<Option<Long>> program =
-      prepareTable()
+    var program = prepareTable()
         .andThen(update(insertRow.bind(1L, "toni")))
         .andThen(update(insertRow.bind(2L, "pepe")))
         .andThen(update(insertRow.bind(3L, "paco")))
@@ -136,8 +132,7 @@ class PureDBCTest {
 
   @Test
   void queryJustOne() {
-    PureDBC<Option<Tuple2<Long, String>>> program =
-        update(createTable)
+    var program = update(createTable)
             .andThen(update(deleteOne.bind(1L)))
             .andThen(update(insertRow.bind(1L, "toni")))
             .andThen(update(updateRow.bind("pepe", 1L)))
@@ -148,8 +143,7 @@ class PureDBCTest {
 
   @Test
   void queryMetaData() {
-    PureDBC<Option<Integer>> program =
-        prepareTable()
+    var program = prepareTable()
             .andThen(update(insertRow.bind(1L, "toni")))
             .andThen(PureDBC.queryMeta(findAll, RowMetaData::columnCount));
 
@@ -158,8 +152,7 @@ class PureDBCTest {
 
   @Test
   void queryValidate() {
-    PureDBC<Option<Validation<Iterable<String>, Unit>>> program =
-        prepareTable()
+    var program = prepareTable()
             .andThen(update(insertRow.bind(1L, "toni")))
             .andThen(PureDBC.queryMeta(findAll.limit(1), TEST::validate));
 
@@ -168,8 +161,7 @@ class PureDBCTest {
 
   @Test
   void queryError() {
-    PureDBC<Option<Tuple2<Long, String>>> program =
-        update(dropTable)
+    var program = update(dropTable)
             .andThen(update(deleteAll))
             .andThen(update(insertRow.bind(1L, "toni")))
             .andThen(queryOne(findOne.bind(1L), TEST::asTuple));
@@ -178,7 +170,7 @@ class PureDBCTest {
   }
 
   private DataSource dataSource() {
-    HikariConfig poolConfig = new HikariConfig();
+    var poolConfig = new HikariConfig();
     poolConfig.setJdbcUrl("jdbc:h2:mem:test");
     poolConfig.setUsername("sa");
     poolConfig.setPassword("");
@@ -191,8 +183,8 @@ class PureDBCTest {
   }
 
   private ConnectionFactory connectionFactory() {
-    ConnectionFactoryOptions baseOptions = ConnectionFactoryOptions.parse("r2dbc:h2:mem:///test");
-    ConnectionFactoryOptions.Builder builder = ConnectionFactoryOptions.builder().from(baseOptions)
+    var baseOptions = ConnectionFactoryOptions.parse("r2dbc:h2:mem:///test");
+    var builder = ConnectionFactoryOptions.builder().from(baseOptions)
         .option(ConnectionFactoryOptions.USER, "sa")
         .option(ConnectionFactoryOptions.PASSWORD, "");
     return ConnectionFactories.get(builder.build());

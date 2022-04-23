@@ -72,7 +72,7 @@ public final class SQL {
   }
 
   public <T> SQL on(Field<T> from, Field<T> to) {
-    return sql(query + " on " + from.name() + " = " + to.name());
+    return sql(query + " on " + from.render() + " = " + to.render());
   }
 
   public <T> SQL1<T> where(Condition<T> condition) {
@@ -136,7 +136,7 @@ public final class SQL {
   }
 
   public static SQL select(NonEmptyList<Field<?>> fields) {
-    return sql(fields.map(Field::name).join(", ", "select ", ""));
+    return sql(fields.map(Field::render).join(", ", "select ", ""));
   }
   
   public static <T extends Tuple, F extends TupleK<Field_>> SQL selectFrom(Table<T, F> table) {
@@ -157,11 +157,11 @@ public final class SQL {
 
   private static String values(Sequence<Field<?>> values) {
     String suffix = values.map(cons("?")).join(", ", ") values (", ")");
-    return values.map(Field::name).join(", ", " (", suffix);
+    return values.map(Field::render).join(", ", " (", suffix);
   }
 
   private static String set(Sequence<Field<?>> values) {
-    return values.map(field -> field.name() + " = ?").join(",", " set ", "");
+    return values.map(field -> field.render() + " = ?").join(",", " set ", "");
   }
   
   private static String process(String query, Sequence<?> values) {

@@ -33,24 +33,24 @@ public class JdbcTemplate implements Recoverable, AutoCloseable {
   }
 
   public Unit update(String query, Sequence<?> params) {
-    return _update(query, populateWith(params), cons(unit()));
+    return doUpdate(query, populateWith(params), cons(unit()));
   }
 
   public <T> Option<T> updateWithKeys(String query, Sequence<?> params, Field<T> field) {
-    return _update(query, populateWith(params), optionExtractor(getField(field).compose(JdbcRow::new)));
+    return doUpdate(query, populateWith(params), optionExtractor(getField(field).compose(JdbcRow::new)));
   }
 
   public <T> Option<T> queryMeta(String query, Sequence<?> params, Function1<RowMetaData, T> rowMapper) {
-    return _query(query, populateWith(params),
+    return doQuery(query, populateWith(params),
         optionExtractor(rowMapper.compose(rs -> new JdbcRowMetaData(rs.getMetaData()))));
   }
 
   public <T> Option<T> queryOne(String query, Sequence<?> params, Function1<Row, T> rowMapper) {
-    return _query(query, populateWith(params), optionExtractor(rowMapper.compose(JdbcRow::new)));
+    return doQuery(query, populateWith(params), optionExtractor(rowMapper.compose(JdbcRow::new)));
   }
 
   public <T> Iterable<T> queryIterable(String query, Sequence<?> params, Function1<Row, T> rowMapper) {
-    return _query(query, populateWith(params), iterableExtractor(rowMapper.compose(JdbcRow::new)));
+    return doQuery(query, populateWith(params), iterableExtractor(rowMapper.compose(JdbcRow::new)));
   }
 
   @Override
@@ -58,7 +58,7 @@ public class JdbcTemplate implements Recoverable, AutoCloseable {
     conn.close();
   }
 
-  private <T> T _query(String query, Consumer1<PreparedStatement> setter, Function1<ResultSet, T> extractor) {
+  private <T> T doQuery(String query, Consumer1<PreparedStatement> setter, Function1<ResultSet, T> extractor) {
     try (PreparedStatement stmt = conn.prepareStatement(query)) {
       setter.accept(stmt);
       try (ResultSet rs = stmt.executeQuery()) {
@@ -69,7 +69,7 @@ public class JdbcTemplate implements Recoverable, AutoCloseable {
     }
   }
 
-  private <T> T _update(String query, Consumer1<PreparedStatement> setter, Function1<ResultSet, T> extractor) {
+  private <T> T doUpdate(String query, Consumer1<PreparedStatement> setter, Function1<ResultSet, T> extractor) {
     try (PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
       setter.accept(stmt);
       stmt.executeUpdate();
@@ -104,12 +104,11 @@ public class JdbcTemplate implements Recoverable, AutoCloseable {
     return stmt -> {
       int i = 1;
       for (Object param : params) {
-        if (param instanceof Range) {
-          var range = (Range) param;
+        if (param instanceof Range range) {
           stmt.setObject(i++, range.begin());
           stmt.setObject(i++, range.end());
-        } else if (param instanceof Iterable) {
-          for (Object p : (Iterable<?>) param) {
+        } else if (param instanceof Iterable<?> iterable) {
+          for (Object p : iterable) {
             stmt.setObject(i++, p);
           }
         } else {

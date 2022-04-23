@@ -12,11 +12,10 @@ import com.github.tonivade.purefun.HigherKind;
 import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.Unit;
 import com.github.tonivade.purefun.Witness;
-import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Option;
 
-@HigherKind(sealed = true)
-interface DSL<T> extends DSLOf<T> {
+@HigherKind
+sealed interface DSL<T> extends DSLOf<T> {
 
   <F extends Witness> Kind<F, T> accept(Visitor<F> visitor);
 
@@ -33,132 +32,67 @@ interface DSL<T> extends DSLOf<T> {
     <T> Kind<F, Option<T>> visit(DSL.QueryOne<T> query);
   }
 
-  abstract class AbstractQuery {
+  record QueryIterable<T>(SQL query, Function1<Row, T> rowMapper) implements DSL<Iterable<T>> {
 
-    private final SQL query;
-
-    private AbstractQuery(SQL query) {
-      this.query = checkNonNull(query);
-    }
-
-    public String getQuery() { return query.getQuery(); }
-
-    public Sequence<?> getParams() { return query.getParams(); }
-
-    @Override
-    public String toString() { return query.toString(); }
-  }
-
-  final class QueryIterable<T> extends AbstractQuery implements SealedDSL<Iterable<T>> {
-
-    private final Function1<Row, T> rowMapper;
-
-    protected QueryIterable(SQL query, Function1<Row, T> rowMapper) {
-      super(query);
-      this.rowMapper = checkNonNull(rowMapper);
-    }
-
-    public Function1<Row, T> getRowMapper() {
-      return rowMapper;
+    public QueryIterable {
+      checkNonNull(query);
+      checkNonNull(rowMapper);
     }
 
     @Override
     public <F extends Witness> Kind<F, Iterable<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
-
-    @Override
-    public String toString() {
-      return String.format("QueryIterable{query=%s}", super.toString());
-    }
   }
 
-  final class QueryMeta<T> extends AbstractQuery implements SealedDSL<Option<T>> {
+  record QueryMeta<T>(SQL query, Function1<RowMetaData, T> rowMapper) implements DSL<Option<T>> {
 
-    private final Function1<RowMetaData, T> rowMapper;
-
-    protected QueryMeta(SQL query, Function1<RowMetaData, T> rowMapper) {
-      super(query);
-      this.rowMapper = checkNonNull(rowMapper);
-    }
-
-    public Function1<RowMetaData, T> getRowMapper() {
-      return rowMapper;
+    public QueryMeta {
+      checkNonNull(query);
+      checkNonNull(rowMapper);
     }
 
     @Override
     public <F extends Witness> Kind<F, Option<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
-
-    @Override
-    public String toString() {
-      return String.format("QueryOne{query=%s}", super.toString());
-    }
   }
 
-  final class QueryOne<T> extends AbstractQuery implements SealedDSL<Option<T>> {
+  record QueryOne<T>(SQL query, Function1<Row, T> rowMapper) implements DSL<Option<T>> {
 
-    private final Function1<Row, T> rowMapper;
-
-    protected QueryOne(SQL query, Function1<Row, T> rowMapper) {
-      super(query);
-      this.rowMapper = checkNonNull(rowMapper);
-    }
-
-    public Function1<Row, T> getRowMapper() {
-      return rowMapper;
+    public QueryOne {
+      checkNonNull(query);
+      checkNonNull(rowMapper);
     }
 
     @Override
     public <F extends Witness> Kind<F, Option<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
-
-    @Override
-    public String toString() {
-      return String.format("QueryOne{query=%s}", super.toString());
-    }
   }
 
-  final class UpdateWithKeys<T> extends AbstractQuery implements SealedDSL<Option<T>> {
+  record UpdateWithKeys<T>(SQL query, Field<T> field) implements DSL<Option<T>> {
 
-    private final Field<T> field;
-
-    protected UpdateWithKeys(SQL query, Field<T> field) {
-      super(query);
-      this.field = checkNonNull(field);
-    }
-
-    public Field<T> getField() {
-      return field;
+    public UpdateWithKeys {
+      checkNonNull(field);
+      checkNonNull(field);
     }
 
     @Override
     public <F extends Witness> Kind<F, Option<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
-
-    @Override
-    public String toString() {
-      return String.format("UpdateWithKeys{query=%s}", super.toString());
-    }
   }
 
-  final class Update extends AbstractQuery implements SealedDSL<Unit> {
+  record Update(SQL query) implements DSL<Unit> {
 
-    protected Update(SQL query) {
-      super(query);
+    public Update {
+      checkNonNull(query);
     }
 
     @Override
     public <F extends Witness> Kind<F, Unit> accept(Visitor<F> visitor) {
       return visitor.visit(this);
-    }
-
-    @Override
-    public String toString() {
-      return String.format("Update{query=%s}", super.toString());
     }
   }
 }
