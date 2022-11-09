@@ -54,16 +54,16 @@ test {
 }
 
 dependencies {
-  annotationProcessor 'com.github.tonivade:purefun-processor:4.0'
-  api 'com.github.tonivade:purefun-free:4.0'
-  implementation 'com.github.tonivade:purefun-effect:4.0'
-  runtimeOnly 'com.github.tonivade:purefun-instances:4.0'
+  annotationProcessor 'com.github.tonivade:purefun-processor:4.1-SNAPSHOT'
+  api 'com.github.tonivade:purefun-free:4.1-SNAPSHOT'
+  implementation 'com.github.tonivade:purefun-effect:4.1-SNAPSHOT'
+  runtimeOnly 'com.github.tonivade:purefun-instances:4.1-SNAPSHOT'
   implementation 'io.r2dbc:r2dbc-spi:1.0.0.RELEASE'
   implementation 'io.r2dbc:r2dbc-pool:0.9.2.RELEASE'
   testRuntimeOnly 'com.h2database:h2:2.1.214'
   testRuntimeOnly 'io.r2dbc:r2dbc-h2:0.9.1.RELEASE'
   testImplementation 'com.zaxxer:HikariCP:5.0.1'
-  testImplementation 'com.github.tonivade:purecheck:0.3'
+  testImplementation 'com.github.tonivade:purecheck:0.4-SNAPSHOT'
   testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
   testImplementation 'org.junit.platform:junit-platform-runner:1.9.1'
 }
