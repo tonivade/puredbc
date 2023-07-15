@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.github.tonivade'
-version = '0.5-SNAPSHOT'
+version = '0.5'
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
@@ -52,16 +52,16 @@ test {
 }
 
 dependencies {
-  annotationProcessor 'com.github.tonivade:purefun-processor:4.1-SNAPSHOT'
-  api 'com.github.tonivade:purefun-free:4.1-SNAPSHOT'
-  implementation 'com.github.tonivade:purefun-effect:4.1-SNAPSHOT'
-  runtimeOnly 'com.github.tonivade:purefun-instances:4.1-SNAPSHOT'
+  annotationProcessor 'com.github.tonivade:purefun-processor:4.1'
+  api 'com.github.tonivade:purefun-free:4.1'
+  implementation 'com.github.tonivade:purefun-effect:4.1'
+  runtimeOnly 'com.github.tonivade:purefun-instances:4.1'
   implementation 'io.r2dbc:r2dbc-spi:1.0.0.RELEASE'
   implementation 'io.r2dbc:r2dbc-pool:1.0.0.RELEASE'
   testRuntimeOnly 'com.h2database:h2:2.2.220'
   testRuntimeOnly 'io.r2dbc:r2dbc-h2:1.0.0.RELEASE'
   testImplementation 'com.zaxxer:HikariCP:5.0.1'
-  testImplementation 'com.github.tonivade:purecheck:0.4-SNAPSHOT'
+  testImplementation 'com.github.tonivade:purecheck:0.4'
   testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
   testImplementation 'org.junit.platform:junit-platform-runner:1.9.3'
 }
