@@ -63,7 +63,7 @@ dependencies {
   testImplementation 'com.zaxxer:HikariCP:5.1.0'
   testImplementation 'com.github.tonivade:purecheck:0.5-SNAPSHOT'
   testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
-  testImplementation 'org.junit.platform:junit-platform-runner:1.10.0'
+  testImplementation 'org.junit.platform:junit-platform-runner:1.10.1'
 }
 
 publishing {
