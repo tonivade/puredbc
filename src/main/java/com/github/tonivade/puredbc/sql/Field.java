@@ -6,7 +6,8 @@ package com.github.tonivade.puredbc.sql;
 
 import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
-import com.github.tonivade.purefun.HigherKind;
+
+import com.github.tonivade.purefun.annotation.HigherKind;
 
 @HigherKind
 public sealed interface Field<T> extends FieldOf<T>, Renderable permits FieldImpl, Function, Alias, TableField {

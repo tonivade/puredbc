@@ -7,10 +7,12 @@ package com.github.tonivade.puredbc.sql;
 import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
 import static com.github.tonivade.purefun.Precondition.checkNonNull;
 import static com.github.tonivade.purefun.data.Sequence.emptyList;
+
 import com.github.tonivade.purefun.data.Sequence;
 
 public sealed interface Function<T> extends Field<T> {
   
+  @Override
   String name();
   Sequence<?> params();
 

@@ -50,6 +50,12 @@ test {
   reports.html.required = false
 }
 
+javadoc {
+  modularity.inferModulePath = false
+  
+  exclude "module-info.java"
+}
+
 dependencies {
   annotationProcessor libs.purefunProcessor
   api libs.purefunFree

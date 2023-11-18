@@ -13,18 +13,22 @@ import static com.github.tonivade.purefun.effect.TaskOf.toTask;
 import static com.github.tonivade.purefun.effect.UIOOf.toUIO;
 import static com.github.tonivade.purefun.type.IdOf.toId;
 import static com.github.tonivade.purefun.type.TryOf.toTry;
+
 import java.sql.SQLException;
+
 import javax.sql.DataSource;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
+
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.Bindable;
 import com.github.tonivade.purefun.Function1;
-import com.github.tonivade.purefun.HigherKind;
-import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.Unit;
-import com.github.tonivade.purefun.Witness;
+import com.github.tonivade.purefun.annotation.HigherKind;
+import com.github.tonivade.purefun.annotation.Kind;
+import com.github.tonivade.purefun.annotation.Witness;
 import com.github.tonivade.purefun.concurrent.Future;
 import com.github.tonivade.purefun.concurrent.Future_;
 import com.github.tonivade.purefun.data.ImmutableList;
@@ -41,6 +45,7 @@ import com.github.tonivade.purefun.type.Try_;
 import com.github.tonivade.purefun.typeclasses.FunctionK;
 import com.github.tonivade.purefun.typeclasses.Instances;
 import com.github.tonivade.purefun.typeclasses.Monad;
+
 import io.r2dbc.spi.ConnectionFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
