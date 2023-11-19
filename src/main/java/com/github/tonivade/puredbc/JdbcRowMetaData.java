@@ -17,7 +17,7 @@ final class JdbcRowMetaData implements RowMetaData, Recoverable {
   private final Map<String, ColumnMetaData> columnsByName;
   private final Map<Integer, ColumnMetaData> columnsByIndex;
 
-  protected JdbcRowMetaData(ResultSetMetaData impl) {
+  JdbcRowMetaData(ResultSetMetaData impl) {
     columnsByName = new HashMap<>();
     columnsByIndex = new HashMap<>();
     try {

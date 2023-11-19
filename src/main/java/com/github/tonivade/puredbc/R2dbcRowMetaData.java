@@ -16,7 +16,7 @@ final class R2dbcRowMetaData implements RowMetaData {
 
   private final RowMetadata impl;
 
-  protected R2dbcRowMetaData(RowMetadata impl) {
+  R2dbcRowMetaData(RowMetadata impl) {
     this.impl = checkNonNull(impl);
   }
 

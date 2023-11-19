@@ -15,7 +15,7 @@ final class R2dbcRow implements Row {
 
   private final io.r2dbc.spi.Row impl;
 
-  protected R2dbcRow(io.r2dbc.spi.Row impl) {
+  R2dbcRow(io.r2dbc.spi.Row impl) {
     this.impl = checkNonNull(impl);
   }
 

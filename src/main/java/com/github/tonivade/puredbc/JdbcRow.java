@@ -16,7 +16,7 @@ final class JdbcRow implements Row, Recoverable {
 
   private final ResultSet resultSet;
 
-  protected JdbcRow(ResultSet resultSet) {
+  JdbcRow(ResultSet resultSet) {
     this.resultSet = checkNonNull(resultSet);
   }
 
