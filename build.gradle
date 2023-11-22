@@ -8,7 +8,6 @@ plugins {
 }
 
 group = 'com.github.tonivade'
-version = '0.6'
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
