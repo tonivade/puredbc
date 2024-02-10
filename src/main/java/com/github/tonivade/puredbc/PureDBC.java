@@ -134,7 +134,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLIdVisitor visitor = new DSLIdVisitor(jdbc);
         Kind<Id_, A> foldMap = free.foldMap(Instances.monad(Id_.class), new DSLTransformer<>(visitor));
-        return foldMap.fix(toId()).get();
+        return foldMap.fix(toId()).value();
       }
     };
   }
