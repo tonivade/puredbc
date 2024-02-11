@@ -1,8 +1,8 @@
 [versions]
-purefunVersion = "5.0"
+purefunVersion = "6.0-SNAPSHOT"
 junitEngineVersion = "5.10.2"
 junitPlatformVersion = "1.10.2"
-purecheckVersion = "1.0"
+purecheckVersion = "2.0-SNAPSHOT"
 versionsVersion = "0.51.0"
 nexusVersion = "2.0.0"
 r2dbcSpiVersion = "1.0.0.RELEASE"
