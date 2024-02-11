@@ -8,8 +8,8 @@ module com.github.tonivade.puredbc {
   requires transitive com.github.tonivade.purefun.free;
   requires transitive com.github.tonivade.purefun.typeclasses;
   requires transitive java.sql;
-  requires transitive org.reactivestreams;
-  requires transitive r2dbc.spi;
-  requires transitive reactor.core;
+  requires org.reactivestreams;
+  requires r2dbc.spi;
+  requires reactor.core;
   requires transitive java.compiler;
 }
