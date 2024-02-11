@@ -4,7 +4,7 @@
  */
 package com.github.tonivade.puredbc;
 
-import com.github.tonivade.purefun.Recoverable;
+import com.github.tonivade.purefun.core.Recoverable;
 import com.github.tonivade.purefun.type.Option;
 
 import java.sql.ResultSetMetaData;

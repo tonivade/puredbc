@@ -16,9 +16,9 @@ import static com.github.tonivade.puredbc.sql.SQL.select;
 import static com.github.tonivade.puredbc.sql.SQL.selectFrom;
 import static com.github.tonivade.puredbc.sql.SQL.sql;
 import static com.github.tonivade.puredbc.sql.SQL.update;
-import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
-import static com.github.tonivade.purefun.Precondition.checkNonNull;
-import static com.github.tonivade.purefun.Unit.unit;
+import static com.github.tonivade.purefun.core.Precondition.checkNonEmpty;
+import static com.github.tonivade.purefun.core.Precondition.checkNonNull;
+import static com.github.tonivade.purefun.core.Unit.unit;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
 import static com.github.tonivade.purefun.data.Sequence.listOf;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -34,9 +34,9 @@ import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.puredbc.sql.SQL1;
 import com.github.tonivade.puredbc.sql.SQL2;
 import com.github.tonivade.puredbc.sql.Table2;
-import com.github.tonivade.purefun.Tuple;
-import com.github.tonivade.purefun.Tuple2;
-import com.github.tonivade.purefun.Unit;
+import com.github.tonivade.purefun.core.Tuple;
+import com.github.tonivade.purefun.core.Tuple2;
+import com.github.tonivade.purefun.core.Unit;
 import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
@@ -244,7 +244,7 @@ final class TestTable implements Table2<Long, String> {
   public TestTable as(String alias) {
     return new TestTable(this, alias);
   }
-  
+
   @Override
   public TupleK2<Field_, Long, String> fields() {
     return TupleK.of(ID, NAME);

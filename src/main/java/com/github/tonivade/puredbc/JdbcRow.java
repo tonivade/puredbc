@@ -4,13 +4,13 @@
  */
 package com.github.tonivade.puredbc;
 
-import static com.github.tonivade.purefun.Precondition.checkNonNull;
+import static com.github.tonivade.purefun.core.Precondition.checkNonNull;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.util.Date;
 import com.github.tonivade.puredbc.sql.Field;
-import com.github.tonivade.purefun.Producer;
-import com.github.tonivade.purefun.Recoverable;
+import com.github.tonivade.purefun.core.Producer;
+import com.github.tonivade.purefun.core.Recoverable;
 
 final class JdbcRow implements Row, Recoverable {
 

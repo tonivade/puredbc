@@ -4,7 +4,7 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
+import static com.github.tonivade.purefun.core.Precondition.checkNonEmpty;
 import com.github.tonivade.purefun.HigherKind;
 import com.github.tonivade.purefun.data.Range;
 

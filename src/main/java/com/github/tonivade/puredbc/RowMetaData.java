@@ -4,7 +4,7 @@
  */
 package com.github.tonivade.puredbc;
 
-import static com.github.tonivade.purefun.Precondition.checkNonNull;
+import static com.github.tonivade.purefun.core.Precondition.checkNonNull;
 import com.github.tonivade.purefun.type.Option;
 
 public interface RowMetaData {
@@ -16,7 +16,7 @@ public interface RowMetaData {
   Iterable<ColumnMetaData> allColumns();
 
   Option<ColumnMetaData> column(String name);
-  
+
   Option<ColumnMetaData> column(int index);
 
   record ColumnMetaData(String name, Class<?> type, Boolean nullable) {

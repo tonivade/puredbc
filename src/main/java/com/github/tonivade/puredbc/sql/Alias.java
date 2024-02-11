@@ -4,14 +4,15 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
-import static com.github.tonivade.purefun.Precondition.checkNonNull;
+import static com.github.tonivade.purefun.core.Precondition.checkNonEmpty;
+import static com.github.tonivade.purefun.core.Precondition.checkNonNull;
 
 public sealed interface Alias<T> extends Field<T> {
-  
+
+  @Override
   String name();
   Field<T> field();
-  
+
   static <T> Alias<T> of(String alias, Field<T> field) {
     return new AliasImpl<>(alias, field);
   }

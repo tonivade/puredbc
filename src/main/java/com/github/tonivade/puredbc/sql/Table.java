@@ -4,15 +4,15 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import static com.github.tonivade.purefun.Unit.unit;
+import static com.github.tonivade.purefun.core.Unit.unit;
 import static com.github.tonivade.purefun.type.Validation.invalid;
 import static com.github.tonivade.purefun.type.Validation.valid;
 import java.util.ArrayList;
 import java.util.List;
 import com.github.tonivade.puredbc.Row;
 import com.github.tonivade.puredbc.RowMetaData;
-import com.github.tonivade.purefun.Tuple;
-import com.github.tonivade.purefun.Unit;
+import com.github.tonivade.purefun.core.Tuple;
+import com.github.tonivade.purefun.core.Unit;
 import com.github.tonivade.purefun.data.ImmutableMap;
 import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Sequence;
@@ -22,11 +22,11 @@ import com.github.tonivade.purefun.typeclasses.TupleK;
 public interface Table<T extends Tuple, F extends TupleK<Field_>> {
 
   String name();
-  
+
   F fields();
-  
+
   T asTuple(Row row);
-  
+
   default Table<T, F> as(String alias) {
     throw new UnsupportedOperationException("not implemented");
   }
@@ -47,7 +47,7 @@ public interface Table<T extends Tuple, F extends TupleK<Field_>> {
     }
     return result.isEmpty() ? valid(unit()) : invalid(result);
   }
-  
+
   private ImmutableMap<String, Field<?>> map() {
     return ImmutableMap.from(all().map(x -> Tuple.of(x.name().toUpperCase(), x)));
   }

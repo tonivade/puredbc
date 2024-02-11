@@ -4,7 +4,7 @@
  */
 package com.github.tonivade.puredbc;
 
-import static com.github.tonivade.purefun.Precondition.checkNonNull;
+import static com.github.tonivade.purefun.core.Precondition.checkNonNull;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;

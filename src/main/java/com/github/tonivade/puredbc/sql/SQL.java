@@ -4,16 +4,16 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import static com.github.tonivade.purefun.Function1.cons;
-import static com.github.tonivade.purefun.Precondition.checkNonEmpty;
-import static com.github.tonivade.purefun.Precondition.checkNonNull;
+import static com.github.tonivade.purefun.core.Function1.cons;
+import static com.github.tonivade.purefun.core.Precondition.checkNonEmpty;
+import static com.github.tonivade.purefun.core.Precondition.checkNonNull;
 import static com.github.tonivade.purefun.data.ImmutableArray.empty;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
 import static com.github.tonivade.purefun.data.Sequence.interleave;
 import static java.util.stream.Collectors.joining;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import com.github.tonivade.purefun.Tuple;
+import com.github.tonivade.purefun.core.Tuple;
 import com.github.tonivade.purefun.data.ImmutableArray;
 import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Range;
@@ -138,7 +138,7 @@ public final class SQL {
   public static SQL select(NonEmptyList<Field<?>> fields) {
     return sql(fields.map(Field::render).join(", ", "select ", ""));
   }
-  
+
   public static <T extends Tuple, F extends TupleK<Field_>> SQL selectFrom(Table<T, F> table) {
     return select(table.all()).from(table);
   }
@@ -163,7 +163,7 @@ public final class SQL {
   private static String set(Sequence<Field<?>> values) {
     return values.map(field -> field.render() + " = ?").join(",", " set ", "");
   }
-  
+
   private static String process(String query, Sequence<?> values) {
     checkNonEmpty(query);
     checkNonNull(values);
