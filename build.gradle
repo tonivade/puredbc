@@ -47,7 +47,7 @@ compileTestJava {
 test {
   useJUnitPlatform()
 
-  reports.html.required = false
+  reports.html.required = true
 }
 
 dependencies {
