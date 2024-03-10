@@ -9,11 +9,13 @@ import static com.github.tonivade.purefun.core.Precondition.checkNonEmpty;
 import static com.github.tonivade.purefun.core.Precondition.checkNonNull;
 import static com.github.tonivade.purefun.data.ImmutableArray.empty;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
-import static com.github.tonivade.purefun.data.Sequence.interleave;
-import static java.util.stream.Collectors.joining;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
+
 import com.github.tonivade.purefun.core.Tuple;
+import com.github.tonivade.purefun.core.Tuple2;
 import com.github.tonivade.purefun.data.ImmutableArray;
 import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Range;
@@ -167,10 +169,17 @@ public final class SQL {
   private static String process(String query, Sequence<?> values) {
     checkNonEmpty(query);
     checkNonNull(values);
-    if (values.isEmpty()) return query;
-    Stream<String> split = Pattern.compile("\\?").splitAsStream(query);
-    Stream<String> replacements = values.stream().map(SQL::replacement);
-    return interleave(split, replacements).collect(joining());
+    if (values.isEmpty()) {
+      return query;
+    }
+    var split = Pattern.compile("\\?").splitAsStream(query);
+    var replacements = values.stream().map(SQL::replacement);
+
+    var sb = new StringBuilder();
+    new PairIterator<>(split.iterator(), replacements.iterator())
+      .forEachRemaining(
+          tuple -> sb.append(tuple.toSequence().filter(Objects::nonNull).join("")));
+    return sb.toString();
   }
 
   private static String replacement(Object value) {
@@ -181,5 +190,33 @@ public final class SQL {
       return ImmutableArray.from((Iterable<?>) value).map(cons("?")).join(", ");
     }
     return "?";
+  }
+}
+
+final class PairIterator<A, B> implements Iterator<Tuple2<A, B>> {
+
+  private final Iterator<A> first;
+  private final Iterator<B> second;
+
+  PairIterator(Iterator<A> first, Iterator<B> second) {
+    this.first = checkNonNull(first);
+    this.second = checkNonNull(second);
+  }
+
+  @Override
+  public boolean hasNext() {
+    return first.hasNext() || second.hasNext();
+  }
+
+  @Override
+  public Tuple2<A, B> next() {
+    if (!hasNext()) {
+      throw new NoSuchElementException();
+    }
+    return Tuple.of(nextItem(first), nextItem(second));
+  }
+
+  private static <Z> Z nextItem(Iterator<Z> it) {
+    return it.hasNext() ? it.next() : null;
   }
 }
