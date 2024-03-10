@@ -5,6 +5,7 @@ plugins {
   id 'signing'
   alias(libs.plugins.nexus)
   alias(libs.plugins.versions)
+  alias(libs.plugins.errorprone)
 }
 
 group = 'com.github.tonivade'
@@ -44,6 +45,21 @@ compileTestJava {
   options.release = 21
 }
 
+tasks.withType(JavaCompile) {
+  if (!name.toLowerCase().contains("test")) {
+    options.errorprone {
+      check("NullAway", net.ltgt.gradle.errorprone.CheckSeverity.ERROR)
+      option("NullAway:AnnotatedPackages", "com.github.tonivade.puredbc")
+      option("NullAway:SuggestSuppressions", "true")
+    }
+  } else {
+    options.errorprone {
+      option("NullAway:AnnotatedPackages", "com.github.tonivade.puredbc")
+      option("ExcludedPaths", ".*/src/test/java/.*")
+    }
+  }
+}
+
 test {
   useJUnitPlatform()
 
@@ -51,6 +67,8 @@ test {
 }
 
 dependencies {
+  errorprone libs.nullaway
+  errorprone libs.errorprone
   annotationProcessor libs.purefunProcessor
   api libs.purefunFree
   implementation libs.purefunEffect

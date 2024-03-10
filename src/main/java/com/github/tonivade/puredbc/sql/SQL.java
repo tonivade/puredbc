@@ -14,6 +14,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import com.github.tonivade.purefun.Nullable;
 import com.github.tonivade.purefun.core.Tuple;
 import com.github.tonivade.purefun.core.Tuple2;
 import com.github.tonivade.purefun.data.ImmutableArray;
@@ -216,6 +217,7 @@ final class PairIterator<A, B> implements Iterator<Tuple2<A, B>> {
     return Tuple.of(nextItem(first), nextItem(second));
   }
 
+  @Nullable
   private static <Z> Z nextItem(Iterator<Z> it) {
     return it.hasNext() ? it.next() : null;
   }

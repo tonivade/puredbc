@@ -10,6 +10,9 @@ r2dbcPoolVersion = "1.0.1.RELEASE"
 r2dbcH2Version = "1.0.0.RELEASE"
 h2Version = "2.2.224"
 hikarcpVersion = "5.1.0"
+errorproneVersion = "2.25.0"
+errorpronePluginVersion = "3.1.0"
+nullawayVersion = "0.10.24"
 
 [libraries]
 purefunProcessor = { group = "com.github.tonivade", name = "purefun-processor", version.ref = "purefunVersion" }
@@ -24,7 +27,10 @@ r2dbcPool = { group = "io.r2dbc", name = "r2dbc-pool", version.ref = "r2dbcPoolV
 h2 = { group = "com.h2database", name = "h2", version.ref = "h2Version" }
 r2dbcH2 = { group = "io.r2dbc", name = "r2dbc-h2", version.ref = "r2dbcH2Version" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikarcpVersion" }
+nullaway = { group = "com.uber.nullaway", name = "nullaway", version.ref = "nullawayVersion" }
+errorprone = { group = "com.google.errorprone", name = "error_prone_core", version.ref = "errorproneVersion" }
 
 [plugins]
 versions = { id = "com.github.ben-manes.versions", version.ref = "versionsVersion" }
 nexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexusVersion" }
+errorprone = { id = "net.ltgt.errorprone", version.ref = "errorpronePluginVersion"}

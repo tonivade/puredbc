@@ -5,6 +5,8 @@
 package com.github.tonivade.puredbc;
 
 import static com.github.tonivade.purefun.core.Precondition.checkNonNull;
+
+import com.github.tonivade.purefun.Nullable;
 import com.github.tonivade.purefun.type.Option;
 
 public interface RowMetaData {
@@ -19,7 +21,7 @@ public interface RowMetaData {
 
   Option<ColumnMetaData> column(int index);
 
-  record ColumnMetaData(String name, Class<?> type, Boolean nullable) {
+  record ColumnMetaData(String name, Class<?> type, @Nullable Boolean nullable) {
 
     public ColumnMetaData {
       checkNonNull(name);
