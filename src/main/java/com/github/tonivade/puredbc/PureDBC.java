@@ -24,7 +24,7 @@ import com.github.tonivade.purefun.core.Function1;
 import com.github.tonivade.purefun.core.Unit;
 import com.github.tonivade.purefun.HigherKind;
 import com.github.tonivade.purefun.Kind;
-import com.github.tonivade.purefun.Witness;
+
 import com.github.tonivade.purefun.concurrent.Future;
 import com.github.tonivade.purefun.concurrent.Future_;
 import com.github.tonivade.purefun.data.ImmutableList;
@@ -397,7 +397,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
     }
   }
 
-  private static class DSLTransformer<F extends Witness> implements FunctionK<DSL_, F> {
+  private static class DSLTransformer<F> implements FunctionK<DSL_, F> {
 
     private final DSL.Visitor<F> visitor;
 

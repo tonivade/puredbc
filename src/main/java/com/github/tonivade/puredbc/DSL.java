@@ -11,15 +11,15 @@ import com.github.tonivade.purefun.core.Function1;
 import com.github.tonivade.purefun.HigherKind;
 import com.github.tonivade.purefun.Kind;
 import com.github.tonivade.purefun.core.Unit;
-import com.github.tonivade.purefun.Witness;
+
 import com.github.tonivade.purefun.type.Option;
 
 @HigherKind
 sealed interface DSL<T> extends DSLOf<T> {
 
-  <F extends Witness> Kind<F, T> accept(Visitor<F> visitor);
+  <F> Kind<F, T> accept(Visitor<F> visitor);
 
-  interface Visitor<F extends Witness> {
+  interface Visitor<F> {
 
     Kind<F, Unit> visit(DSL.Update update);
 
@@ -40,7 +40,7 @@ sealed interface DSL<T> extends DSLOf<T> {
     }
 
     @Override
-    public <F extends Witness> Kind<F, Iterable<T>> accept(Visitor<F> visitor) {
+    public <F> Kind<F, Iterable<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
   }
@@ -53,7 +53,7 @@ sealed interface DSL<T> extends DSLOf<T> {
     }
 
     @Override
-    public <F extends Witness> Kind<F, Option<T>> accept(Visitor<F> visitor) {
+    public <F> Kind<F, Option<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
   }
@@ -66,7 +66,7 @@ sealed interface DSL<T> extends DSLOf<T> {
     }
 
     @Override
-    public <F extends Witness> Kind<F, Option<T>> accept(Visitor<F> visitor) {
+    public <F> Kind<F, Option<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
   }
@@ -79,7 +79,7 @@ sealed interface DSL<T> extends DSLOf<T> {
     }
 
     @Override
-    public <F extends Witness> Kind<F, Option<T>> accept(Visitor<F> visitor) {
+    public <F> Kind<F, Option<T>> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
   }
@@ -91,7 +91,7 @@ sealed interface DSL<T> extends DSLOf<T> {
     }
 
     @Override
-    public <F extends Witness> Kind<F, Unit> accept(Visitor<F> visitor) {
+    public <F> Kind<F, Unit> accept(Visitor<F> visitor) {
       return visitor.visit(this);
     }
   }
