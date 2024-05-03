@@ -10,7 +10,7 @@ import com.github.tonivade.purefun.core.Tuple;
 import com.github.tonivade.purefun.core.Tuple4;
 import com.github.tonivade.purefun.typeclasses.TupleK4;
 
-public interface Table4<A, B, C, D> extends Table<Tuple4<A, B, C, D>, TupleK4<Field_, A, B, C, D>> {
+public interface Table4<A, B, C, D> extends Table<Tuple4<A, B, C, D>, TupleK4<Field<?>, A, B, C, D>> {
 
   default Field<A> field1() {
     return fields().get1().fix(toField());

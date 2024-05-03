@@ -26,18 +26,13 @@ import com.github.tonivade.purefun.HigherKind;
 import com.github.tonivade.purefun.Kind;
 
 import com.github.tonivade.purefun.concurrent.Future;
-import com.github.tonivade.purefun.concurrent.Future_;
 import com.github.tonivade.purefun.data.ImmutableList;
 import com.github.tonivade.purefun.effect.Task;
-import com.github.tonivade.purefun.effect.Task_;
 import com.github.tonivade.purefun.effect.UIO;
-import com.github.tonivade.purefun.effect.UIO_;
 import com.github.tonivade.purefun.free.Free;
 import com.github.tonivade.purefun.type.Id;
-import com.github.tonivade.purefun.type.Id_;
 import com.github.tonivade.purefun.type.Option;
 import com.github.tonivade.purefun.type.Try;
-import com.github.tonivade.purefun.type.Try_;
 import com.github.tonivade.purefun.typeclasses.FunctionK;
 import com.github.tonivade.purefun.typeclasses.Instances;
 import com.github.tonivade.purefun.typeclasses.Monad;
@@ -46,9 +41,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @HigherKind
-public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
+public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
 
-  private final Free<DSL_, T> value;
+  private final Free<DSL<?>, T> value;
 
   private PureDBC(T value) {
     this(Free.pure(value));
@@ -58,7 +53,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
     this(Free.liftF(value));
   }
 
-  private PureDBC(Free<DSL_, T> value) {
+  private PureDBC(Free<DSL<?>, T> value) {
     this.value = checkNonNull(value);
   }
 
@@ -68,12 +63,12 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
   }
 
   @Override
-  public <R> PureDBC<R> flatMap(Function1<? super T, ? extends Kind<PureDBC_, ? extends R>> map) {
+  public <R> PureDBC<R> flatMap(Function1<? super T, ? extends Kind<PureDBC<?>, ? extends R>> map) {
     return new PureDBC<>(value.flatMap(t -> map.andThen(PureDBCOf::narrowK).apply(t).value));
   }
 
   @Override
-  public <R> PureDBC<R> andThen(Kind<PureDBC_, ? extends R> next) {
+  public <R> PureDBC<R> andThen(Kind<PureDBC<?>, ? extends R> next) {
     return flatMap(cons(next));
   }
 
@@ -125,58 +120,58 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
     return new PureDBC<>(new DSL.QueryIterable<>(query, rowMapper));
   }
 
-  public static Monad<PureDBC_> monad() {
+  public static Monad<PureDBC<?>> monad() {
     return PureDBCMonad.INSTANCE;
   }
 
-  private static <A> Function1<DataSource, A> unsafeRun(Free<DSL_, A> free) {
+  private static <A> Function1<DataSource, A> unsafeRun(Free<DSL<?>, A> free) {
     return dataSource -> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLIdVisitor visitor = new DSLIdVisitor(jdbc);
-        Kind<Id_, A> foldMap = free.foldMap(Instances.<Id_>monad(), new DSLTransformer<>(visitor));
+        Kind<Id<?>, A> foldMap = free.foldMap(Instances.<Id<?>>monad(), new DSLTransformer<>(visitor));
         return foldMap.fix(toId()).value();
       }
     };
   }
 
-  private static <A> Function1<DataSource, Try<A>> safeRun(Free<DSL_, A> free) {
+  private static <A> Function1<DataSource, Try<A>> safeRun(Free<DSL<?>, A> free) {
     return dataSource -> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLTryVisitor visitor = new DSLTryVisitor(jdbc);
-        Kind<Try_, A> foldMap = free.foldMap(Instances.<Try_>monad(), new DSLTransformer<>(visitor));
+        Kind<Try<?>, A> foldMap = free.foldMap(Instances.<Try<?>>monad(), new DSLTransformer<>(visitor));
         return foldMap.fix(toTry());
       }
     };
   }
 
-  private static <A> Function1<DataSource, UIO<A>> unsafeRunIO(Free<DSL_, A> free) {
+  private static <A> Function1<DataSource, UIO<A>> unsafeRunIO(Free<DSL<?>, A> free) {
     return dataSource ->
       UIO.bracket(UIO.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
-        Kind<UIO_, A> foldMap = free.foldMap(Instances.<UIO_>monad(), new DSLTransformer<>(visitor));
+        Kind<UIO<?>, A> foldMap = free.foldMap(Instances.<UIO<?>>monad(), new DSLTransformer<>(visitor));
         return foldMap.fix(toUIO());
       });
   }
 
-  private static <A> Function1<DataSource, Task<A>> safeRunIO(Free<DSL_, A> free) {
+  private static <A> Function1<DataSource, Task<A>> safeRunIO(Free<DSL<?>, A> free) {
     return dataSource ->
       Task.bracket(Task.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLTaskVisitor visitor = new DSLTaskVisitor(jdbc);
-        Kind<Task_, A> foldMap = free.foldMap(Instances.<Task_>monad(), new DSLTransformer<>(visitor));
+        Kind<Task<?>, A> foldMap = free.foldMap(Instances.<Task<?>>monad(), new DSLTransformer<>(visitor));
         return foldMap.fix(toTask());
       });
   }
 
-  private static <A> Function1<DataSource, Future<A>> asyncRun(Free<DSL_, A> free) {
+  private static <A> Function1<DataSource, Future<A>> asyncRun(Free<DSL<?>, A> free) {
     return dataSource ->
         Future.bracket(Future.task(() -> newTemplate(dataSource)), jdbc -> {
           DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
-          Kind<Future_, A> foldMap = free.foldMap(Instances.<Future_>monad(), new DSLTransformer<>(visitor));
+          Kind<Future<?>, A> foldMap = free.foldMap(Instances.<Future<?>>monad(), new DSLTransformer<>(visitor));
           return foldMap.fix(toFuture());
         });
   }
 
-  private static <A> Function1<ConnectionFactory, Publisher<A>> reactorRun(Free<DSL_, A> free) {
+  private static <A> Function1<ConnectionFactory, Publisher<A>> reactorRun(Free<DSL<?>, A> free) {
     return connectionFactory -> {
       R2dbcTemplate r2dbc = newTemplate(connectionFactory);
       DSLReactVisitor visitor = new DSLReactVisitor(r2dbc);
@@ -192,7 +187,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
     return new R2dbcTemplate(connectionFactory);
   }
 
-  private static class DSLIdVisitor implements DSL.Visitor<Id_> {
+  private static class DSLIdVisitor implements DSL.Visitor<Id<?>> {
 
     private final JdbcTemplate jdbc;
 
@@ -226,7 +221,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
     }
   }
 
-  private static class DSLTryVisitor implements DSL.Visitor<Try_> {
+  private static class DSLTryVisitor implements DSL.Visitor<Try<?>> {
 
     private final JdbcTemplate jdbc;
 
@@ -260,7 +255,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
     }
   }
 
-  private static class DSLUIOVisitor implements DSL.Visitor<UIO_> {
+  private static class DSLUIOVisitor implements DSL.Visitor<UIO<?>> {
 
     private final JdbcTemplate jdbc;
 
@@ -294,7 +289,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
     }
   }
 
-  private static class DSLTaskVisitor implements DSL.Visitor<Task_> {
+  private static class DSLTaskVisitor implements DSL.Visitor<Task<?>> {
 
     private final JdbcTemplate jdbc;
 
@@ -328,7 +323,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
     }
   }
 
-  private static class DSLFutureVisitor implements DSL.Visitor<Future_> {
+  private static class DSLFutureVisitor implements DSL.Visitor<Future<?>> {
 
     private final JdbcTemplate jdbc;
 
@@ -362,7 +357,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
     }
   }
 
-  private static class DSLReactVisitor implements DSL.Visitor<PublisherK_> {
+  private static class DSLReactVisitor implements DSL.Visitor<PublisherK<?>> {
 
     private final R2dbcTemplate r2dbc;
 
@@ -397,7 +392,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
     }
   }
 
-  private static class DSLTransformer<F> implements FunctionK<DSL_, F> {
+  private static class DSLTransformer<F> implements FunctionK<DSL<?>, F> {
 
     private final DSL.Visitor<F> visitor;
 
@@ -406,13 +401,13 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC_, T> {
     }
 
     @Override
-    public <T> Kind<F, T> apply(Kind<DSL_, ? extends T> from) {
+    public <T> Kind<F, T> apply(Kind<DSL<?>, ? extends T> from) {
       return from.fix(DSLOf::<T>narrowK).accept(visitor);
     }
   }
 }
 
-interface PureDBCMonad extends Monad<PureDBC_> {
+interface PureDBCMonad extends Monad<PureDBC<?>> {
 
   PureDBCMonad INSTANCE = new PureDBCMonad() { };
 
@@ -423,23 +418,23 @@ interface PureDBCMonad extends Monad<PureDBC_> {
 
   @Override
   default <T, R> PureDBC<R> flatMap(
-      Kind<PureDBC_, ? extends T> value, Function1<? super T, ? extends Kind<PureDBC_, ? extends R>> mapper) {
+      Kind<PureDBC<?>, ? extends T> value, Function1<? super T, ? extends Kind<PureDBC<?>, ? extends R>> mapper) {
     return value.fix(toPureDBC()).flatMap(mapper.andThen(PureDBCOf::narrowK));
   }
 }
 
-interface PublisherKMonad extends Monad<PublisherK_> {
+interface PublisherKMonad extends Monad<PublisherK<?>> {
 
   PublisherKMonad INSTANCE = new PublisherKMonad() {};
 
   @Override
-  default <T, R> PublisherK<R> map(Kind<PublisherK_, ? extends T> value, Function1<? super T, ? extends R> map) {
+  default <T, R> PublisherK<R> map(Kind<PublisherK<?>, ? extends T> value, Function1<? super T, ? extends R> map) {
     return value.fix(toPublisherK()).map(map);
   }
 
   @Override
   default <T, R> PublisherK<R> flatMap(
-      Kind<PublisherK_, ? extends T> value, Function1<? super T, ? extends Kind<PublisherK_, ? extends R>> map) {
+      Kind<PublisherK<?>, ? extends T> value, Function1<? super T, ? extends Kind<PublisherK<?>, ? extends R>> map) {
     return value.fix(toPublisherK()).flatMap(map.andThen(PublisherKOf::narrowK));
   }
 

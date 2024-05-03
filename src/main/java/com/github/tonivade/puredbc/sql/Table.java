@@ -19,7 +19,7 @@ import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.type.Validation;
 import com.github.tonivade.purefun.typeclasses.TupleK;
 
-public interface Table<T extends Tuple, F extends TupleK<Field_>> {
+public interface Table<T extends Tuple, F extends TupleK<Field<?>>> {
 
   String name();
 

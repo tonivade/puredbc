@@ -58,19 +58,19 @@ public final class SQL {
     return sql(query + " from " + NonEmptyList.of(table, tables).map(Table::name).join(","));
   }
 
-  public <T extends Tuple, F extends TupleK<Field_>> SQL innerJoin(Table<T, F> table) {
+  public <T extends Tuple, F extends TupleK<Field<?>>> SQL innerJoin(Table<T, F> table) {
     return sql(query + " inner join " + table.name());
   }
 
-  public <T extends Tuple, F extends TupleK<Field_>> SQL leftJoin(Table<T, F> table) {
+  public <T extends Tuple, F extends TupleK<Field<?>>> SQL leftJoin(Table<T, F> table) {
     return sql(query + " left join " + table.name());
   }
 
-  public <T extends Tuple, F extends TupleK<Field_>> SQL rightJoin(Table<T, F> table) {
+  public <T extends Tuple, F extends TupleK<Field<?>>> SQL rightJoin(Table<T, F> table) {
     return sql(query + " right join " + table.name());
   }
 
-  public <T extends Tuple, F extends TupleK<Field_>> SQL fullJoin(Table<T, F> table) {
+  public <T extends Tuple, F extends TupleK<Field<?>>> SQL fullJoin(Table<T, F> table) {
     return sql(query + " full join " + table.name());
   }
 
@@ -142,19 +142,19 @@ public final class SQL {
     return sql(fields.map(Field::render).join(", ", "select ", ""));
   }
 
-  public static <T extends Tuple, F extends TupleK<Field_>> SQL selectFrom(Table<T, F> table) {
+  public static <T extends Tuple, F extends TupleK<Field<?>>> SQL selectFrom(Table<T, F> table) {
     return select(table.all()).from(table);
   }
 
-  public static <T extends Tuple, F extends TupleK<Field_>> SQL insertInto(Table<T, F> table) {
+  public static <T extends Tuple, F extends TupleK<Field<?>>> SQL insertInto(Table<T, F> table) {
     return sql("insert into " + table.name());
   }
 
-  public static <T extends Tuple, F extends TupleK<Field_>> SQL update(Table<T, F> table) {
+  public static <T extends Tuple, F extends TupleK<Field<?>>> SQL update(Table<T, F> table) {
     return sql("update " + table.name());
   }
 
-  public static <T extends Tuple, F extends TupleK<Field_>> SQL deleteFrom(Table<T, F> table) {
+  public static <T extends Tuple, F extends TupleK<Field<?>>> SQL deleteFrom(Table<T, F> table) {
     return sql("delete from " + table.name());
   }
 

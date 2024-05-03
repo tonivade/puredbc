@@ -30,7 +30,6 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import com.github.tonivade.puredbc.sql.Field;
-import com.github.tonivade.puredbc.sql.Field_;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.puredbc.sql.SQL1;
 import com.github.tonivade.puredbc.sql.SQL2;
@@ -247,7 +246,7 @@ final class TestTable implements Table2<Long, String> {
   }
 
   @Override
-  public TupleK2<Field_, Long, String> fields() {
+  public TupleK2<Field<?>, Long, String> fields() {
     return TupleK.of(ID, NAME);
   }
 }

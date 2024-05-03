@@ -24,9 +24,9 @@ class SQLTest {
     public String name() {
       return "example";
     }
-    
+
     @Override
-    public TupleK2<Field_, Integer, String> fields() {
+    public TupleK2<Field<?>, Integer, String> fields() {
       return new TupleK2<>(ID, NAME);
     }
   }
