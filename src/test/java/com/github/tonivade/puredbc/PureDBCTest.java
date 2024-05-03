@@ -9,6 +9,7 @@ import static com.github.tonivade.puredbc.PureDBC.queryIterable;
 import static com.github.tonivade.puredbc.PureDBC.queryOne;
 import static com.github.tonivade.puredbc.PureDBC.update;
 import static com.github.tonivade.puredbc.PureDBC.updateWithKeys;
+import static com.github.tonivade.puredbc.PureDBCOf.toPureDBC;
 import static com.github.tonivade.puredbc.sql.Condition.between;
 import static com.github.tonivade.puredbc.sql.SQL.deleteFrom;
 import static com.github.tonivade.puredbc.sql.SQL.insertInto;
@@ -84,7 +85,7 @@ class PureDBCTest {
         .then(updateWithKeys(insertRowWithKey.bind("toni"), TEST.ID))
         .then(updateWithKeys(insertRowWithKey.bind("pepe"), TEST.ID))
         .then(queryIterable(findAll, TEST::asTuple))
-        .fix(PureDBCOf::narrowK);
+        .fix(toPureDBC());
 
     assertProgram(program, listOf(Tuple.of(1L, "toni"), Tuple.of(2L, "pepe")));
   }
