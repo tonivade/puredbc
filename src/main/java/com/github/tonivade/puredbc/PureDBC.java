@@ -128,7 +128,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
     return dataSource -> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLIdVisitor visitor = new DSLIdVisitor(jdbc);
-        Kind<Id<?>, A> foldMap = free.foldMap(Instances.<Id<?>>monad(), new DSLTransformer<>(visitor));
+        Kind<Id<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
         return foldMap.fix(toId()).value();
       }
     };
@@ -138,7 +138,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
     return dataSource -> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLTryVisitor visitor = new DSLTryVisitor(jdbc);
-        Kind<Try<?>, A> foldMap = free.foldMap(Instances.<Try<?>>monad(), new DSLTransformer<>(visitor));
+        Kind<Try<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
         return foldMap.fix(toTry());
       }
     };
@@ -148,7 +148,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
     return dataSource ->
       UIO.bracket(UIO.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
-        Kind<UIO<?>, A> foldMap = free.foldMap(Instances.<UIO<?>>monad(), new DSLTransformer<>(visitor));
+        Kind<UIO<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
         return foldMap.fix(toUIO());
       });
   }
@@ -157,7 +157,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
     return dataSource ->
       Task.bracket(Task.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLTaskVisitor visitor = new DSLTaskVisitor(jdbc);
-        Kind<Task<?>, A> foldMap = free.foldMap(Instances.<Task<?>>monad(), new DSLTransformer<>(visitor));
+        Kind<Task<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
         return foldMap.fix(toTask());
       });
   }
@@ -166,7 +166,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
     return dataSource ->
         Future.bracket(Future.task(() -> newTemplate(dataSource)), jdbc -> {
           DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
-          Kind<Future<?>, A> foldMap = free.foldMap(Instances.<Future<?>>monad(), new DSLTransformer<>(visitor));
+          Kind<Future<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
           return foldMap.fix(toFuture());
         });
   }
