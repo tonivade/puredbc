@@ -12,7 +12,7 @@ h2Version = "2.2.224"
 hikarcpVersion = "5.1.0"
 errorproneVersion = "2.27.1"
 errorpronePluginVersion = "3.1.0"
-nullawayVersion = "0.10.25"
+nullawayVersion = "0.10.26"
 
 [libraries]
 purefunProcessor = { group = "com.github.tonivade", name = "purefun-processor", version.ref = "purefunVersion" }
