@@ -4,38 +4,35 @@
  */
 package com.github.tonivade.puredbc;
 
-import static com.github.tonivade.puredbc.PublisherKOf.toPublisherK;
-import static com.github.tonivade.puredbc.PureDBCOf.toPureDBC;
 import static com.github.tonivade.purefun.core.Function1.cons;
 import static com.github.tonivade.purefun.core.Precondition.checkNonNull;
-import static com.github.tonivade.purefun.concurrent.FutureOf.toFuture;
-import static com.github.tonivade.purefun.effect.TaskOf.toTask;
-import static com.github.tonivade.purefun.effect.UIOOf.toUIO;
-import static com.github.tonivade.purefun.type.IdOf.toId;
-import static com.github.tonivade.purefun.type.TryOf.toTry;
+import com.github.tonivade.puredbc.sql.Field;
+import com.github.tonivade.puredbc.sql.SQL;
+import com.github.tonivade.purefun.HigherKind;
+import com.github.tonivade.purefun.Kind;
+import com.github.tonivade.purefun.concurrent.Future;
+import com.github.tonivade.purefun.concurrent.FutureOf;
+import com.github.tonivade.purefun.core.Bindable;
+import com.github.tonivade.purefun.core.Function1;
+import com.github.tonivade.purefun.core.Unit;
+import com.github.tonivade.purefun.data.ImmutableList;
+import com.github.tonivade.purefun.effect.Task;
+import com.github.tonivade.purefun.effect.TaskOf;
+import com.github.tonivade.purefun.effect.UIO;
+import com.github.tonivade.purefun.effect.UIOOf;
+import com.github.tonivade.purefun.free.Free;
+import com.github.tonivade.purefun.type.Id;
+import com.github.tonivade.purefun.type.IdOf;
+import com.github.tonivade.purefun.type.Option;
+import com.github.tonivade.purefun.type.Try;
+import com.github.tonivade.purefun.type.TryOf;
+import com.github.tonivade.purefun.typeclasses.FunctionK;
+import com.github.tonivade.purefun.typeclasses.Instances;
+import com.github.tonivade.purefun.typeclasses.Monad;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
-import com.github.tonivade.puredbc.sql.Field;
-import com.github.tonivade.puredbc.sql.SQL;
-import com.github.tonivade.purefun.core.Bindable;
-import com.github.tonivade.purefun.core.Function1;
-import com.github.tonivade.purefun.core.Unit;
-import com.github.tonivade.purefun.HigherKind;
-import com.github.tonivade.purefun.Kind;
-
-import com.github.tonivade.purefun.concurrent.Future;
-import com.github.tonivade.purefun.data.ImmutableList;
-import com.github.tonivade.purefun.effect.Task;
-import com.github.tonivade.purefun.effect.UIO;
-import com.github.tonivade.purefun.free.Free;
-import com.github.tonivade.purefun.type.Id;
-import com.github.tonivade.purefun.type.Option;
-import com.github.tonivade.purefun.type.Try;
-import com.github.tonivade.purefun.typeclasses.FunctionK;
-import com.github.tonivade.purefun.typeclasses.Instances;
-import com.github.tonivade.purefun.typeclasses.Monad;
 import io.r2dbc.spi.ConnectionFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -64,7 +61,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
 
   @Override
   public <R> PureDBC<R> flatMap(Function1<? super T, ? extends Kind<PureDBC<?>, ? extends R>> map) {
-    return new PureDBC<>(value.flatMap(t -> map.andThen(PureDBCOf::narrowK).apply(t).value));
+    return new PureDBC<>(value.flatMap(t -> map.andThen(PureDBCOf::toPureDBC).apply(t).value));
   }
 
   @Override
@@ -129,7 +126,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLIdVisitor visitor = new DSLIdVisitor(jdbc);
         Kind<Id<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix(toId()).value();
+        return foldMap.fix(IdOf::toId).value();
       }
     };
   }
@@ -139,7 +136,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
       try (JdbcTemplate jdbc = newTemplate(dataSource)) {
         DSLTryVisitor visitor = new DSLTryVisitor(jdbc);
         Kind<Try<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix(toTry());
+        return foldMap.fix(TryOf::toTry);
       }
     };
   }
@@ -149,7 +146,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
       UIO.bracket(UIO.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
         Kind<UIO<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix(toUIO());
+        return foldMap.fix(UIOOf::toUIO);
       });
   }
 
@@ -158,7 +155,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
       Task.bracket(Task.task(() -> newTemplate(dataSource)), jdbc -> {
         DSLTaskVisitor visitor = new DSLTaskVisitor(jdbc);
         Kind<Task<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix(toTask());
+        return foldMap.fix(TaskOf::toTask);
       });
   }
 
@@ -167,7 +164,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
         Future.bracket(Future.task(() -> newTemplate(dataSource)), jdbc -> {
           DSLFutureVisitor visitor = new DSLFutureVisitor(jdbc);
           Kind<Future<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
-          return foldMap.fix(toFuture());
+          return foldMap.fix(FutureOf::toFuture);
         });
   }
 
@@ -175,7 +172,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
     return connectionFactory -> {
       R2dbcTemplate r2dbc = newTemplate(connectionFactory);
       DSLReactVisitor visitor = new DSLReactVisitor(r2dbc);
-      return free.foldMap(PublisherKMonad.INSTANCE, new DSLTransformer<>(visitor)).fix(toPublisherK());
+      return free.foldMap(PublisherKMonad.INSTANCE, new DSLTransformer<>(visitor)).fix(PublisherKOf::toPublisherK);
     };
   }
 
@@ -402,7 +399,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
 
     @Override
     public <T> Kind<F, T> apply(Kind<DSL<?>, ? extends T> from) {
-      return from.fix(DSLOf::<T>narrowK).accept(visitor);
+      return from.fix(DSLOf::<T>toDSL).accept(visitor);
     }
   }
 }
@@ -419,7 +416,7 @@ interface PureDBCMonad extends Monad<PureDBC<?>> {
   @Override
   default <T, R> PureDBC<R> flatMap(
       Kind<PureDBC<?>, ? extends T> value, Function1<? super T, ? extends Kind<PureDBC<?>, ? extends R>> mapper) {
-    return value.fix(toPureDBC()).flatMap(mapper.andThen(PureDBCOf::narrowK));
+    return value.fix(PureDBCOf::toPureDBC).flatMap(mapper.andThen(PureDBCOf::toPureDBC));
   }
 }
 
@@ -429,13 +426,13 @@ interface PublisherKMonad extends Monad<PublisherK<?>> {
 
   @Override
   default <T, R> PublisherK<R> map(Kind<PublisherK<?>, ? extends T> value, Function1<? super T, ? extends R> map) {
-    return value.fix(toPublisherK()).map(map);
+    return value.fix(PublisherKOf::toPublisherK).map(map);
   }
 
   @Override
   default <T, R> PublisherK<R> flatMap(
       Kind<PublisherK<?>, ? extends T> value, Function1<? super T, ? extends Kind<PublisherK<?>, ? extends R>> map) {
-    return value.fix(toPublisherK()).flatMap(map.andThen(PublisherKOf::narrowK));
+    return value.fix(PublisherKOf::toPublisherK).flatMap(map.andThen(PublisherKOf::toPublisherK));
   }
 
   @Override

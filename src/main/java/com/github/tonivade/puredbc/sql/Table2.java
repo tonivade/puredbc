@@ -4,7 +4,6 @@
  */
 package com.github.tonivade.puredbc.sql;
 
-import static com.github.tonivade.puredbc.sql.FieldOf.toField;
 import com.github.tonivade.puredbc.Row;
 import com.github.tonivade.purefun.core.Tuple;
 import com.github.tonivade.purefun.core.Tuple2;
@@ -13,11 +12,11 @@ import com.github.tonivade.purefun.typeclasses.TupleK2;
 public interface Table2<A, B> extends Table<Tuple2<A, B>, TupleK2<Field<?>, A, B>> {
 
   default Field<A> field1() {
-    return fields().get1().fix(toField());
+    return fields().get1().fix(FieldOf::toField);
   }
 
   default Field<B> field2() {
-    return fields().get2().fix(toField());
+    return fields().get2().fix(FieldOf::toField);
   }
 
   @Override

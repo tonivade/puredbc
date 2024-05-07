@@ -32,7 +32,7 @@ public interface Table<T extends Tuple, F extends TupleK<Field<?>>> {
   }
 
   default NonEmptyList<Field<?>> all() {
-    Sequence<Field<?>> sequence = fields().toSequence().map(FieldOf::narrowK);
+    Sequence<Field<?>> sequence = fields().toSequence().map(FieldOf::toField);
     return NonEmptyList.of(sequence.asList());
   }
 

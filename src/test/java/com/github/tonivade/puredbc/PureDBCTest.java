@@ -9,7 +9,6 @@ import static com.github.tonivade.puredbc.PureDBC.queryIterable;
 import static com.github.tonivade.puredbc.PureDBC.queryOne;
 import static com.github.tonivade.puredbc.PureDBC.update;
 import static com.github.tonivade.puredbc.PureDBC.updateWithKeys;
-import static com.github.tonivade.puredbc.PureDBCOf.toPureDBC;
 import static com.github.tonivade.puredbc.sql.Condition.between;
 import static com.github.tonivade.puredbc.sql.SQL.deleteFrom;
 import static com.github.tonivade.puredbc.sql.SQL.insertInto;
@@ -26,9 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-import org.junit.jupiter.api.Test;
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.puredbc.sql.SQL1;
@@ -45,6 +41,9 @@ import com.github.tonivade.purefun.typeclasses.TupleK;
 import com.github.tonivade.purefun.typeclasses.TupleK2;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import java.sql.SQLException;
+import javax.sql.DataSource;
+import org.junit.jupiter.api.Test;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
@@ -84,7 +83,7 @@ class PureDBCTest {
         .then(updateWithKeys(insertRowWithKey.bind("toni"), TEST.ID))
         .then(updateWithKeys(insertRowWithKey.bind("pepe"), TEST.ID))
         .then(queryIterable(findAll, TEST::asTuple))
-        .fix(toPureDBC());
+        .fix(PureDBCOf::<Iterable<Tuple2<Long, String>>>toPureDBC);
 
     assertProgram(program, listOf(Tuple.of(1L, "toni"), Tuple.of(2L, "pepe")));
   }
