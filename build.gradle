@@ -6,6 +6,7 @@ plugins {
   alias(libs.plugins.nexus)
   alias(libs.plugins.versions)
   alias(libs.plugins.errorprone)
+  alias(libs.plugins.eclipse)
 }
 
 group = 'com.github.tonivade'
