@@ -103,16 +103,18 @@ public class JdbcTemplate implements Recoverable, AutoCloseable {
   private static Consumer1<PreparedStatement> populateWith(Sequence<?> params) {
     return stmt -> {
       int i = 1;
-      for (Object param : params) {
-        if (param instanceof Range range) {
-          stmt.setObject(i++, range.begin());
-          stmt.setObject(i++, range.end());
-        } else if (param instanceof Iterable<?> iterable) {
-          for (Object p : iterable) {
-            stmt.setObject(i++, p);
+      for (var param : params) {
+        switch (param) {
+          case Range(var begin, var end) -> {
+            stmt.setObject(i++, begin);
+            stmt.setObject(i++, end);
           }
-        } else {
-          stmt.setObject(i++, param);
+          case Iterable<?> iterable -> {
+            for (Object p : iterable) {
+              stmt.setObject(i++, p);
+            }
+          }
+          case null, default -> stmt.setObject(i++, param);
         }
       }
     };
