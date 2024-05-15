@@ -84,14 +84,14 @@ public final class R2dbcTemplate {
     return Mono.just(conn.createStatement(query))
         .map(stmt -> {
           int i = 0;
-          for (Object param : params) {
+          for (var param : params) {
             switch (param) {
               case Range(var begin, var end) -> {
                 stmt.bind(i++, begin);
                 stmt.bind(i++, end);
               }
               case Iterable<?> iterable -> {
-                for (Object p : iterable) {
+                for (var p : iterable) {
                   stmt.bind(i++, p);
                 }
               }

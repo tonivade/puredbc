@@ -110,7 +110,7 @@ public class JdbcTemplate implements Recoverable, AutoCloseable {
             stmt.setObject(i++, end);
           }
           case Iterable<?> iterable -> {
-            for (Object p : iterable) {
+            for (var p : iterable) {
               stmt.setObject(i++, p);
             }
           }
