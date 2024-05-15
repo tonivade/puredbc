@@ -85,19 +85,15 @@ public final class R2dbcTemplate {
         .map(stmt -> {
           int i = 0;
           for (Object param : params) {
-            switch (param) {
-              case Range(var begin, var end) -> {
-                stmt.bind(i++, begin);
-                stmt.bind(i++, end);
+            if (param instanceof Range range) {
+              stmt.bind(i++, range.begin());
+              stmt.bind(i++, range.end());
+            } else if (param instanceof Iterable<?> iterable) {
+              for (Object p : iterable) {
+                stmt.bind(i++, p);
               }
-              case Iterable<?> iterable -> {
-                for (Object p : iterable) {
-                  stmt.bind(i++, p);
-                }
-              }
-              default -> {
-                stmt.bind(i++, param);
-              }
+            } else {
+              stmt.bind(i++, param);
             }
           }
           return stmt;
