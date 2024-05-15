@@ -457,7 +457,7 @@ final class PublisherK<T> implements PublisherKOf<T>, Publisher<T> {
     return new PublisherK<>(Flux.from(value).map(mapper::apply));
   }
 
-  public <R> PublisherK<R> flatMap(Function1<? super T, ? extends PublisherK<? extends R>> mapper) {
+  public <R> PublisherK<R> flatMap(Function1<? super T, PublisherK<? extends R>> mapper) {
     if (value instanceof Mono) {
       return new PublisherK<>(Mono.from(value).flatMap(mapper.andThen(Mono::from)::apply));
     }
