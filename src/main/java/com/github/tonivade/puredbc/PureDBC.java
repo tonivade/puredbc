@@ -389,7 +389,7 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
     }
   }
 
-  private static class DSLTransformer<F> implements FunctionK<DSL<?>, F> {
+  private static class DSLTransformer<F extends Kind<F, ?>> implements FunctionK<DSL<?>, F> {
 
     private final DSL.Visitor<F> visitor;
 
