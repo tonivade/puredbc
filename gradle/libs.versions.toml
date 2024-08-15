@@ -1,7 +1,7 @@
 [versions]
 purefunVersion = "5.0"
 junitEngineVersion = "5.10.3"
-junitPlatformVersion = "1.10.3"
+junitPlatformVersion = "1.11.0"
 purecheckVersion = "1.0"
 versionsVersion = "0.51.0"
 nexusVersion = "2.0.0"
