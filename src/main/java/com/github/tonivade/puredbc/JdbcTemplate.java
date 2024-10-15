@@ -105,7 +105,7 @@ public class JdbcTemplate implements Recoverable, AutoCloseable {
       int i = 1;
       for (var param : params) {
         switch (param) {
-          case Range(var begin, var end) -> {
+          case Range(var begin, var end, var increment) when increment == 1 -> {
             stmt.setObject(i++, begin);
             stmt.setObject(i++, end);
           }

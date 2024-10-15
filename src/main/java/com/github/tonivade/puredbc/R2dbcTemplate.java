@@ -86,7 +86,7 @@ public final class R2dbcTemplate {
           int i = 0;
           for (var param : params) {
             switch (param) {
-              case Range(var begin, var end) -> {
+              case Range(var begin, var end, var increment) when increment == 1 -> {
                 stmt.bind(i++, begin);
                 stmt.bind(i++, end);
               }
