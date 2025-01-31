@@ -1,7 +1,6 @@
 [versions]
 purefunVersion = "5.1-SNAPSHOT"
-junitEngineVersion = "5.11.4"
-junitPlatformVersion = "1.11.4"
+junitVersion = "5.11.4"
 purecheckVersion = "1.0"
 versionsVersion = "0.52.0"
 nexusVersion = "2.0.0"
@@ -21,8 +20,9 @@ purefunFree = { group = "com.github.tonivade", name = "purefun-free", version.re
 purefunEffect = { group = "com.github.tonivade", name = "purefun-effect", version.ref = "purefunVersion" }
 purefunInstances = { group = "com.github.tonivade", name = "purefun-instances", version.ref = "purefunVersion" }
 purecheck = { group = "com.github.tonivade", name = "purecheck", version.ref = "purecheckVersion" }
-junitJupiter = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junitEngineVersion" }
-junitRunner = { group = "org.junit.platform", name = "junit-platform-runner", version.ref = "junitPlatformVersion" }
+junitBom = { group = "org.junit", name = "junit-bom", version.ref = "junitVersion" }
+junitJupiter = { module = "org.junit.jupiter:junit-jupiter-engine" }
+junitLauncher = { module = "org.junit.platform:junit-platform-launcher" }
 r2dbcSpi = { group = "io.r2dbc", name = "r2dbc-spi", version.ref = "r2dbcSpiVersion" }
 r2dbcPool = { group = "io.r2dbc", name = "r2dbc-pool", version.ref = "r2dbcPoolVersion" }
 h2 = { group = "com.h2database", name = "h2", version.ref = "h2Version" }

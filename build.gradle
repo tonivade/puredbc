@@ -75,10 +75,11 @@ dependencies {
   implementation libs.r2dbcPool
   testRuntimeOnly libs.h2
   testRuntimeOnly libs.r2dbcH2
+  testImplementation platform(libs.junitBom)
   testImplementation libs.hikaricp
   testImplementation libs.purecheck
   testImplementation libs.junitJupiter
-  testImplementation libs.junitRunner
+  testRuntimeOnly libs.junitLauncher
 }
 
 publishing {
