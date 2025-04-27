@@ -1,7 +1,7 @@
 [versions]
-purefunVersion = "5.1-SNAPSHOT"
+purefunVersion = "5.1"
 junitVersion = "5.12.2"
-purecheckVersion = "1.0"
+purecheckVersion = "1.1"
 versionsVersion = "0.52.0"
 nexusVersion = "2.0.0"
 r2dbcSpiVersion = "1.0.0.RELEASE"
