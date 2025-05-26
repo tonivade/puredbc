@@ -61,7 +61,19 @@ tasks.withType(JavaCompile) {
 test {
   useJUnitPlatform()
 
+  jacoco {
+    destinationFile = file("${buildDir}/jacoco/test.exec")
+  }
+
   reports.html.required = true
+}
+
+jacocoTestReport {
+  reports {
+    xml.required = true
+    html.required = true
+    xml.outputLocation = file("${buildDir}/reports/jacoco/report.xml")
+  }
 }
 
 dependencies {
