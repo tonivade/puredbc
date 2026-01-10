@@ -37,6 +37,7 @@ java {
 compileJava {
   options.compilerArgs << '-Xlint:unchecked'
   options.compilerArgs << '-Xlint:rawtypes'
+  options.compilerArgs << '-XDaddTypeAnnotationsToSymbol=true'
   options.release = 21
 }
 
