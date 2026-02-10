@@ -9,6 +9,7 @@ import static com.github.tonivade.purefun.core.Precondition.checkNonEmpty;
 import static com.github.tonivade.purefun.core.Precondition.checkNonNull;
 import static com.github.tonivade.purefun.data.ImmutableArray.empty;
 import static com.github.tonivade.purefun.data.Sequence.arrayOf;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -17,8 +18,9 @@ import java.util.regex.Pattern;
 import com.github.tonivade.purefun.Nullable;
 import com.github.tonivade.purefun.core.Tuple;
 import com.github.tonivade.purefun.core.Tuple2;
-import com.github.tonivade.purefun.data.ImmutableArray;
+import com.github.tonivade.purefun.data.Finisher;
 import com.github.tonivade.purefun.data.NonEmptyList;
+import com.github.tonivade.purefun.data.Pipeline;
 import com.github.tonivade.purefun.data.Range;
 import com.github.tonivade.purefun.data.Sequence;
 import com.github.tonivade.purefun.typeclasses.TupleK;
@@ -187,8 +189,8 @@ public final class SQL {
     if (value instanceof Range) { // between
       return "? and ?";
     }
-    if (value instanceof Iterable) { // in
-      return ImmutableArray.from((Iterable<?>) value).map(cons("?")).join(", ");
+    if (value instanceof Iterable<?> list) { // in
+      return Pipeline.identity().map(x -> "?").finish(Finisher.join(list, ", "));
     }
     return "?";
   }

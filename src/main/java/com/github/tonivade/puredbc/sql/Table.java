@@ -8,8 +8,10 @@ import static com.github.tonivade.purefun.core.Function1.identity;
 import static com.github.tonivade.purefun.core.Unit.unit;
 import static com.github.tonivade.purefun.type.Validation.invalid;
 import static com.github.tonivade.purefun.type.Validation.valid;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import com.github.tonivade.puredbc.Row;
 import com.github.tonivade.puredbc.RowMetaData;
 import com.github.tonivade.purefun.core.Tuple;
@@ -52,6 +54,6 @@ public interface Table<T extends Tuple, F extends TupleK<Field<?>>> {
 
   private ImmutableMap<String, Field<?>> map() {
     return all().pipeline()
-        .finish(input -> Finisher.toImmutableMap(input, Field::name, identity()));
+        .finish(input -> Finisher.toImmutableMap(input, f -> f.name().toUpperCase(), identity()));
   }
 }
