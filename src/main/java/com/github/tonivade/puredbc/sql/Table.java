@@ -4,6 +4,7 @@
  */
 package com.github.tonivade.puredbc.sql;
 
+import static com.github.tonivade.purefun.core.Function1.identity;
 import static com.github.tonivade.purefun.core.Unit.unit;
 import static com.github.tonivade.purefun.type.Validation.invalid;
 import static com.github.tonivade.purefun.type.Validation.valid;
@@ -13,6 +14,7 @@ import com.github.tonivade.puredbc.Row;
 import com.github.tonivade.puredbc.RowMetaData;
 import com.github.tonivade.purefun.core.Tuple;
 import com.github.tonivade.purefun.core.Unit;
+import com.github.tonivade.purefun.data.Finisher;
 import com.github.tonivade.purefun.data.ImmutableMap;
 import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Sequence;
@@ -49,6 +51,7 @@ public interface Table<T extends Tuple, F extends TupleK<Field<?>>> {
   }
 
   private ImmutableMap<String, Field<?>> map() {
-    return ImmutableMap.from(all().map(x -> Tuple.of(x.name().toUpperCase(), x)));
+    return all().pipeline()
+        .finish(input -> Finisher.toImmutableMap(input, Field::name, identity()));
   }
 }
