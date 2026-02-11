@@ -16,7 +16,6 @@ import com.github.tonivade.puredbc.Row;
 import com.github.tonivade.puredbc.RowMetaData;
 import com.github.tonivade.purefun.core.Tuple;
 import com.github.tonivade.purefun.core.Unit;
-import com.github.tonivade.purefun.data.Finisher;
 import com.github.tonivade.purefun.data.ImmutableMap;
 import com.github.tonivade.purefun.data.NonEmptyList;
 import com.github.tonivade.purefun.data.Sequence;
@@ -54,6 +53,6 @@ public interface Table<T extends Tuple, F extends TupleK<Field<?>>> {
 
   private ImmutableMap<String, Field<?>> map() {
     return all().pipeline()
-        .finish(input -> Finisher.toImmutableMap(input, f -> f.name().toUpperCase(), identity()));
+        .toImmutableMap(f -> f.name().toUpperCase(), identity());
   }
 }
