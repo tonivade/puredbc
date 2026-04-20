@@ -2,7 +2,7 @@
 purefunVersion = "5.2"
 junitVersion = "6.0.3"
 purecheckVersion = "1.2"
-versionsVersion = "0.53.0"
+versionsVersion = "0.54.0"
 nexusVersion = "2.0.0"
 r2dbcSpiVersion = "1.0.0.RELEASE"
 r2dbcPoolVersion = "1.0.2.RELEASE"
