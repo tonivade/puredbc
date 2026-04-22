@@ -11,7 +11,7 @@ h2Version = "2.4.240"
 hikarcpVersion = "7.0.2"
 errorproneVersion = "2.49.0"
 errorpronePluginVersion = "5.1.0"
-nullawayVersion = "0.13.3"
+nullawayVersion = "0.13.4"
 eclipseVersion = "4.4.1"
 
 [libraries]
