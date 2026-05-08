@@ -15,7 +15,8 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import com.github.tonivade.purefun.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import com.github.tonivade.purefun.core.Tuple;
 import com.github.tonivade.purefun.core.Tuple2;
 import com.github.tonivade.purefun.data.Finisher;

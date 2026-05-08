@@ -6,7 +6,8 @@ package com.github.tonivade.puredbc;
 
 import static com.github.tonivade.purefun.core.Precondition.checkNonNull;
 
-import com.github.tonivade.purefun.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import com.github.tonivade.purefun.type.Option;
 
 public interface RowMetaData {

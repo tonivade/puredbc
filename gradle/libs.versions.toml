@@ -1,5 +1,5 @@
 [versions]
-purefunVersion = "5.2"
+purefunVersion = "6.0-SNAPSHOT"
 junitVersion = "6.0.3"
 purecheckVersion = "1.2"
 versionsVersion = "0.54.0"
@@ -13,6 +13,7 @@ errorproneVersion = "2.49.0"
 errorpronePluginVersion = "5.1.0"
 nullawayVersion = "0.13.4"
 eclipseVersion = "4.4.1"
+jspecifyVersion = "1.0.0"
 
 [libraries]
 purefunProcessor = { group = "com.github.tonivade", name = "purefun-processor", version.ref = "purefunVersion" }
@@ -30,6 +31,7 @@ r2dbcH2 = { group = "io.r2dbc", name = "r2dbc-h2", version.ref = "r2dbcH2Version
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikarcpVersion" }
 nullaway = { group = "com.uber.nullaway", name = "nullaway", version.ref = "nullawayVersion" }
 errorprone = { group = "com.google.errorprone", name = "error_prone_core", version.ref = "errorproneVersion" }
+jspecify = { group = "org.jspecify", name = "jspecify", version.ref = "jspecifyVersion" }
 
 [plugins]
 versions = { id = "com.github.ben-manes.versions", version.ref = "versionsVersion" }

@@ -82,6 +82,7 @@ dependencies {
   api libs.purefunFree
   implementation libs.purefunEffect
   runtimeOnly libs.purefunInstances
+  compileOnly libs.jspecify
   implementation libs.r2dbcSpi
   implementation libs.r2dbcPool
   testRuntimeOnly libs.h2
