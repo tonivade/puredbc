@@ -1,6 +1,6 @@
 [versions]
 purefunVersion = "6.0-SNAPSHOT"
-junitVersion = "6.0.3"
+junitVersion = "6.1.0"
 purecheckVersion = "1.3-SNAPSHOT"
 versionsVersion = "0.54.0"
 nexusVersion = "2.0.0"
