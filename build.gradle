@@ -80,11 +80,12 @@ dependencies {
   errorprone libs.errorprone
   annotationProcessor libs.purefunProcessor
   api libs.purefunFree
-  implementation libs.purefunEffect
+  implementation libs.purefunMonad
   runtimeOnly libs.purefunInstances
   compileOnly libs.jspecify
   implementation libs.r2dbcSpi
   implementation libs.r2dbcPool
+
   testRuntimeOnly libs.h2
   testRuntimeOnly libs.r2dbcH2
   testImplementation platform(libs.junitBom)
