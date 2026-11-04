@@ -1,5 +1,5 @@
 [versions]
-purefunVersion = "5.3"
+purefunVersion = "6.0-SNAPSHOT"
 junitVersion = "6.1.3"
 purecheckVersion = "1.3"
 versionsVersion = "0.67.0"
@@ -18,7 +18,7 @@ jspecifyVersion = "1.0.1"
 [libraries]
 purefunProcessor = { group = "com.github.tonivade", name = "purefun-processor", version.ref = "purefunVersion" }
 purefunFree = { group = "com.github.tonivade", name = "purefun-free", version.ref = "purefunVersion" }
-purefunEffect = { group = "com.github.tonivade", name = "purefun-effect", version.ref = "purefunVersion" }
+purefunMonad = { group = "com.github.tonivade", name = "purefun-monad", version.ref = "purefunVersion" }
 purefunInstances = { group = "com.github.tonivade", name = "purefun-instances", version.ref = "purefunVersion" }
 purecheck = { group = "com.github.tonivade", name = "purecheck", version.ref = "purecheckVersion" }
 junitBom = { group = "org.junit", name = "junit-bom", version.ref = "junitVersion" }

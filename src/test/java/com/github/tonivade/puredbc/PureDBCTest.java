@@ -194,7 +194,6 @@ class PureDBCTest {
         () -> assertEquals(expected, program.unsafeRun(dataSource)),
         () -> assertEquals(Try.success(expected), program.safeRun(dataSource)),
         () -> assertEquals(expected, program.unsafeRunIO(dataSource).unsafeRunSync()),
-        () -> assertEquals(Try.success(expected), program.safeRunIO(dataSource).safeRunSync()),
         () -> assertEquals(Try.success(expected), program.asyncRun(dataSource).await()),
         () -> assertEquals(expected, Mono.from(program.reactorRun(connectionFactory)).block())
     );
@@ -205,7 +204,6 @@ class PureDBCTest {
         () -> assertThrows(SQLException.class, () -> program.unsafeRun(dataSource)),
         () -> assertTrue(program.safeRun(dataSource).isFailure()),
         () -> assertThrows(SQLException.class, () -> program.unsafeRunIO(dataSource).unsafeRunSync()),
-        () -> assertTrue(program.safeRunIO(dataSource).safeRunSync().isFailure()),
         () -> assertTrue(program.asyncRun(dataSource).await().isFailure()),
         () -> assertThrows(R2dbcBadGrammarException.class,
             () -> Mono.from(program.reactorRun(connectionFactory)).block())

@@ -6,6 +6,14 @@ package com.github.tonivade.puredbc;
 
 import static com.github.tonivade.purefun.core.Function1.cons;
 import static com.github.tonivade.purefun.core.Precondition.checkNonNull;
+
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+
 import com.github.tonivade.puredbc.sql.Field;
 import com.github.tonivade.puredbc.sql.SQL;
 import com.github.tonivade.purefun.HigherKind;
@@ -16,11 +24,9 @@ import com.github.tonivade.purefun.core.Bindable;
 import com.github.tonivade.purefun.core.Function1;
 import com.github.tonivade.purefun.core.Unit;
 import com.github.tonivade.purefun.data.ImmutableList;
-import com.github.tonivade.purefun.effect.Task;
-import com.github.tonivade.purefun.effect.TaskOf;
-import com.github.tonivade.purefun.effect.UIO;
-import com.github.tonivade.purefun.effect.UIOOf;
 import com.github.tonivade.purefun.free.Free;
+import com.github.tonivade.purefun.monad.IO;
+import com.github.tonivade.purefun.monad.IOOf;
 import com.github.tonivade.purefun.type.Id;
 import com.github.tonivade.purefun.type.IdOf;
 import com.github.tonivade.purefun.type.Option;
@@ -29,10 +35,7 @@ import com.github.tonivade.purefun.type.TryOf;
 import com.github.tonivade.purefun.typeclasses.FunctionK;
 import com.github.tonivade.purefun.typeclasses.Instances;
 import com.github.tonivade.purefun.typeclasses.Monad;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
+
 import io.r2dbc.spi.ConnectionFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -77,12 +80,8 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
     return safeRun(value).apply(dataSource);
   }
 
-  public UIO<T> unsafeRunIO(DataSource dataSource) {
+  public IO<T> unsafeRunIO(DataSource dataSource) {
     return unsafeRunIO(value).apply(dataSource);
-  }
-
-  public Task<T> safeRunIO(DataSource dataSource) {
-    return safeRunIO(value).apply(dataSource);
   }
 
   public Future<T> asyncRun(DataSource dataSource) {
@@ -141,21 +140,12 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
     };
   }
 
-  private static <A> Function1<DataSource, UIO<A>> unsafeRunIO(Free<DSL<?>, A> free) {
+  private static <A> Function1<DataSource, IO<A>> unsafeRunIO(Free<DSL<?>, A> free) {
     return dataSource ->
-      UIO.bracket(UIO.task(() -> newTemplate(dataSource)), jdbc -> {
-        DSLUIOVisitor visitor = new DSLUIOVisitor(jdbc);
-        Kind<UIO<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix(UIOOf::toUIO);
-      });
-  }
-
-  private static <A> Function1<DataSource, Task<A>> safeRunIO(Free<DSL<?>, A> free) {
-    return dataSource ->
-      Task.bracket(Task.task(() -> newTemplate(dataSource)), jdbc -> {
-        DSLTaskVisitor visitor = new DSLTaskVisitor(jdbc);
-        Kind<Task<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
-        return foldMap.fix(TaskOf::toTask);
+      IO.bracket(IO.task(() -> newTemplate(dataSource)), jdbc -> {
+        DSLIOVisitor visitor = new DSLIOVisitor(jdbc);
+        Kind<IO<?>, A> foldMap = free.foldMap(Instances.monad(), new DSLTransformer<>(visitor));
+        return foldMap.fix(IOOf::toIO);
       });
   }
 
@@ -252,71 +242,37 @@ public final class PureDBC<T> implements PureDBCOf<T>, Bindable<PureDBC<?>, T> {
     }
   }
 
-  private static class DSLUIOVisitor implements DSL.Visitor<UIO<?>> {
+  private static class DSLIOVisitor implements DSL.Visitor<IO<?>> {
 
     private final JdbcTemplate jdbc;
 
-    public DSLUIOVisitor(JdbcTemplate jdbc) {
+    public DSLIOVisitor(JdbcTemplate jdbc) {
       this.jdbc = checkNonNull(jdbc);
     }
 
     @Override
-    public <T> UIO<Option<T>> visit(DSL.QueryMeta<T> query) {
-      return UIO.task(() -> jdbc.queryMeta(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
+    public <T> IO<Option<T>> visit(DSL.QueryMeta<T> query) {
+      return IO.task(() -> jdbc.queryMeta(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
-    public <T> UIO<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return UIO.task(() -> jdbc.queryIterable(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
+    public <T> IO<Iterable<T>> visit(DSL.QueryIterable<T> query) {
+      return IO.task(() -> jdbc.queryIterable(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
-    public <T> UIO<Option<T>> visit(DSL.QueryOne<T> query) {
-      return UIO.task(() -> jdbc.queryOne(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
+    public <T> IO<Option<T>> visit(DSL.QueryOne<T> query) {
+      return IO.task(() -> jdbc.queryOne(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
     }
 
     @Override
-    public UIO<Unit> visit(DSL.Update update) {
-      return UIO.task(() -> jdbc.update(update.query().getQuery(), update.query().getParams()));
+    public IO<Unit> visit(DSL.Update update) {
+      return IO.task(() -> jdbc.update(update.query().getQuery(), update.query().getParams()));
     }
 
     @Override
-    public <T> UIO<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return UIO.task(() -> jdbc.updateWithKeys(update.query().getQuery(), update.query().getParams(), update.field()));
-    }
-  }
-
-  private static class DSLTaskVisitor implements DSL.Visitor<Task<?>> {
-
-    private final JdbcTemplate jdbc;
-
-    public DSLTaskVisitor(JdbcTemplate jdbc) {
-      this.jdbc = checkNonNull(jdbc);
-    }
-
-    @Override
-    public <T> Task<Option<T>> visit(DSL.QueryMeta<T> query) {
-      return Task.task(() -> jdbc.queryMeta(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
-    }
-
-    @Override
-    public <T> Task<Iterable<T>> visit(DSL.QueryIterable<T> query) {
-      return Task.task(() -> jdbc.queryIterable(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
-    }
-
-    @Override
-    public <T> Task<Option<T>> visit(DSL.QueryOne<T> query) {
-      return Task.task(() -> jdbc.queryOne(query.query().getQuery(), query.query().getParams(), query.rowMapper()));
-    }
-
-    @Override
-    public Task<Unit> visit(DSL.Update update) {
-      return Task.task(() -> jdbc.update(update.query().getQuery(), update.query().getParams()));
-    }
-
-    @Override
-    public <T> Task<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
-      return Task.task(() -> jdbc.updateWithKeys(update.query().getQuery(), update.query().getParams(), update.field()));
+    public <T> IO<Option<T>> visit(DSL.UpdateWithKeys<T> update) {
+      return IO.task(() -> jdbc.updateWithKeys(update.query().getQuery(), update.query().getParams(), update.field()));
     }
   }
 
